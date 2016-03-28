@@ -50,3 +50,8 @@ end
 group :development, :test do
   gem 'rspec-rails', '~> 3.4', '>= 3.4.2'
 end
+
+group :test do
+  gem 'capybara'
+  gem 'selenium-webdriver'
+end
