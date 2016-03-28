@@ -1,0 +1,19 @@
+<%= render 'navidation' %>
+
+<h1>Sites new</h1>
+
+<%= render 'errors' %>
+
+<div>
+<%= form_for(@site) do |f| %>
+
+  <%= f.label :name %>
+  <%= f.text_field :name %>
+
+  <%= f.label :feed_url %>
+  <%= f.text_field :feed_url %>
+
+  <%= f.submit "Create new site", class: "btn btn-primary" %>
+
+<% end %>
+</div>

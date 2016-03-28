@@ -1,0 +1,15 @@
+<%= render 'navidation' %>
+
+<h1>Sites show</h1>
+
+<div>
+  name: <%= @site.name %>
+</div>
+
+<div>
+  feed_url: <%= @site.feed_url %>
+</div>
+
+<div>
+  <%= link_to('edit', edit_site_path(@site)) %>
+</div>

@@ -1,0 +1,9 @@
+<%= render 'navidation' %>
+
+<h1>Sites index</h1>
+
+<ul>
+<% @sites.each do |site| %>
+  <li><%= link_to(site.name, site_path(site)) %> - <%= link_to(site.feed_url, site.feed_url) %></li>
+<% end %>
+</ul>
