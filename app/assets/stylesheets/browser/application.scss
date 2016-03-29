@@ -1,0 +1,13 @@
+// "bootstrap-sprockets" must be imported before "bootstrap" and "bootstrap/variables"
+@import "bootstrap-sprockets";
+@import "bootstrap";
+@import "layout-default";
+@import "prototype-layout";
+
+body {
+  background-color: #fcc;
+}
+
+.row {
+  margin-bottom: 1em;
+}

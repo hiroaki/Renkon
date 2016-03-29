@@ -1,0 +1,120 @@
+html {
+  widht: 100%;
+  height: 100%;
+}
+body {
+  position: relative;
+  widht: 100%;
+  height: 100%;
+}
+
+/* Move down content because we have a fixed navbar that is 50px tall */
+#layout {
+  padding-top: 70px;
+}
+
+/* extend bootstrap */
+.label-normal {
+  background-color: #aaa;
+}
+.label-transparency {
+  color: #333;
+  background-color: #eee;
+}
+
+/* Sidebar navigation */
+.nav-sidebar {
+  margin-right: -15px;
+  margin-bottom: 0px;
+  margin-left: -20px;
+}
+.nav-sidebar > li > a {
+  padding-right: 20px;
+  padding-left: 20px;
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+.nav-sidebar > .active > a,
+.nav-sidebar > .active > a:hover,
+.nav-sidebar > .active > a:focus {
+  color: #fff;
+  background-color: #428bca;
+}
+.nav-sidebar > li > a > span {
+  position: absolute;
+  right: 10px;
+}
+.nav-sidebar.panel-group .panel {
+  border-radius: 0;
+  border: none !important;
+}
+.nav-sidebar.panel-group .panel-heading {
+  border-radius: 0;
+  border: none !important;
+}
+.nav-sidebar.panel-group .panel-body {
+  border-radius: 0;
+  border: none !important;
+}
+
+/*
+ * Main content
+ */
+
+.pane {
+  overflow-y: scroll;
+}
+
+/* layout frame border */
+.ui-layout-resizer {
+  background-color: #fff;
+}
+
+.outer-west {
+  background-color: #f5f5f5;
+  border-color: #f5f5f5;
+}
+
+/* extention bootstrap - selected item in pulldown menu */
+span.glyphicon.state.inactive, span.glyphicon.state {
+  visibility: hidden;
+}
+span.glyphicon.state.active {
+  visibility: visible;
+}
+
+table#videos {
+  padding-right: 10px;
+}
+
+#videos span {
+  margin-right: 1px;
+}
+
+#videos h3.video-title {
+  margin-bottom: 0.5em;
+}
+
+#videos .video-controls {
+  white-space:nowrap;
+}
+
+#conditions {
+  white-space:nowrap;
+}
+
+#vocal {
+  width: 12em;
+  max-width: 12em;
+}
+
+#album {
+  width: 12em;
+  max-width: 18em;
+}
+
+#footer {
+  font-size: xx-small;
+  color: #999;
+  padding-left: 1em;
+}

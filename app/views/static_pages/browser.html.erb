@@ -1,0 +1,40 @@
+<html lang="ja"><head>
+<meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+<title>Renkon: Browser</title>
+<%= stylesheet_link_tag    'browser/application', media: 'all', 'data-turbolinks-track' => true %>
+<%= javascript_include_tag 'browser/application', 'data-turbolinks-track' => true %>
+<%= csrf_meta_tags %>
+</head>
+<body>
+
+<div id="header" class="pane outer-north">
+  <nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="#">Renkon</a>
+      </div>
+    </div>
+  </nav>
+</div>
+
+<div id="sources" class="pane outer-west">
+  #sources
+</div>
+
+<div class="pane outer-center">
+  <div id="subjects" class="pane middle-west">
+      #subjects
+  </div>
+  <div id="contents" class="pane middle-center">
+      #contents
+  </div>
+</div>
+
+<div id="footer" class="pane outer-south">
+  Ready
+</div>
+
+</body></html>

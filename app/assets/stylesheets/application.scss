@@ -1,0 +1,13 @@
+// "bootstrap-sprockets" must be imported before "bootstrap" and "bootstrap/variables"
+@import "bootstrap-sprockets";
+@import "bootstrap";
+@import "sites";
+@import "static_pages";
+
+.row {
+  margin-bottom: 1em;
+}
+
+.palyer-video-container {
+  margin-top: 2em;
+}
