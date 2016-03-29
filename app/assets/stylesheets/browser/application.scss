@@ -2,8 +2,12 @@
 @import "bootstrap-sprockets";
 @import "bootstrap";
 @import "layout-default";
+@import "prototype-layout";
 
 body {
   background-color: #fcc;
 }
 
+.row {
+  margin-bottom: 1em;
+}
