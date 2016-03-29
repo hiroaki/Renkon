@@ -1,0 +1,49 @@
+// This is a manifest file that'll be compiled into application.js, which will include all the files
+// listed below.
+//
+// Any JavaScript/Coffee file within this directory, lib/assets/javascripts, vendor/assets/javascripts,
+// or any plugin's vendor/assets/javascripts directory can be referenced here using a relative path.
+//
+// It's not advisable to add code directly here, but if you do, it'll appear at the bottom of the
+// compiled file.
+//
+// Read Sprockets README (https://github.com/rails/sprockets#sprockets-directives) for details
+// about supported directives.
+//
+//= require jquery
+//= require jquery_ujs
+//= require turbolinks
+//= require ./jquery-ui
+//= require ./jquery.layout
+//= require ./prototype-layout
+
+// WORKAROUND:
+//  Using a Rails helper method within a javascript asset
+//  http://stackoverflow.com/questions/7451517/using-a-rails-helper-method-within-a-javascript-asset
+<% environment.context_class.instance_eval { include Rails.application.routes.url_helpers } %>
+
+;(function() {
+
+function Browser() {
+  this.initialize.apply(this, arguments);
+}
+Browser.prototype.initialize = function() {
+  this.build();
+};
+Browser.prototype.build = function() {
+  $.ajax('<%= api_v1_sites_path %>', {
+    dataType: 'json'
+  }).then(function(data) {
+    var i, l;
+    console.log(data);
+    $ul = $('#sources').empty().append('<ul>');
+    for ( i = 0, l = data.length; i < l; ++i ) {
+      $ul.append('<li>'+ data[i].name +'</li>');
+    }
+  });
+};
+
+$(document).ready(function() {
+  new Browser();
+});
+})();
