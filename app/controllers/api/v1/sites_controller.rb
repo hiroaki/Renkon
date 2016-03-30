@@ -3,6 +3,10 @@ class Api::V1::SitesController < ApplicationController
     @sites = Site.all
     render jbuilder: @sites
   end
+  def channels
+    @sites = Site.all
+    render jbuilder: @sites
+  end
   def show
     @site = Site.find(params[:id])
     render jbuilder: @site

@@ -31,16 +31,26 @@ Browser.prototype.initialize = function() {
   this.build();
 };
 Browser.prototype.build = function() {
-  $.ajax('<%= api_v1_sites_path %>', {
+  $.ajax('<%= api_v1_channels_path %>', {
     dataType: 'json'
   }).then(function(data) {
-    var i, l;
+    var i, l, j, m, site, channel;
     console.log(data);
-    $ul = $('#sources').empty().append('<ul>');
+    $ul = $('#channels').empty().append('<ul>');
     for ( i = 0, l = data.length; i < l; ++i ) {
-      $ul.append('<li>'+ data[i].name +'</li>');
+      site = data[i];
+      for ( j = 0, m = site.channels.length; j < m; ++j ) {
+        channel = site.channels[j];
+        $ul.append('<li data-channel-id="'+ channel.id +'">'+ channel.title +'</li>');
+      }
     }
   });
+
+  $('#channels').on({
+    click: function(evt) {
+      console.log("click: "+ $(evt.target).data("channel-id"));
+    }
+  }, 'li[data-channel-id]');
 };
 
 $(document).ready(function() {

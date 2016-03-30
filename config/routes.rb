@@ -5,6 +5,7 @@ Rails.application.routes.draw do
   namespace :api, { format: 'json' } do
     namespace :v1 do
       resources :sites
+      get 'channels' => 'sites#channels'
     end
   end
 
