@@ -11,7 +11,31 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160328081057) do
+ActiveRecord::Schema.define(version: 20160329161206) do
+
+  create_table "articles", force: :cascade do |t|
+    t.integer  "channel_id",  null: false
+    t.string   "title"
+    t.string   "link"
+    t.text     "description"
+    t.string   "author"
+    t.datetime "pubdate"
+    t.boolean  "permalink"
+    t.text     "guid"
+    t.text     "content"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+  end
+
+  create_table "channels", force: :cascade do |t|
+    t.integer  "site_id",     null: false
+    t.string   "title",       null: false
+    t.datetime "date"
+    t.string   "description", null: false
+    t.string   "link",        null: false
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+  end
 
   create_table "sites", force: :cascade do |t|
     t.string   "name"
