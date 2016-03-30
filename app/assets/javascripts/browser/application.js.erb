@@ -27,6 +27,11 @@
 /*
 
 */
+var CACHE = {};
+
+/*
+
+*/
 function Browser() {
   this.initialize.apply(this, arguments);
 }
@@ -151,6 +156,9 @@ Articles.prototype.update = function(url) {
     for ( i = 0, l = data.length; i < l; ++i ) {
       article = data[i];
       $ul.append('<li data-article-id="'+ article.id +'">'+ article.title +'</li>');
+
+      // WORKAROUND: quick implementation
+      CACHE[article.id] = article.content || article.description;
     }
   }.bind(this));
 }
@@ -166,6 +174,10 @@ Articles.prototype.addListeners = function() {
       $('li.active', this.root_id).removeClass('active');
       $target.addClass('active');
       this.notify();
+
+      // WORKAROUND: quick implementation
+      $('#contents').empty().append(CACHE[this.selectedValue()]);
+
       return false;
     }.bind(this)
   }, 'li');
