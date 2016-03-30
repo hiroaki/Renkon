@@ -6,6 +6,7 @@ Rails.application.routes.draw do
     namespace :v1 do
       resources :sites
       get 'channels' => 'sites#channels'
+      get 'channels/:id/articles' => 'sites#articles', as: :channels_articles
     end
   end
 
