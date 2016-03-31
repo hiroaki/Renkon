@@ -1,5 +1,5 @@
 /*
-
+  this Class requires "Observable" and "jQuery"
 */
 function Channels() {
   this.super = Observable.prototype;
@@ -7,9 +7,11 @@ function Channels() {
   this.$root = $(this.root_id);
   Observable.apply(this, arguments);
 }
+
 Channels.prototype = Object.create(Observable.prototype, {
   constructor: { value: Channels }
 });
+
 Channels.prototype.update = function(url) {
   $.ajax(url, {
     dataType: 'json'
@@ -27,10 +29,12 @@ Channels.prototype.update = function(url) {
     }
   }.bind(this));
 }
+
 Channels.prototype.build = function() {
   this.$root.empty();
   this.addListeners();
 };
+
 Channels.prototype.addListeners = function() {
   this.$root.on({
     click: function(evt) {
@@ -43,9 +47,11 @@ Channels.prototype.addListeners = function() {
     }.bind(this)
   }, 'li[data-channel-id]');
 };
+
 Channels.prototype.selectedValue = function() {
   return $('li.active', this.root_id).data('channel-id');
 };
+
 Channels.prototype.selectedUrlArticles = function() {
   return $('li.active', this.root_id).data('url_articles');
 };

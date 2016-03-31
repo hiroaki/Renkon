@@ -18,6 +18,7 @@
 //= require ./jquery-ui
 //= require ./jquery.layout
 //= require ./Observable
+//= require ./HtmlManipulator
 //= require ./Channels
 //= require ./Articles
 
@@ -26,14 +27,16 @@
 //  http://stackoverflow.com/questions/7451517/using-a-rails-helper-method-within-a-javascript-asset
 <% environment.context_class.instance_eval { include Rails.application.routes.url_helpers } %>
 
-(function (){
+;(function (){
 
 function Browser() {
   this.initialize.apply(this, arguments);
 }
+
 Browser.prototype.initialize = function() {
   this.build();
 };
+
 Browser.prototype.build = function() {
   this._apply_layout();
 
@@ -49,18 +52,19 @@ Browser.prototype.build = function() {
   this.channels.update('<%= api_v1_channels_path %>');
   $('#contents').empty();
 };
+
 Browser.prototype._apply_layout = function() {
   var bodyLayout, outerCenterLayout;
   bodyLayout = $('body').layout({
     resizable: false,
-    center__paneSelector: '.outer-center', // layout
-    north__paneSelector: '.outer-north', // #header - pane for the header navigation bar
+    center__paneSelector: '.outer-center',
+    north__paneSelector: '.outer-north',
     north__size: 50,
     north__closable: false,
     north__slidable: false,
-    west__paneSelector: '.outer-west', // #sources - pane for list of the input sources
+    west__paneSelector: '.outer-west',
     west__size: 200,
-    south__paneSelector: '.outer-south', // #footer - pane for the status bar bottom
+    south__paneSelector: '.outer-south',
     south__size: 25
   });
   // for the pulldown menu by the header navigation bar
@@ -68,11 +72,12 @@ Browser.prototype._apply_layout = function() {
 
   outerCenterLayout = $('div.outer-center').layout({ 
     resizable: true,
-    center__paneSelector: '.middle-center', // layout
-    west__paneSelector: '.middle-west', // layout
+    center__paneSelector: '.middle-center',
+    west__paneSelector: '.middle-west',
     west__size: 200
   }); 
 };
+
 Browser.prototype.update = function(notified_by, category) {
   console.log('Browser#update received notify from=['+ notified_by.constructor.name +'] with category=['+ category +']');
   if ( notified_by.constructor === Channels ) {
