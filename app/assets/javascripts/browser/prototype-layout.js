@@ -10,7 +10,7 @@ $(document).ready(function () {
     north__closable: false,
     north__slidable: false,
     west__paneSelector: '.outer-west', // #sources - pane for list of the input sources
-    west__size: 150,
+    west__size: 200,
     south__paneSelector: '.outer-south', // #footer - pane for the status bar bottom
     south__size: 25
   });
@@ -18,10 +18,10 @@ $(document).ready(function () {
   bodyLayout.allowOverflow('north');
 
   outerCenterLayout = $('div.outer-center').layout({ 
-    resizable: false,
+    resizable: true,
     center__paneSelector: '.middle-center', // layout
     west__paneSelector: '.middle-west', // layout
-    west__size: 150
+    west__size: 200
   }); 
 });
 })();
