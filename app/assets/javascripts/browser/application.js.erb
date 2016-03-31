@@ -17,23 +17,17 @@
 //= require ./URI.js
 //= require ./jquery-ui
 //= require ./jquery.layout
-//= require ./prototype-layout
+//= require ./Observable
+//= require ./Channels
+//= require ./Articles
 
 // WORKAROUND:
 //  Using a Rails helper method within a javascript asset
 //  http://stackoverflow.com/questions/7451517/using-a-rails-helper-method-within-a-javascript-asset
 <% environment.context_class.instance_eval { include Rails.application.routes.url_helpers } %>
 
-;(function() {
+(function (){
 
-/*
-
-*/
-var CACHE = {};
-
-/*
-
-*/
 function Browser() {
   this.initialize.apply(this, arguments);
 }
@@ -41,6 +35,8 @@ Browser.prototype.initialize = function() {
   this.build();
 };
 Browser.prototype.build = function() {
+  this._apply_layout();
+
   this.channels = new Channels();
   this.channels.addObserver(this);
   this.channels.build();
@@ -52,6 +48,30 @@ Browser.prototype.build = function() {
   // initial trigger
   this.channels.update('<%= api_v1_channels_path %>');
   $('#contents').empty();
+};
+Browser.prototype._apply_layout = function() {
+  var bodyLayout, outerCenterLayout;
+  bodyLayout = $('body').layout({
+    resizable: false,
+    center__paneSelector: '.outer-center', // layout
+    north__paneSelector: '.outer-north', // #header - pane for the header navigation bar
+    north__size: 50,
+    north__closable: false,
+    north__slidable: false,
+    west__paneSelector: '.outer-west', // #sources - pane for list of the input sources
+    west__size: 200,
+    south__paneSelector: '.outer-south', // #footer - pane for the status bar bottom
+    south__size: 25
+  });
+  // for the pulldown menu by the header navigation bar
+  bodyLayout.allowOverflow('north');
+
+  outerCenterLayout = $('div.outer-center').layout({ 
+    resizable: true,
+    center__paneSelector: '.middle-center', // layout
+    west__paneSelector: '.middle-west', // layout
+    west__size: 200
+  }); 
 };
 Browser.prototype.update = function(notified_by, category) {
   console.log('Browser#update received notify from=['+ notified_by.constructor.name +'] with category=['+ category +']');
@@ -65,187 +85,8 @@ Browser.prototype.update = function(notified_by, category) {
   }
 };
 
-/*
-  Abstract class Observable
-*/
-Observable = function() {
-  this.initialize.apply(this, arguments);
-};
-Observable.prototype.initialize = function() {
-  this.observers = [];
-};
-Observable.prototype.addObserver = function(observer) {
-  this.observers.push(observer);
-  return this;
-};
-Observable.prototype.notify = function(category) {
-  var i;
-  for ( i in this.observers ) {
-    this.observers[i].update(this, category);
-  }
-  return this;
-};
-
-/*
-
-*/
-function Channels() {
-  this.super = Observable.prototype;
-  this.root_id = '#channels';
-  this.$root = $(this.root_id);
-  Observable.apply(this, arguments);
-}
-Channels.prototype = Object.create(Observable.prototype, {
-  constructor: { value: Channels }
-});
-Channels.prototype.update = function(url) {
-  $.ajax(url, {
-    dataType: 'json'
-  }).then(function(data) {
-    var i, l, j, m, site, channel, $ul;
-    console.log(data);
-    $ul = $('<ul>');
-    this.$root.empty().append($ul);
-    for ( i = 0, l = data.length; i < l; ++i ) {
-      site = data[i];
-      for ( j = 0, m = site.channels.length; j < m; ++j ) {
-        channel = site.channels[j];
-        $ul.append('<li data-channel-id="'+ channel.id +'" data-url_articles="'+ channel.url_articles +'">'+ channel.title +'</li>');
-      }
-    }
-  }.bind(this));
-}
-Channels.prototype.build = function() {
-  this.$root.empty();
-  this.addListeners();
-};
-Channels.prototype.addListeners = function() {
-  this.$root.on({
-    click: function(evt) {
-      var $target = $(evt.target);
-      console.log("click: "+ $target.data('channel-id'));
-      $('li[data-channel-id].active', this.root_id).removeClass('active');
-      $target.addClass('active');
-      this.notify();
-      return false;
-    }.bind(this)
-  }, 'li[data-channel-id]');
-};
-Channels.prototype.selectedValue = function() {
-  return $('li.active', this.root_id).data('channel-id');
-};
-Channels.prototype.selectedUrlArticles = function() {
-  return $('li.active', this.root_id).data('url_articles');
-};
-
-/*
-
-*/
-function Articles() {
-  this.super = Observable.prototype;
-  this.root_id = '#articles';
-  this.$root = $(this.root_id);
-  Observable.apply(this, arguments);
-}
-Articles.prototype = Object.create(Observable.prototype, {
-  constructor: { value: Articles }
-});
-Articles.prototype.update = function(url) {
-  $.ajax(url, {
-    dataType: 'json'
-  }).then(function(data) {
-    var i, l, article, $ul;
-    console.log(data);
-    $ul = $('<ul>');
-    this.$root.empty().append($ul);
-    for ( i = 0, l = data.length; i < l; ++i ) {
-      article = data[i];
-      $ul.append('<li data-article-id="'+ article.id +'" title="'+ article.title +'">'+ article.title +'</li>');
-
-      // WORKAROUND: quick implementation
-      $('#contents').empty();
-      CACHE[article.id] = (function(html_string, url_base) {
-        var doc = new DOMParser().parseFromString(html_string, 'text/html'),
-            abspath, strip_tags, strip_attr, target_blank, inactivate_form;
-        // console.log(doc);
-        strip_tags = function(tag_name) {
-          var idx, ndlist = doc.body.getElementsByTagName(tag_name);
-          for ( idx = ndlist.length - 1; 0 <= idx; --idx ) {
-            ndlist[idx].parentNode.removeChild(ndlist[idx]);
-          }
-        };
-        strip_attr = function (attr_name) {
-          var idx, ndlist = doc.querySelectorAll('*');
-          for ( idx = ndlist.length - 1; 0 <= idx; --idx ) {
-            ndlist[idx].removeAttribute(attr_name);
-          }
-        };
-        abspath = function(tag_name, attr_name) {
-          $.each(doc.body.getElementsByTagName(tag_name), function(idx, elem) {
-            elem.setAttribute(attr_name, URI(elem.getAttribute(attr_name), url_base).href());
-          });
-        };
-        target_blank = function() {
-          var idx, ndlist = doc.body.getElementsByTagName('a');
-          for ( idx = ndlist.length - 1; 0 <= idx; --idx ) {
-            ndlist[idx].setAttribute('target', '_blank');
-          }
-        };
-        inactivate_form = function() {
-          var idx, ndlist = doc.body.getElementsByTagName('form');
-          for ( idx = ndlist.length - 1; 0 <= idx; --idx ) {
-            ndlist[idx].setAttribute('method', 'GET');
-            ndlist[idx].setAttribute('action', 'javascript:void(0);');
-          }
-        };
-        // replace url relative to absolute
-        abspath('img', 'src');
-        abspath('a', 'href');
-        // remove unexpected tags
-        strip_tags('script');
-        strip_tags('iframe');
-        strip_tags('object');
-        strip_tags('embed');
-        strip_tags('form');
-        strip_tags('link');
-        //
-        strip_attr('class');
-        strip_attr('style');
-        //
-        target_blank();
-        inactivate_form();
-
-        return $(doc.body).html();
-      })(article.content || article.description, article.channel.link);
-
-    }
-  }.bind(this));
-}
-Articles.prototype.build = function() {
-  this.$root.empty();
-  this.addListeners();
-};
-Articles.prototype.addListeners = function() {
-  this.$root.on({
-    click: function(evt) {
-      var $target = $(evt.target);
-      console.log("click: "+ $target.data('article-id'));
-      $('li.active', this.root_id).removeClass('active');
-      $target.addClass('active');
-      this.notify();
-
-      // WORKAROUND: quick implementation
-      $('#contents').empty().append(CACHE[this.selectedValue()]);
-
-      return false;
-    }.bind(this)
-  }, 'li');
-};
-Articles.prototype.selectedValue = function() {
-  return $('li.active', this.root_id).data('article-id');
-};
-
 $(document).ready(function() {
   new Browser();
 });
+
 })();
