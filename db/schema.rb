@@ -10,12 +10,23 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_08_06_115138) do
+ActiveRecord::Schema[7.1].define(version: 2024_08_07_093001) do
   create_table "channels", force: :cascade do |t|
     t.string "title"
     t.string "link"
     t.text "description"
     t.datetime "last_build_date"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "items", force: :cascade do |t|
+    t.string "title"
+    t.string "link"
+    t.text "description"
+    t.datetime "pub_date"
+    t.string "guid"
+    t.boolean "unread"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
