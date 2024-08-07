@@ -1,0 +1,13 @@
+<p style="color: green"><%= notice %></p>
+
+<h1>channel.items</h1>
+
+<ul id="items">
+  <% @items.each do |item| %>
+    <li>
+      <%= item.title %>
+    </li>
+  <% end %>
+</ul>
+
+<%= link_to "Back to channels", channels_path %>

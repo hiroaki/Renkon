@@ -1,6 +1,7 @@
 source "https://rubygems.org"
 
 ruby "3.3.4"
+gem 'rss' # is a standard library, but is not part of the default gems since Ruby 3.0.0
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
 gem "rails", "~> 7.1.3", ">= 7.1.3.4"

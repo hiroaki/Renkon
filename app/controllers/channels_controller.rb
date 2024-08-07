@@ -1,5 +1,5 @@
 class ChannelsController < ApplicationController
-  before_action :set_channel, only: %i[ show edit update destroy ]
+  before_action :set_channel, only: %i[ show edit update destroy fetch items ]
 
   # GET /channels
   def index
@@ -43,6 +43,17 @@ class ChannelsController < ApplicationController
   def destroy
     @channel.destroy!
     redirect_to channels_url, notice: "Channel was successfully destroyed.", status: :see_other
+  end
+
+  # fetch_channel GET /channels/:id/fetch(.:format)
+  def fetch
+    @channel.fetch
+  end
+
+  # items_channel GET /channels/:id/items(.:format)
+  def items
+    rss = fetch
+    @items = rss.items
   end
 
   private
