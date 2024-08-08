@@ -3,8 +3,8 @@
 <%= render @item %>
 
 <div>
-  <%= link_to "Edit this item", edit_item_path(@item) %> |
-  <%= link_to "Back to items", items_path %>
+  <%= link_to "Edit this item", edit_channel_item_path(@channel, @item) %> |
+  <%= link_to "Back to items", channel_items_path(@channel) %>
 
-  <%= button_to "Destroy this item", @item, method: :delete %>
+  <%= button_to "Destroy this item", channel_item_path(@channel, @item), method: :delete, data: { 'turbo-confirm': 'Are you sure?' } %>
 </div>

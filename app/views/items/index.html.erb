@@ -2,13 +2,21 @@
 
 <h1>Items</h1>
 
-<div id="items">
+<ul id="items">
   <% @items.each do |item| %>
-    <%= render item %>
-    <p>
-      <%= link_to "Show this item", item %>
-    </p>
+    <li id="<%= dom_id item %>">
+      <%= item.title %>
+      <p>
+        <%= link_to "Show this item", channel_item_path(item.channel, item) %>
+      </p>
+    </li>
   <% end %>
-</div>
+</ul>
 
-<%= link_to "New item", new_item_path %>
+<%= link_to "New item", new_channel_item_path %>
+
+
+<div>
+  <%= link_to "Show this channel", channel_path(@items.first.channel) %> |
+  <%= link_to "Back to channels", channels_path %>
+</div>

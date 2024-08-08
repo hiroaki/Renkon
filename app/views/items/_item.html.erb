@@ -1,2 +1,11 @@
-<div id="<%= dom_id item %>">
+<h2><%= item.title %></h2>
+
+<p>
+  <%= link_to item.link %>
+</p>
+
+<div>
+  <%= sanitize(item.description, tags: ['img'], attributes: ['src']).html_safe %>
 </div>
+
+<hr>
