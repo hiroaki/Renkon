@@ -1,4 +1,6 @@
 class ChannelsController < ApplicationController
+  include Factory
+
   before_action :set_channel, only: %i[ show edit update destroy fetch items ]
 
   # GET /channels
@@ -47,13 +49,13 @@ class ChannelsController < ApplicationController
 
   # fetch_channel GET /channels/:id/fetch(.:format)
   def fetch
-    @channel.fetch
+    fetch_and_merge_feed_entries_for_channel(@channel)
   end
 
   # items_channel GET /channels/:id/items(.:format)
   def items
-    rss = fetch
-    @items = rss.items
+    fetch
+    @items = @channel.items
   end
 
   private
