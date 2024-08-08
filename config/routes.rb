@@ -9,9 +9,9 @@ Rails.application.routes.draw do
   # root "posts#index"
 
   resources :channels do
+    resources :items
     member do
       get :fetch
-      get :items
     end
   end
 end
