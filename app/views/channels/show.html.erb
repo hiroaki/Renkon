@@ -6,5 +6,5 @@
   <%= link_to "Edit this channel", edit_channel_path(@channel) %> |
   <%= link_to "Back to channels", channels_path %>
 
-  <%= button_to "Destroy this channel", @channel, method: :delete %>
+  <%= button_to "Destroy this channel", @channel, method: :delete, data: { 'turbo-confirm': 'Are you sure?' } %>
 </div>
