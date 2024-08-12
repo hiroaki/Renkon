@@ -4,7 +4,7 @@ class ItemsController < ApplicationController
 
   # GET /items
   def index
-    @items = @channel.items
+    @items = @channel.items.enabled.all
   end
 
   # GET /items/1
@@ -60,6 +60,6 @@ class ItemsController < ApplicationController
     end
 
     def permitted_item_params
-      params.require(:item).permit(:title, :link, :description)
+      params.require(:item).permit(:title, :link, :description, :unread, :disabled)
     end
 end

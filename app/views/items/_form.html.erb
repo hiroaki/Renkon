@@ -27,6 +27,16 @@
   </div>
 
   <div>
+    <%= form.label :unread, style: "display: block" %>
+    <%= form.check_box :unread %>
+  </div>
+
+  <div>
+    <%= form.label :disabled, style: "display: block" %>
+    <%= form.check_box :disabled %>
+  </div>
+
+  <div>
     <%= form.submit %>
   </div>
 <% end %>
