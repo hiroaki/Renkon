@@ -50,12 +50,7 @@ class ChannelsController < ApplicationController
   # fetch_channel GET /channels/:id/fetch(.:format)
   def fetch
     fetch_and_merge_feed_entries_for_channel(@channel)
-  end
-
-  # items_channel GET /channels/:id/items(.:format)
-  def items
-    fetch
-    @items = @channel.items
+    redirect_to @channel
   end
 
   private
