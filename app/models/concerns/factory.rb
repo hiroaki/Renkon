@@ -15,9 +15,9 @@ module Factory
   def feed_entry_to_params_for_item(entry)
     {
       guid: entry.id,
-      title: entry.title,
+      title: entry.title&.strip,
       link: entry.url,
-      description: entry.summary,
+      description: entry.content&.strip || entry.summary&.strip,
       pub_date: entry.published,
     }
   end

@@ -5,6 +5,9 @@ module FeedUtils
     res = HTTP.get(url)
     # TODO: check response
     xml = res.body.to_s
-    Feedjira.parse(xml)
+
+    parser = Feedjira.parser_for_xml(xml)
+    parser.preprocess_xml = true
+    parser.parse(xml)
   end
 end
