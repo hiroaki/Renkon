@@ -1,9 +1,11 @@
-<h2><%= item.title %></h2>
+<header class="contaner">
+  <h3><%= item.title %></h3>
+</header>
 
-<p>
+<div class="contaner">
   <%= link_to item.link, item.link %>
-</p>
+</div>
 
-<div>
+<div class="contaner m-4">
   <%= sanitize(item.description, tags: ['img'], attributes: ['src']).html_safe %>
 </div>

@@ -1,22 +1,10 @@
-<div class="contaner">
-  <p style="color: green"><%= notice %></p>
-</div>
-
 <header class="contaner">
   <h2>Channels</h2>
 </header>
 
 <div id="channels" class="contaner">
-  <hr>
   <% @channels.each do |channel| %>
     <%= render channel %>
-    <p>
-      <%= link_to "Show this channel", channel %>
-    </p>
-    <p>
-      <%= link_to "items of this channel", channel_items_path(channel) %>
-    </p>
-    <hr>
   <% end %>
 </div>
 

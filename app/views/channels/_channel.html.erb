@@ -1,4 +1,4 @@
-<div id="<%= dom_id channel %>">
+<div id="<%= dom_id channel %>" class="my-4 container">
   <p>
     <strong>Title:</strong>
     <%= channel.title %>
@@ -20,8 +20,12 @@
   </p>
 
   <p>
-    <strong>unread</strong>
-    <%= channel.items_count %>
+    <strong>Unread:</strong>
+    <%= channel.items.count %>
   </p>
 
+  <p>
+    <%= link_to "Show this channel", channel %> |
+    <%= link_to "items of this channel", channel_items_path(channel) %>
+  </p>
 </div>

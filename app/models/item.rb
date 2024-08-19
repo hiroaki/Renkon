@@ -3,4 +3,8 @@ class Item < ApplicationRecord
 
   scope :enabled, -> { where(disabled: false) }
   scope :disabled, -> { where(disabled: true) }
+
+  def unread?
+    unread == true
+  end
 end

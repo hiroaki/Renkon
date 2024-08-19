@@ -1,14 +1,14 @@
-<p style="color: green"><%= notice %></p>
+<header class="contaner">
+  <h2>Show item</h2>
+</header>
 
 <%= render @item %>
 
 <hr>
 
-<div>
+<div class="contaner">
   <%= link_to "Edit this item", edit_channel_item_path(@channel, @item) %> |
   <%= link_to "Back to items", channel_items_path(@channel) %>
-</div>
 
-<div class="my-4">
   <%= button_to "Destroy this item", channel_item_path(@channel, @item), method: :delete, data: { 'turbo-confirm': 'Are you sure?' }, class: 'button-danger' %>
 </div>

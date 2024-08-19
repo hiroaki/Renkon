@@ -1,7 +1,3 @@
-<div class="container">
-  <p style="color: green"><%= notice %></p>
-</div>
-
 <header class="contaner">
   <h2>Items</h2>
 </header>
@@ -9,7 +5,14 @@
 <ul id="items" class="container list-disc">
   <% @items.each do |item| %>
     <li id="<%= dom_id item %>">
-      <%= link_to item.title, channel_item_path(item.channel, item) %>
+      <div class="container">
+        <p class="overflow-hidden text-nowrap">
+          <span>[<%= item.unread? ? '●' : '　' %>]</span> <%= link_to item.title, channel_item_path(item.channel, item) %>
+        </p>
+        <p class="text-sm text-gray-400">
+          <%= item.pub_date %>
+        </p>
+      </div>
     </li>
   <% end %>
 </ul>
@@ -17,10 +20,7 @@
 <hr>
 
 <div class="container">
-  <%= link_to "New item", new_channel_item_path %>
-</div>
-
-<div class="container">
+  <%= link_to "New item", new_channel_item_path %> |
   <%= link_to "Show this channel", channel_path(@channel) %> |
   <%= link_to "Back to channels", channels_path %>
 </div>
