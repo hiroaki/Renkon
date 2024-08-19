@@ -42,3 +42,5 @@ end
 
 gem 'feedjira'
 gem 'http'
+
+gem "tailwindcss-rails", "~> 2.7"

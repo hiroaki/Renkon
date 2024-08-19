@@ -12,26 +12,26 @@
   <% end %>
 
   <div>
-    <%= form.label :title, style: "display: block" %>
-    <%= form.text_field :title %>
+    <%= form.label :title, class: 'block text-sm' %>
+    <%= form.text_field :title, class: 'input-text' %>
   </div>
 
   <div>
-    <%= form.label :link, style: "display: block" %>
-    <%= form.text_field :link %>
+    <%= form.label :link, class: 'block text-sm' %>
+    <%= form.text_field :link, class: 'input-text' %>
   </div>
 
   <div>
-    <%= form.label :description, style: "display: block" %>
-    <%= form.text_area :description %>
+    <%= form.label :description, class: 'block text-sm' %>
+    <%= form.text_area :description, class: 'textarea' %>
   </div>
 
   <div>
-    <%= form.label :last_build_date, style: "display: block" %>
-    <%= form.datetime_field :last_build_date %>
+    <%= form.label :last_build_date, class: 'block text-sm' %>
+    <%= form.datetime_field :last_build_date, class: 'input_text' %>
   </div>
 
-  <div>
-    <%= form.submit %>
+  <div class="my-4">
+    <%= form.submit nil, class: 'button-notice' %>
   </div>
 <% end %>

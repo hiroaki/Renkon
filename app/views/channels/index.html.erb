@@ -1,8 +1,13 @@
-<p style="color: green"><%= notice %></p>
+<div class="contaner">
+  <p style="color: green"><%= notice %></p>
+</div>
 
-<h1>Channels</h1>
+<header class="contaner">
+  <h2>Channels</h2>
+</header>
 
-<div id="channels">
+<div id="channels" class="contaner">
+  <hr>
   <% @channels.each do |channel| %>
     <%= render channel %>
     <p>
@@ -11,7 +16,12 @@
     <p>
       <%= link_to "items of this channel", channel_items_path(channel) %>
     </p>
+    <hr>
   <% end %>
 </div>
 
-<%= link_to "New channel", new_channel_path %>
+<hr>
+
+<div class="contaner">
+  <%= link_to "New channel", new_channel_path %>
+</div>
