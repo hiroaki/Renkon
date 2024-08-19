@@ -2,9 +2,13 @@
 
 <%= render @item %>
 
+<hr>
+
 <div>
   <%= link_to "Edit this item", edit_channel_item_path(@channel, @item) %> |
   <%= link_to "Back to items", channel_items_path(@channel) %>
+</div>
 
-  <%= button_to "Destroy this item", channel_item_path(@channel, @item), method: :delete, data: { 'turbo-confirm': 'Are you sure?' } %>
+<div class="my-4">
+  <%= button_to "Destroy this item", channel_item_path(@channel, @item), method: :delete, data: { 'turbo-confirm': 'Are you sure?' }, class: 'button-danger' %>
 </div>

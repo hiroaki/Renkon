@@ -1,22 +1,26 @@
-<p style="color: green"><%= notice %></p>
+<div class="container">
+  <p style="color: green"><%= notice %></p>
+</div>
 
-<h1>Items</h1>
+<header class="contaner">
+  <h2>Items</h2>
+</header>
 
-<ul id="items">
+<ul id="items" class="container list-disc">
   <% @items.each do |item| %>
     <li id="<%= dom_id item %>">
-      <%= item.title %>
-      <p>
-        <%= link_to "Show this item", channel_item_path(item.channel, item) %>
-      </p>
+      <%= link_to item.title, channel_item_path(item.channel, item) %>
     </li>
   <% end %>
 </ul>
 
-<%= link_to "New item", new_channel_item_path %>
+<hr>
 
+<div class="container">
+  <%= link_to "New item", new_channel_item_path %>
+</div>
 
-<div>
+<div class="container">
   <%= link_to "Show this channel", channel_path(@channel) %> |
   <%= link_to "Back to channels", channels_path %>
 </div>
