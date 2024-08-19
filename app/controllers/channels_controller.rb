@@ -5,7 +5,7 @@ class ChannelsController < ApplicationController
 
   # GET /channels
   def index
-    @channels = Channel.all
+    @channels = Channel.all_with_count_items(true, 'items_count')
   end
 
   # GET /channels/1
