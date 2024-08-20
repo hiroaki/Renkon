@@ -13,6 +13,8 @@ Rails.application.routes.draw do
       member do
         patch :disable
         patch :enable
+        patch :read
+        patch :unread
       end
     end
 
