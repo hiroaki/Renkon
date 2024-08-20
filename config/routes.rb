@@ -19,5 +19,9 @@ Rails.application.routes.draw do
     member do
       patch :fetch
     end
+
+    collection do
+      get :trash
+    end
   end
 end
