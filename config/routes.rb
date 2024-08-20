@@ -11,7 +11,7 @@ Rails.application.routes.draw do
   resources :channels do
     resources :items
     member do
-      get :fetch
+      patch :fetch
     end
   end
 end
