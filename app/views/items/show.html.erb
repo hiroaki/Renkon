@@ -7,8 +7,9 @@
 <hr>
 
 <div class="contaner">
-  <%= link_to "Edit this item", edit_channel_item_path(@channel, @item) %> |
+  <%= link_to "Edit", edit_channel_item_path(@channel, @item) %> |
   <%= link_to "Back to items", channel_items_path(@channel) %>
 
-  <%= button_to "Destroy this item", channel_item_path(@channel, @item), method: :delete, data: { 'turbo-confirm': 'Are you sure?' }, class: 'button-danger' %>
+  <%= button_to "Disable", disable_channel_item_path(@channel, @item), method: :patch, data: { 'turbo-confirm': 'Are you sure?' }, class: 'button-notice' %>
+  <%= button_to "Destroy", channel_item_path(@channel, @item), method: :delete, data: { 'turbo-confirm': 'Are you sure?' }, class: 'button-danger' %>
 </div>

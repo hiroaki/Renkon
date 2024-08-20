@@ -9,7 +9,13 @@ Rails.application.routes.draw do
   # root "posts#index"
 
   resources :channels do
-    resources :items
+    resources :items do
+      member do
+        patch :disable
+        patch :enable
+      end
+    end
+
     member do
       patch :fetch
     end
