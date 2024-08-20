@@ -1,6 +1,6 @@
 class ItemsController < ApplicationController
   before_action :set_channel
-  before_action :set_item, only: %i[ show edit update destroy disable enable ]
+  before_action :set_item, only: %i[ show edit update destroy disable enable unread read ]
 
   # GET /items
   def index
@@ -33,11 +33,7 @@ class ItemsController < ApplicationController
 
   # PATCH/PUT /items/1
   def update
-    if @item.update(item_params)
-      redirect_to [@channel, @item], notice: "Item was successfully updated.", status: :see_other
-    else
-      render :edit, status: :unprocessable_entity
-    end
+    common_action_for_update(item_params)
   end
 
   # DELETE /items/1
@@ -48,20 +44,22 @@ class ItemsController < ApplicationController
 
   # disable_channel_item PATCH /channels/:channel_id/items/:id/disable(.:format)
   def disable
-    if @item.update(disabled: true)
-      redirect_to [@channel, @item], notice: "Item was successfully updated.", status: :see_other
-    else
-      render :edit, status: :unprocessable_entity
-    end
+    common_action_for_update(disabled: true)
   end
 
   # enable_channel_item PATCH /channels/:channel_id/items/:id/enable(.:format)
   def enable
-    if @item.update(disabled: false)
-      redirect_to [@channel, @item], notice: "Item was successfully updated.", status: :see_other
-    else
-      render :edit, status: :unprocessable_entity
-    end
+    common_action_for_update(disabled: false)
+  end
+
+  # unread_channel_item PATCH /channels/:channel_id/items/:id/unread(.:format)
+  def unread
+    common_action_for_update(unread: true)
+  end
+
+  # read_channel_item PATCH /channels/:channel_id/items/:id/read(.:format)
+  def read
+    common_action_for_update(unread: false)
   end
 
   private
@@ -79,5 +77,13 @@ class ItemsController < ApplicationController
 
     def permitted_item_params
       params.require(:item).permit(:title, :link, :description, :unread, :disabled)
+    end
+
+    def common_action_for_update(params)
+      if @item.update(params)
+        redirect_to [@channel, @item], notice: "Item was successfully updated.", status: :see_other
+      else
+        render :edit, status: :unprocessable_entity
+      end
     end
 end
