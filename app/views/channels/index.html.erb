@@ -5,6 +5,13 @@
 <div id="channels" class="contaner">
   <% @channels.each do |channel| %>
     <%= render channel %>
+
+    <p>
+      <%= link_to "Refresh channel", fetch_channel_path(channel), data: { turbo_method: :patch, turbo_frame: dom_id(channel) } %> |
+      <%= link_to "Show this channel", channel %> |
+      <%= link_to "items of this channel", channel_items_path(channel) %>
+    </p>
+
   <% end %>
 </div>
 

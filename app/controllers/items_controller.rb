@@ -4,7 +4,7 @@ class ItemsController < ApplicationController
 
   # GET /items
   def index
-    @items = @channel.items.enabled.all
+    @items = @channel.items.enabled.all.order(pub_date: :desc)
   end
 
   # GET /items/1

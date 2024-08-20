@@ -1,31 +1,28 @@
-<div id="<%= dom_id channel %>" class="my-4 container">
-  <p>
-    <strong>Title:</strong>
-    <%= channel.title %>
-  </p>
+<%= turbo_frame_tag channel do %>
+  <div class="my-4 container">
+    <p>
+      <strong>Title:</strong>
+      <%= channel.title %>
+    </p>
 
-  <p>
-    <strong>Link:</strong>
-    <%= channel.link %>
-  </p>
+    <p>
+      <strong>Link:</strong>
+      <%= channel.link %>
+    </p>
 
-  <p>
-    <strong>Description:</strong>
-    <%= channel.description %>
-  </p>
+    <p>
+      <strong>Description:</strong>
+      <%= channel.description %>
+    </p>
 
-  <p>
-    <strong>Last build date:</strong>
-    <%= channel.last_build_date %>
-  </p>
+    <p>
+      <strong>Last build date:</strong>
+      <%= channel.last_build_date %>
+    </p>
 
-  <p>
-    <strong>Unread:</strong>
-    <%= channel.items.count %>
-  </p>
-
-  <p>
-    <%= link_to "Show this channel", channel %> |
-    <%= link_to "items of this channel", channel_items_path(channel) %>
-  </p>
-</div>
+    <p>
+      <strong>Unread:</strong>
+      <%= channel.items.count %>
+    </p>
+  </div>
+<% end %>
