@@ -1,6 +1,6 @@
 class ItemsController < ApplicationController
   before_action :set_channel
-  before_action :set_item, only: %i[ show edit update destroy ]
+  before_action :set_item, only: %i[ show edit update destroy disable enable ]
 
   # GET /items
   def index
@@ -44,6 +44,24 @@ class ItemsController < ApplicationController
   def destroy
     @item.destroy!
     redirect_to channel_items_url(@channel), notice: "Item was successfully destroyed.", status: :see_other
+  end
+
+  # disable_channel_item PATCH /channels/:channel_id/items/:id/disable(.:format)
+  def disable
+    if @item.update(disabled: true)
+      redirect_to [@channel, @item], notice: "Item was successfully updated.", status: :see_other
+    else
+      render :edit, status: :unprocessable_entity
+    end
+  end
+
+  # enable_channel_item PATCH /channels/:channel_id/items/:id/enable(.:format)
+  def enable
+    if @item.update(disabled: false)
+      redirect_to [@channel, @item], notice: "Item was successfully updated.", status: :see_other
+    else
+      render :edit, status: :unprocessable_entity
+    end
   end
 
   private

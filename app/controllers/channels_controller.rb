@@ -1,7 +1,7 @@
 class ChannelsController < ApplicationController
   include Factory
 
-  before_action :set_channel, only: %i[ show edit update destroy fetch items ]
+  before_action :set_channel, only: %i[ show edit update destroy fetch ]
 
   # GET /channels
   def index
@@ -51,6 +51,11 @@ class ChannelsController < ApplicationController
   def fetch
     fetch_and_merge_feed_entries_for_channel(@channel)
     redirect_to @channel
+  end
+
+  # trash_channels GET /channels/trash(.:format)
+  def trash
+    @items = Item.where(disabled: true).all
   end
 
   private
