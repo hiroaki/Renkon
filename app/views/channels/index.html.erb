@@ -2,16 +2,30 @@
   <h2>Channels</h2>
 </header>
 
-<div id="channels" class="contaner">
+<ul id="channels" class="container" data-controller="keyevent">
   <% @channels.each do |channel| %>
-    <%= render channel %>
-
-    <p>
-      <%= link_to "Refresh channel", fetch_channel_path(channel), data: { turbo_method: :patch, turbo_frame: dom_id(channel) } %> |
-      <%= link_to "Show this channel", channel %> |
-      <%= link_to "items of this channel", channel_items_path(channel) %>
-    </p>
-
+    <%# FIXME: box-border が効かない？ため border-transparent を指定しています %>
+    <li tabindex="-1" class="container box-border border-2 border-transparent focus:border-gray-400"
+      data-model="item"
+      data-action="keydown->keyevent#cancelScrollByKeydown keyup->keyevent#keyupEnter"
+      data-url="<%= channel.link %>"
+    >
+      <div class="container p-2">
+        <%= render channel %>
+        <p>
+          <%=
+            link_to(
+              'Refresh channel', fetch_channel_path(channel),
+              data: { turbo_method: :patch, turbo_frame: dom_id(channel) },
+            )
+          %>
+          |
+          <%= link_to('Show this channel', channel) %>
+          |
+          <%= link_to('items of this channel', channel_items_path(channel)) %>
+        </p>
+      </div>
+    </li>
   <% end %>
 </div>
 
@@ -19,12 +33,12 @@
 
 <div class="contaner">
   <p>
-    <%= link_to "Trash", trash_channels_path %>
+    <%= link_to 'Trash', trash_channels_path %>
   </p>
 </div>
 
 <hr>
 
 <div class="contaner">
-  <%= link_to "New channel", new_channel_path %>
+  <%= link_to 'New channel', new_channel_path %>
 </div>

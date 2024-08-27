@@ -1,5 +1,7 @@
 <%= turbo_frame_tag channel do %>
-  <div class="my-4 container">
+  <div class="container"
+    data-url="<%= channel.link %>"
+  >
     <p>
       <strong>Title:</strong>
       <%= channel.title %>
