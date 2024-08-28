@@ -17,7 +17,7 @@ module Factory
     {
       guid: entry.id,
       title: entry.title&.strip,
-      link: entry.url,
+      url: entry.url,
       description: entry.content&.strip || entry.summary&.strip,
       pub_date: entry.published,
     }
