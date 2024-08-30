@@ -24,6 +24,7 @@ Rails.application.routes.draw do
 
     collection do
       get :trash
+      get :main # FOR DEVELOPMENT
     end
   end
 end

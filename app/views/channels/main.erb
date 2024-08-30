@@ -1,0 +1,35 @@
+<div class="container max-w-full h-screen p-0 m-0 text-gray-700 flex flex-col" data-controller="frame">
+  <div id="header-pane" class="bg-cyan-200 px-2 py-1">
+    <h1>Three-Pane Layout</h1>
+  </div>
+
+  <div class="grow flex flex-row" data-action="dragover->frame#handlerDragover">
+    <div id="channels-pane" class="bg-emerald-200 px-2 min-w-32">
+      Channels
+    </div>
+
+    <div class="bg-slate-200 px-1 w-1 cursor-col-resize" draggable="true"
+      data-action="dragstart->frame#handlerDragStart drag->frame#handlerDrag dragend->frame#handlerDragEnd"
+      data-width-target="channels-pane"
+    >
+    </div>
+
+    <div id="items-pane" class="bg-yellow-200 pl-2 min-w-32">
+      Items
+    </div>
+
+    <div class="bg-slate-200 px-1 w-1 cursor-col-resize" draggable="true"
+      data-action="dragstart->frame#handlerDragStart drag->frame#handlerDrag dragend->frame#handlerDragEnd"
+      data-width-target="items-pane"
+    >
+    </div>
+
+    <div id="contents-pane" class="bg-rose-200 px-2 grow">
+      Contents
+    </div>
+  </div>
+
+  <div id="footer-pane" class="bg-violet-200 px-2 py-1">
+    <p>Status</p>
+  </div>
+</div>

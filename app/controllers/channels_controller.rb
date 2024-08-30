@@ -3,6 +3,11 @@ class ChannelsController < ApplicationController
 
   before_action :set_channel, only: %i[ show edit update destroy fetch ]
 
+  # FOR DEVELOPMENT
+  def main
+    render layout: 'viewport_full'
+  end
+
   # GET /channels
   def index
     @channels = Channel.all_with_count_items(true, 'items_count')
