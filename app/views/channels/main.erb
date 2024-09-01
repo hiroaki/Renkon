@@ -1,35 +1,48 @@
-<div class="container max-w-full h-screen p-0 m-0 text-gray-700 flex flex-col" data-controller="frame">
-  <div id="header-pane" class="bg-cyan-200 px-2 py-1">
+<div class="container flex flex-col max-w-full h-screen p-0 m-0 text-gray-700">
+  <div id="header-pane" class="px-2 py-1 bg-cyan-200">
     <h1>Three-Pane Layout</h1>
   </div>
 
-  <div class="grow flex flex-row" data-action="dragover->frame#handlerDragover">
-    <div id="channels-pane" class="bg-emerald-200 px-2 min-w-32">
-      Channels
+  <div class="flex flex-row grow">
+    <!-- -->
+    <div class="h-full flex flex-row min-w-32" data-controller="frame">
+      <div class="grow px-2 bg-emerald-200" data-frame-target="movablePane">
+        Channels
+      </div>
+      <div class="flex-none w-1 cursor-col-resize bg-slate-200" draggable="true"
+        data-action="
+          dragstart->frame#handlerDragStart
+          drag->frame#handlerDrag
+          dragend->frame#handlerDragEnd
+        "
+      >
+      </div>
     </div>
 
-    <div class="bg-slate-200 px-1 w-1 cursor-col-resize" draggable="true"
-      data-action="dragstart->frame#handlerDragStart drag->frame#handlerDrag dragend->frame#handlerDragEnd"
-      data-width-target="channels-pane"
-    >
+    <!-- -->
+    <div class="h-full flex flex-row min-w-32" data-controller="frame">
+      <div class="grow px-2 bg-yellow-200" data-frame-target="movablePane">
+        Items
+      </div>
+      <div class="flex-none w-1 cursor-col-resize bg-slate-200" draggable="true"
+        data-action="
+          dragstart->frame#handlerDragStart
+          drag->frame#handlerDrag
+          dragend->frame#handlerDragEnd
+        "
+      >
+      </div>
     </div>
 
-    <div id="items-pane" class="bg-yellow-200 pl-2 min-w-32">
-      Items
-    </div>
-
-    <div class="bg-slate-200 px-1 w-1 cursor-col-resize" draggable="true"
-      data-action="dragstart->frame#handlerDragStart drag->frame#handlerDrag dragend->frame#handlerDragEnd"
-      data-width-target="items-pane"
-    >
-    </div>
-
-    <div id="contents-pane" class="bg-rose-200 px-2 grow">
-      Contents
+    <!-- -->
+    <div class="flex flex-row grow">
+      <div class="h-full w-full px-2 bg-rose-200">
+        Contents
+      </div>
     </div>
   </div>
 
-  <div id="footer-pane" class="bg-violet-200 px-2 py-1">
+  <div id="footer-pane" class="px-2 py-1 bg-violet-200">
     <p>Status</p>
   </div>
 </div>

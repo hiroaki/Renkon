@@ -1,6 +1,8 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
+  static targets = ['movablePane'];
+
   connect() {
     console.info('frame_controller');
   }
@@ -34,27 +36,18 @@ export default class extends Controller {
 
   reset() {
     this.start_x = null;
-    this.targetElement = null;
     this.start_width = null;
   }
 
   handlerDragStart(evt) {
     this.start_x = evt.x;
-    this.targetElement = document.getElementById(evt.target.dataset['widthTarget']);
-    this.start_width = this.targetElement.offsetWidth;
+    this.start_width = this.movablePaneTarget.offsetWidth;
 
     evt.dataTransfer.setDragImage(this.emptyImage, 4, 4);
   }
 
   handlerDrag(evt) {
-    const target = document.getElementById(evt.target.dataset['widthTarget']);
-
-    if (this.targetElement == target) {
-      this.updateWidthOfTarget(evt.x - this.start_x);
-    }
-    else {
-      console.error('Target at drag do not match with one at dragstart')
-    }
+    this.updateWidthOfTarget(evt.x - this.start_x);
   }
 
   handlerDragover(evt) {
@@ -63,19 +56,10 @@ export default class extends Controller {
   }
 
   handlerDragEnd(evt) {
-    const target = document.getElementById(evt.target.dataset['widthTarget']);
-
-    if (this.targetElement == target) {
-      this.updateWidthOfTarget(evt.x - this.start_x);
-    }
-    else {
-      console.error('Target at dragstart and dragend do not match')
-    }
-
     this.reset();
   }
 
   updateWidthOfTarget(delta_x) {
-    this.targetElement.style.width = (this.start_width + delta_x) + 'px';
+    this.movablePaneTarget.style.width = (this.start_width + delta_x) + 'px';
   }
 }
