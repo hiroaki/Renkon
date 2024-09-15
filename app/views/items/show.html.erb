@@ -2,11 +2,15 @@
   <h2>Show item</h2>
 </header>
 
-<%= render @item %>
+<turbo-frame id="contents">
+  <div class="contaner">
+    <%= render @item %>
+  </div>
+</turbo-frame>
 
 <hr>
 
-<div class="contaner">
+<div class="container">
   <%= link_to 'Edit', edit_channel_item_path(@channel, @item) %> |
 
   <% read_unread = capture do %>

@@ -1,33 +1,40 @@
-<%= turbo_frame_tag channel do %>
-  <div class="container">
-    <p>
-      <strong>Title:</strong>
-      <%= channel.title %>
-    </p>
+<%= turbo_frame_tag dom_id(channel) do %>
+  <% if params[:short].present? %>
+    <div class="container">
+      <p>
+        <%= channel.title %>
+      </p>
+    </div>
+  <% else %>
+    <div class="container">
+      <p>
+        <strong>Title:</strong>
+        <%= channel.title %>
+      </p>
+      <p>
+        <strong>Src:</strong>
+        <%= channel.src %>
+      </p>
 
-    <p>
-      <strong>Src:</strong>
-      <%= channel.src %>
-    </p>
+      <p>
+        <strong>Description:</strong>
+        <%= channel.description %>
+      </p>
 
-    <p>
-      <strong>Description:</strong>
-      <%= channel.description %>
-    </p>
+      <p>
+        <strong>Last build date:</strong>
+        <%= channel.last_build_date %>
+      </p>
 
-    <p>
-      <strong>Last build date:</strong>
-      <%= channel.last_build_date %>
-    </p>
+      <p>
+        <strong>Unread:</strong>
+        <%= channel.items.count %>
+      </p>
 
-    <p>
-      <strong>Unread:</strong>
-      <%= channel.items.count %>
-    </p>
-
-    <p>
-      <strong>URL:</strong>
-      <%= channel.url %>
-    </p>
-  </div>
+      <p>
+        <strong>URL:</strong>
+        <%= channel.url %>
+      </p>
+    </div>
+  <% end %>
 <% end %>

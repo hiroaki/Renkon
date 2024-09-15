@@ -53,19 +53,23 @@ export default class extends Controller {
 
     const width = this.restoreWidth(this.storageKeyValue);
     if (width) {
-      this.movablePaneTarget.style.width =  width + 'px'
+      this.movablePaneTarget.style.width = parseInt(width) + 'px';
     }
   }
 
   handlerDragStart(evt) {
     this.start_x = evt.x;
     this.start_width = this.movablePaneTarget.offsetWidth;
-
     evt.dataTransfer.setDragImage(this.emptyImage, 4, 4);
   }
 
   handlerDrag(evt) {
-    this.updateWidthOfTarget(evt.x - this.start_x);
+    // WORKAROUND:  drag を終了して dragend になる最後の drag イベントの evt.x が 0 になります（なぜ？バグ？）
+    // このことから、 evt.x == 0 は無視します。
+    // ちなみに dragend 時の evt.x は 0 ではなく、ちゃんとした位置になっています。
+    if (evt.x != 0) {
+      this.updateWidthOfTarget(evt.x - this.start_x);
+    }
   }
 
   handlerDragover(evt) {
@@ -74,12 +78,13 @@ export default class extends Controller {
   }
 
   handlerDragEnd(evt) {
-    console.info(this.storageKeyValue, this.movablePaneTarget.offsetWidth);
     this.storeWidth(this.storageKeyValue, this.movablePaneTarget.offsetWidth);
     this.reset();
   }
 
   updateWidthOfTarget(delta_x) {
-    this.movablePaneTarget.style.width = (this.start_width + delta_x) + 'px';
+    const new_width = this.start_width + delta_x;
+    // console.log("new_width="+ new_width, this)
+    this.movablePaneTarget.style.width = parseInt(new_width) +'px'
   }
 }

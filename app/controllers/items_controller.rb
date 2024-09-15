@@ -4,6 +4,9 @@ class ItemsController < ApplicationController
 
   # GET /items
   def index
+    if turbo_frame_request?
+      logger.info("TURBO_FRAME_REQUEST")
+    end
     @items = @channel.items.enabled.all.order(pub_date: :desc)
   end
 

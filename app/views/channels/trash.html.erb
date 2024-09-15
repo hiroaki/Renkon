@@ -4,23 +4,36 @@
   <h2>Disabled items</h2>
 </header>
 
-<ul id="items" class="container list-disc">
-  <% @items.each do |item| %>
-    <li id="<%= dom_id item %>">
-      <div class="container">
-        <p class="overflow-hidden text-nowrap">
-          <span>[<%= item.unread? ? '●' : '　' %>]</span> <%= link_to item.title, channel_item_path(item.channel, item) %>
-        </p>
-        <p class="text-sm text-gray-400">
-          <%= item.pub_date %>
-        </p>
-      </div>
-    </li>
-  <% end %>
-</ul>
+<%= turbo_frame_tag 'items' do %>
+  <ul id="items" class="container" data-controller="keyevent">
+    <% @items.each do |item| %>
+      <li id="<%= dom_id item %>" tabindex="-1" class="container box-border border-2 border-transparent focus:border-gray-400"
+        data-model="item"
+        data-action="keydown->keyevent#handlerKeydown keyup->keyevent#handlerKeyup"
+        data-url="<%= item.url %>"
+      >
+        <div class="container p-2">
+          <p class="overflow-hidden text-nowrap">
+            <span>[<%= item.unread? ? '●' : '　' %>]</span>
+            <%=
+              link_to(item.title, channel_item_path(item.channel, item),
+                'tabindex' => '-1',
+                'data-listen-keyevent' => 'right',
+                'data-turbo-frame' => turbo_frame_if_turbo_frame_request('contents'),
+              )
+            %>
+          </p>
+          <p class="text-sm text-gray-400">
+            <%= item.pub_date %>
+          </p>
+        </div>
+      </li>
+    <% end %>
+  </ul>
+<% end %>
 
 <hr>
 
-<div class="container">
+<nav class="container">
   <%= link_to "Back to channels", channels_path %>
-</div>
+</nav>
