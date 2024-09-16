@@ -1,0 +1,48 @@
+<div class="container flex flex-col max-w-full h-screen p-0 m-0 text-gray-700">
+  <div id="header-pane" class="px-2 py-1 bg-cyan-200">
+    <h1>Three-Pane Layout</h1>
+  </div>
+
+  <div class="flex flex-row grow">
+    <!-- -->
+    <div class="h-full flex flex-row min-w-32" data-controller="frame">
+      <div class="grow px-2 bg-emerald-200" data-frame-target="movablePane">
+        Channels
+      </div>
+      <div class="flex-none w-1 cursor-col-resize bg-slate-200" draggable="true"
+        data-action="
+          dragstart->frame#handlerDragStart
+          drag->frame#handlerDrag
+          dragend->frame#handlerDragEnd
+        "
+      >
+      </div>
+    </div>
+
+    <!-- -->
+    <div class="h-full flex flex-row min-w-32" data-controller="frame">
+      <div class="grow px-2 bg-yellow-200" data-frame-target="movablePane">
+        Items
+      </div>
+      <div class="flex-none w-1 cursor-col-resize bg-slate-200" draggable="true"
+        data-action="
+          dragstart->frame#handlerDragStart
+          drag->frame#handlerDrag
+          dragend->frame#handlerDragEnd
+        "
+      >
+      </div>
+    </div>
+
+    <!-- -->
+    <div class="flex flex-row grow">
+      <div class="h-full w-full px-2 bg-rose-200">
+        Contents
+      </div>
+    </div>
+  </div>
+
+  <div id="footer-pane" class="px-2 py-1 bg-violet-200">
+    <p>Status</p>
+  </div>
+</div>
