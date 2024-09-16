@@ -76,7 +76,7 @@ class ItemsController < ApplicationController
     end
 
     def permitted_item_params
-      params.require(:item).permit(:title, :link, :description, :unread, :disabled)
+      params.require(:item).permit(:title, :url, :description, :unread, :disabled)
     end
 
     def common_action_for_update(params)

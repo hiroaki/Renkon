@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_08_27_171031) do
+ActiveRecord::Schema[7.1].define(version: 2024_08_28_120625) do
   create_table "channels", force: :cascade do |t|
     t.string "title"
     t.string "src"
@@ -23,7 +23,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_27_171031) do
 
   create_table "items", force: :cascade do |t|
     t.string "title"
-    t.string "link"
+    t.string "url"
     t.text "description"
     t.datetime "pub_date"
     t.string "guid"
