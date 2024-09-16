@@ -23,19 +23,19 @@ export default class extends Controller {
         break;
       case 38:
         console.info('up');
-        this.focusPrevItem(evt.target);
+        this.focusPrevItem(evt.currentTarget);
         break;
       case 39:
         console.info('right');
-        this.clickLinkForItems(evt.target);
+        this.clickLinkForItems(evt.currentTarget);
         break;
       case 40:
         console.info('down');
-        this.focusNextItem(evt.target);
+        this.focusNextItem(evt.currentTarget);
         break;
       case 13:
         console.info('enter');
-        this.openWindow(evt.target.dataset.url);
+        this.openWindow(evt.currentTarget.dataset.url);
         break;
       case 8:
         console.info('delete');
