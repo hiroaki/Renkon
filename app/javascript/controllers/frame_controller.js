@@ -2,6 +2,9 @@ import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
   static targets = ['movablePane'];
+  static values = {
+    storageKey: String
+  };
 
   connect() {
     console.info('frame_controller');
@@ -34,9 +37,24 @@ export default class extends Controller {
     document.body.append(div);
   }
 
+  storeWidth(storageKey, value) {
+    if (storageKey) {
+      localStorage.setItem(storageKey, value);
+    }
+  }
+
+  restoreWidth(storageKey) {
+    return localStorage.getItem(storageKey);
+  }
+
   reset() {
     this.start_x = null;
     this.start_width = null;
+
+    const width = this.restoreWidth(this.storageKeyValue);
+    if (width) {
+      this.movablePaneTarget.style.width =  width + 'px'
+    }
   }
 
   handlerDragStart(evt) {
@@ -56,6 +74,8 @@ export default class extends Controller {
   }
 
   handlerDragEnd(evt) {
+    console.info(this.storageKeyValue, this.movablePaneTarget.offsetWidth);
+    this.storeWidth(this.storageKeyValue, this.movablePaneTarget.offsetWidth);
     this.reset();
   }
 

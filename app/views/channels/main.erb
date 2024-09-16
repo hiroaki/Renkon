@@ -5,8 +5,13 @@
 
   <div class="flex flex-row grow">
     <!-- -->
-    <div class="h-full flex flex-row min-w-32" data-controller="frame">
-      <div class="grow px-2 bg-emerald-200" data-frame-target="movablePane">
+    <div class="h-full flex flex-row min-w-32"
+      data-controller="frame"
+      data-frame-storage-key-value="channelsPane"
+    >
+      <div class="grow px-2 bg-emerald-200"
+        data-frame-target="movablePane"
+      >
         Channels
       </div>
       <div class="flex-none w-1 cursor-col-resize bg-slate-200" draggable="true"
@@ -20,8 +25,13 @@
     </div>
 
     <!-- -->
-    <div class="h-full flex flex-row min-w-32" data-controller="frame">
-      <div class="grow px-2 bg-yellow-200" data-frame-target="movablePane">
+    <div class="h-full flex flex-row min-w-32"
+      data-controller="frame"
+      data-frame-storage-key-value="itemsPane"
+    >
+      <div class="grow px-2 bg-yellow-200"
+        data-frame-target="movablePane"
+      >
         Items
       </div>
       <div class="flex-none w-1 cursor-col-resize bg-slate-200" draggable="true"
