@@ -2,45 +2,59 @@
   <h2>Channels</h2>
 </header>
 
-<ul id="channels" class="container" data-controller="keyevent">
-  <% @channels.each do |channel| %>
-    <%# FIXME: box-border が効かない？ため border-transparent を指定しています %>
-    <li tabindex="-1" class="container box-border border-2 border-transparent focus:border-gray-400"
-      data-model="item"
-      data-action="keydown->keyevent#handlerKeydown keyup->keyevent#handlerKeyup"
-      data-url="<%= channel.url %>"
-    >
-      <div class="container p-2">
-        <%= render channel %>
-        <p>
-          <%=
-            link_to(
-              'Refresh channel', fetch_channel_path(channel),
-              data: { turbo_method: :patch, turbo_frame: dom_id(channel) },
-            )
-          %>
-          |
-          <%= link_to('Show this channel', channel) %>
-          |
-          <%=
-            link_to('items of this channel', channel_items_path(channel), 'data-listen-keyevent' => 'right')
-          %>
-        </p>
-      </div>
-    </li>
-  <% end %>
-</div>
+<%= turbo_frame_tag 'channels' do %>
+  <ul id="channels" class="container" data-controller="keyevent">
+    <% @channels.each do |channel| %>
+      <%# FIXME: box-border が効かない？ため border-transparent を指定しています %>
+      <li tabindex="-1" class="container box-border border-2 border-transparent focus:border-gray-400"
+        data-model="item"
+        data-action="
+          keydown->keyevent#handlerKeydown
+          keyup->keyevent#handlerKeyup
+        "
+        data-url="<%= channel.url %>"
+      >
+        <div class="container p-2 overflow-hidden text-nowrap">
+          <a href="<%= channel_items_path(channel) %>" data-turbo-frame="<%= turbo_frame_if_turbo_frame_request('items') %>">
+            <%= render channel %>
+          </a>
 
-<hr>
+          <%= capture_unless_turbo_frame_request do %>
+            <p>
+              <%=
+                link_to(
+                  'Refresh channel', fetch_channel_path(channel),
+                  data: { turbo_method: :patch, turbo_frame: dom_id(channel) },
+                )
+              %>
+              |
+              <%= link_to('Show this channel', channel, data: { turbo_frame: '_top' }) %>
+              |
+              <%=
+                link_to('items of this channel', channel_items_path(channel), data: {
+                  listen_keyevent: 'right',
+                  turbo_frame: '_top',
+                })
+              %>
+            </p>
+          <% end %>
+        </div>
+      </li>
+    <% end %>
+  </ul>
 
-<div class="contaner">
-  <p>
-    <%= link_to 'Trash', trash_channels_path %>
-  </p>
-</div>
+  <hr>
 
-<hr>
+  <div class="contaner">
+    <p>
+      <%= link_to('Trash', trash_channels_path, 'data-turbo-frame' => turbo_frame_if_turbo_frame_request('items')) %>
+    </p>
+  </div>
 
-<div class="contaner">
-  <%= link_to 'New channel', new_channel_path %>
-</div>
+  <hr>
+
+  <div class="contaner">
+    <%# TODO: モーダルに出したいです %>
+    <%= link_to 'New channel', new_channel_path, 'data-turbo-frame' => '_top' %>
+  </div>
+<% end %>

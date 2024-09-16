@@ -1,20 +1,20 @@
-<div class="container flex flex-col max-w-full h-screen p-0 m-0 text-gray-700">
-  <div id="header-pane" class="px-2 py-1 bg-cyan-200">
+<div class="flex flex-col h-screen text-gray-700">
+  <header class="flex-shrink-0 h-16 bg-gray-200">
     <h1>Three-Pane Layout</h1>
-  </div>
+  </header>
 
-  <div class="flex flex-row grow">
+  <main class="flex flex-row flex-1 overflow-hidden">
     <!-- -->
-    <div class="h-full flex flex-row min-w-32"
+    <div class="flex flex-row flex-shrink-0" style="width: 8rem;"
       data-controller="frame"
+      data-frame-target="movablePane"
       data-frame-storage-key-value="channelsPane"
     >
-      <div class="grow px-2 bg-emerald-200"
-        data-frame-target="movablePane"
-      >
-        Channels
+      <div class="flex-1 bg-gray-300 overflow-y-auto overflow-x-hidden">
+        <turbo-frame id="channels" src="<%= channels_path(short: true) %>">
+        </turbo-frame>
       </div>
-      <div class="flex-none w-1 cursor-col-resize bg-slate-200" draggable="true"
+      <div class="w-0.5 bg-red-500 cursor-col-resize" draggable="true"
         data-action="
           dragstart->frame#handlerDragStart
           drag->frame#handlerDrag
@@ -24,35 +24,39 @@
       </div>
     </div>
 
+
     <!-- -->
-    <div class="h-full flex flex-row min-w-32"
+    <div id="center-frame" class="flex flex-row flex-shrink-0" style="width: 8rem;"
       data-controller="frame"
+      data-frame-target="movablePane"
       data-frame-storage-key-value="itemsPane"
     >
-      <div class="grow px-2 bg-yellow-200"
-        data-frame-target="movablePane"
-      >
-        Items
+      <div class="flex-1 bg-gray-400 overflow-y-auto overflow-x-hidden">
+        <turbo-frame id="items">
+        </turbo-frame>
       </div>
-      <div class="flex-none w-1 cursor-col-resize bg-slate-200" draggable="true"
-        data-action="
-          dragstart->frame#handlerDragStart
-          drag->frame#handlerDrag
-          dragend->frame#handlerDragEnd
-        "
+      <div class="w-0.5 bg-red-500 cursor-col-resize" draggable="true"
+      data-action="
+        dragstart->frame#handlerDragStart
+        drag->frame#handlerDrag
+        dragend->frame#handlerDragEnd
+      "
       >
       </div>
     </div>
 
     <!-- -->
-    <div class="flex flex-row grow">
-      <div class="h-full w-full px-2 bg-rose-200">
-        Contents
+    <div id="right-frame" class="flex-1 bg-gray-500 overflow-y-auto">
+      <div>
+        <turbo-frame id="contents">
+        </turbo-frame>
+      </div>
+      <div class="w-0.5 bg-red-500 cursor-col-resize">
       </div>
     </div>
-  </div>
+  </main>
 
-  <div id="footer-pane" class="px-2 py-1 bg-violet-200">
+  <footer class="flex-shrink-0 h-16 bg-gray-200">
     <p>Status</p>
-  </div>
+  </footer>
 </div>

@@ -5,6 +5,7 @@ class ChannelsController < ApplicationController
 
   # FOR DEVELOPMENT
   def main
+    @channels = Channel.all_with_count_items(true, 'items_count')
     render layout: 'viewport_full'
   end
 
@@ -15,6 +16,7 @@ class ChannelsController < ApplicationController
 
   # GET /channels/1
   def show
+    # NOTE: 追加のパラメータ short: true をビューで使っています
   end
 
   # GET /channels/new

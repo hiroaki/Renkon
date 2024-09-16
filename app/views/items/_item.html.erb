@@ -6,6 +6,6 @@
   <%= link_to item.url, item.url %>
 </div>
 
-<div class="contaner m-4">
+<div class="contaner">
   <%= sanitize(item.description, tags: ['img'], attributes: ['src']).html_safe %>
 </div>
