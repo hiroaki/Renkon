@@ -1,6 +1,9 @@
 class Channel < ApplicationRecord
   has_many :items, dependent: :delete_all
 
+  validates :title, presence: true
+  validates :src, presence: true
+
   def self.all_with_count_items(unread = nil, as_name = 'items_count')
     rel = all.left_outer_joins(:items).group('channels.id').select("channels.*, COUNT(`items`.`id`) AS #{as_name}")
     unless unread.nil?
