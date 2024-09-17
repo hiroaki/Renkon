@@ -54,7 +54,6 @@
   <hr>
 
   <div class="contaner">
-    <%# TODO: モーダルに出したいです %>
-    <%= link_to 'New channel', new_channel_path, 'data-turbo-frame' => '_top' %>
+    <%= link_to 'New channel', new_channel_path, 'data-turbo-frame' => turbo_frame_if_turbo_frame_request('modal') %>
   </div>
 <% end %>
