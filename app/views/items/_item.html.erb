@@ -7,5 +7,5 @@
 </div>
 
 <div class="contaner">
-  <%= sanitize(item.description, tags: ['img'], attributes: ['src']).html_safe %>
+  <%= sanitize(item.description, tags: ['img', 'p', 'br', 'div'], attributes: ['src']).html_safe %>
 </div>

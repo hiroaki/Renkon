@@ -1,18 +1,24 @@
-<%# TODO: app/views/items/index.html とほぼ同じなので統合してください %>
+<%# TODO: turbo_frame_tag の中は app/views/items/index.html とまったく同じなので統合してください %>
 
 <header class="contaner">
   <h2>Disabled items</h2>
 </header>
 
+<nav class="container">
+  <%= link_to "Back to channels", channels_path %>
+</nav>
+
+<hr>
+
 <%= turbo_frame_tag 'items' do %>
   <ul id="items" class="container" data-controller="keyevent">
     <% @items.each do |item| %>
-      <li id="<%= dom_id item %>" tabindex="-1" class="container box-border border-2 border-transparent focus:border-gray-400"
+      <li id="<%= dom_id item %>" tabindex="-1" class="container box-border border-2 border-transparent focus:border-gray-400 text-xs"
         data-model="item"
         data-action="keydown->keyevent#handlerKeydown keyup->keyevent#handlerKeyup"
         data-url="<%= item.url %>"
       >
-        <div class="container p-2">
+        <div class="container px-2">
           <p class="overflow-hidden text-nowrap">
             <span>[<%= item.unread? ? '●' : '　' %>]</span>
             <%=
@@ -31,9 +37,3 @@
     <% end %>
   </ul>
 <% end %>
-
-<hr>
-
-<nav class="container">
-  <%= link_to "Back to channels", channels_path %>
-</nav>
