@@ -1,5 +1,5 @@
 class ItemsController < ApplicationController
-  before_action :set_channel
+  before_action :set_channel, except: %i[ trash]
   before_action :set_item, only: %i[ show edit update destroy disable enable unread read ]
 
   # GET /items
@@ -63,6 +63,11 @@ class ItemsController < ApplicationController
   # read_channel_item PATCH /channels/:channel_id/items/:id/read(.:format)
   def read
     common_action_for_update(unread: false)
+  end
+
+  # trash GET /trash(.:format)
+  def trash
+    @items = Item.where(disabled: true).all
   end
 
   private

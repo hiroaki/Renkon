@@ -60,11 +60,6 @@ class ChannelsController < ApplicationController
     redirect_to @channel
   end
 
-  # trash_channels GET /channels/trash(.:format)
-  def trash
-    @items = Item.where(disabled: true).all
-  end
-
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_channel
