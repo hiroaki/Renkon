@@ -4,7 +4,10 @@ class Channel < ApplicationRecord
   validates :title, presence: true
   validates :src, presence: true
 
-  def self.all_with_count_items(unread = nil, as_name = 'items_count')
+  def self.all_with_count_items(options = {})
+    unread = options[:unread].presence
+    as_name = options[:as_name].presence || 'items_count'
+
     rel = all.left_outer_joins(:items).group('channels.id').select("channels.*, COUNT(`items`.`id`) AS #{as_name}")
     unless unread.nil?
       # LEFT OUTER JOIN した結果、 Channel の items が 0 件の時、

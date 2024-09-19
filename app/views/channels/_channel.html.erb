@@ -1,9 +1,14 @@
 <%= turbo_frame_tag dom_id(channel) do %>
   <% if params[:short].present? %>
-    <div class="container">
-      <p>
-        <%= channel.title %>
-      </p>
+    <div class="relative w-full">
+      <div class="flex justify-between">
+        <span class="left text-nowrap overflow-hidden ">
+          <%= channel.title %>
+        </span>
+        <span class="right ml-2 px-2 py-1 font-semibold leading-none text-green-700 bg-green-100 rounded-full dark:bg-green-700 dark:text-green-100">
+          <%= channel.items_count %>
+        </span>
+      </div>
     </div>
   <% else %>
     <div class="container">
@@ -28,7 +33,7 @@
 
       <p>
         <strong>Unread:</strong>
-        <%= channel.items.count %>
+        <%= channel.items_count %>
       </p>
 
       <p>

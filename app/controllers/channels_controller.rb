@@ -5,13 +5,13 @@ class ChannelsController < ApplicationController
 
   # FOR DEVELOPMENT
   def main
-    @channels = Channel.all_with_count_items(true, 'items_count')
+    @channels = Channel.all_with_count_items(unread: true, as_name: 'items_count')
     render layout: 'viewport_full'
   end
 
   # GET /channels
   def index
-    @channels = Channel.all_with_count_items(true, 'items_count')
+    @channels = Channel.all_with_count_items(unread: true, as_name: 'items_count')
   end
 
   # GET /channels/1
