@@ -5,7 +5,12 @@
       <p class="text-xs m-0 p-0 text-nowrap overflow-hidden"><%= 123 %> unread</p>
     </div>
     <div class="mx-1">
-      <button class="px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-blue-600 border border-transparent rounded-md active:bg-blue-600 hover:bg-blue-700 focus:outline-none focus:shadow-outline-blue">Refresh</button>
+      <button class="px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-blue-600 border border-transparent rounded-md active:bg-blue-600 hover:bg-blue-700 focus:outline-none focus:shadow-outline-blue"
+        data-controller="refresh"
+        data-action="click->refresh#all"
+      >
+        Refresh
+      </button>
     </div>
     <div class="mx-1">
       <%= link_to 'New channel', new_channel_path, 'data-turbo-frame' => 'modal' %>

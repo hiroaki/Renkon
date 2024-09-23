@@ -10,6 +10,7 @@
 
 <%= turbo_frame_tag 'channels' do %>
 <div class="flex flex-col h-full">
+  <%# there are fixed items %>
   <ul id="trash" class="container">
     <li tabindex="-1" class="container box-border border-2 border-transparent focus:border-gray-400 text-xs">
       <div class="container pl-2 pr-1 overflow-hidden text-nowrap">
@@ -30,7 +31,7 @@
     <hr class="p-0 m-0">
   </ul>
 
-  <ul id="channels" class="container" data-controller="keyevent">
+  <ul id="channel_list" class="container" data-controller="keyevent">
     <% @channels.each do |channel| %>
       <%# FIXME: box-border が効かない？ため border-transparent を指定しています %>
       <li tabindex="-1" class="container box-border border-2 border-transparent focus:border-gray-400 text-xs"
@@ -43,7 +44,9 @@
       >
         <div class="container pl-2 pr-1 overflow-hidden text-nowrap">
           <a href="<%= channel_items_path(channel) %>" data-turbo-frame="<%= turbo_frame_if_turbo_frame_request('items') %>">
-            <%= render channel %>
+            <%= turbo_frame_tag(dom_id(channel), data: { 'url-for-refresh' => fetch_channel_path(channel) } ) do %>
+              <%= render channel %>
+            <% end %>
           </a>
 
           <%= capture_unless_turbo_frame_request do %>

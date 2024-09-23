@@ -57,7 +57,7 @@ class ChannelsController < ApplicationController
   # fetch_channel GET /channels/:id/fetch(.:format)
   def fetch
     fetch_and_merge_feed_entries_for_channel(@channel)
-    redirect_to @channel
+    redirect_to channel_url(@channel, short: !!params[:short]), status: :see_other
   end
 
   private
