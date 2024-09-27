@@ -1,0 +1,66 @@
+<header class="contaner">
+  <h2>Show item</h2>
+</header>
+
+<turbo-frame id="contents">
+  <div id="contents" class="contaner">
+    <%= render @item %>
+  </div>
+</turbo-frame>
+
+<hr>
+
+<div class="container">
+  <%= link_to 'Edit', edit_channel_item_path(@channel, @item) %> |
+
+  <% read_unread = capture do %>
+    <% if @item.unread? %>
+      <%=
+        button_to('Mark Read', read_channel_item_path(@channel, @item),
+          method: :patch, data: { 'turbo-confirm': 'Are you sure?' }, class: 'button-notice',
+        )
+      %>
+    <% else %>
+      <%=
+        button_to('Mark Unead', unread_channel_item_path(@channel, @item),
+          method: :patch, data: { 'turbo-confirm': 'Are you sure?' }, class: 'button-notice',
+        )
+      %>
+    <% end %>
+  <% end %>
+
+  <% if @item.disabled? %>
+    <%= link_to 'Back to items', channel_items_path(@channel) %> |
+    <%= link_to 'Back to Trash', trash_path %>
+
+    <%= read_unread %>
+
+    <%=
+      button_to(
+        'Enable', enable_channel_item_path(@channel, @item),
+        method: :patch, data: { 'turbo-confirm': 'Are you sure?' }, class: 'button-notice',
+      )
+    %>
+    <%=
+      button_to(
+        'Destroy', channel_item_path(@channel, @item),
+        method: :delete, data: { 'turbo-confirm': 'Are you sure?' }, class: 'button-danger',
+      )
+    %>
+  <% else %>
+    <%= link_to 'Back to items', channel_items_path(@channel) %>
+
+    <%= read_unread %>
+
+    <%=
+      button_to('Disable', disable_channel_item_path(@channel, @item),
+        method: :patch, data: { 'turbo-confirm': 'Are you sure?' }, class: 'button-notice',
+      )
+    %>
+    <%=
+      button_to('Destroy', channel_item_path(@channel, @item),
+        method: :delete, data: { 'turbo-confirm': 'Are you sure?' }, class: 'button-danger',
+      )
+    %>
+  <% end %>
+</div>

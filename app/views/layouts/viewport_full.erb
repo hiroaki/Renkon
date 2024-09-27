@@ -11,13 +11,8 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
-    <div class="contaner mx-4 px-4">
-      <p style="color: green"><%= notice %></p>
-    </div>
-
-    <main class="container m-4 p-4">
-      <%= yield %>
-    </main>
+  <body class="container max-w-full m-0 p-0">
+    <%= yield %>
+    <%= turbo_frame_tag 'modal' %>
   </body>
 </html>

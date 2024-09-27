@@ -1,0 +1,76 @@
+<div class="flex flex-col h-screen text-gray-700">
+  <nav class="flex-shrink-0 h-12 bg-gray-200 px-1 flex flex-row place-items-center">
+    <div class="ml-1 mr-2 max-w-20">
+      <h2 class="m-0 p-0 my-0 text-gray-400">Renkon</h2>
+      <p class="text-xs m-0 p-0 text-nowrap overflow-hidden"><%= 123 %> unread</p>
+    </div>
+    <div class="mx-1">
+      <button class="px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-blue-600 border border-transparent rounded-md active:bg-blue-600 hover:bg-blue-700 focus:outline-none focus:shadow-outline-blue"
+        data-controller="refresh"
+        data-action="click->refresh#all"
+        data-refresh-concurrency-value="2"
+      >
+        Refresh
+      </button>
+    </div>
+    <div class="mx-1">
+      <%= link_to 'New channel', new_channel_path, 'data-turbo-frame' => 'modal' %>
+    </div>
+  </nav>
+
+  <main class="flex flex-row flex-1 overflow-hidden">
+    <!-- -->
+    <div class="flex flex-row flex-shrink-0 min-w-8" style="width: 8rem;"
+      data-controller="frame"
+      data-frame-target="movablePane"
+      data-frame-storage-key-value="channelsPane"
+    >
+      <div class="flex-1 bg-blue-100 overflow-y-auto overflow-x-hidden pt-2">
+        <turbo-frame id="channels" src="<%= channels_path(short: true) %>">
+        </turbo-frame>
+      </div>
+      <div class="w-0.5 bg-gray-200 cursor-col-resize" draggable="true"
+        data-action="
+          dragstart->frame#handlerDragStart
+          drag->frame#handlerDrag
+          dragend->frame#handlerDragEnd
+        "
+      >
+      </div>
+    </div>
+
+    <!-- -->
+    <div class="flex flex-row flex-shrink-0 min-w-8" style="width: 8rem;"
+      data-controller="frame"
+      data-frame-target="movablePane"
+      data-frame-storage-key-value="itemsPane"
+    >
+      <div class="flex-1 bg-white-100 overflow-y-auto overflow-x-hidden pt-2">
+        <turbo-frame id="items">
+        </turbo-frame>
+      </div>
+      <div class="w-0.5 bg-gray-200 cursor-col-resize" draggable="true"
+      data-action="
+        dragstart->frame#handlerDragStart
+        drag->frame#handlerDrag
+        dragend->frame#handlerDragEnd
+      "
+      >
+      </div>
+    </div>
+
+    <!-- -->
+    <div class="flex-1 overflow-y-auto min-w-8">
+      <div class="bg-white p-2">
+        <turbo-frame id="contents">
+        </turbo-frame>
+      </div>
+      <div class="w-0.5 bg-gray-200 cursor-col-resize">
+      </div>
+    </div>
+  </main>
+
+  <footer class="flex-shrink-0 h-4 bg-gray-200 text-xs px-1">
+    <p>Status</p>
+  </footer>
+</div>

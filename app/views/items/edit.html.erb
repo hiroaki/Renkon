@@ -1,0 +1,12 @@
+<header class="contaner">
+  <h2>Editing item</h2>
+</header>
+
+<%= render "form", item: @item %>
+
+<hr>
+
+<div class="container">
+  <%= link_to "Show this item", channel_item_path(@channel, @item) %> |
+  <%= link_to "Back to items", channel_items_path(@channel) %>
+</div>

@@ -7,4 +7,23 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   # root "posts#index"
+
+  root to: 'channels#main'
+
+  get 'trash', to: 'items#trash'
+
+  resources :channels do
+    resources :items do
+      member do
+        patch :disable
+        patch :enable
+        patch :read
+        patch :unread
+      end
+    end
+
+    member do
+      patch :fetch
+    end
+  end
 end

@@ -1,0 +1,11 @@
+<header class="contaner">
+  <h3><span>[<%= item.unread? ? '●' : '　' %>]</span> <%= item.title %></h3>
+</header>
+
+<div class="contaner">
+  <%= link_to item.url, item.url %>
+</div>
+
+<div class="contaner">
+  <%= sanitize(item.description, tags: ['img', 'p', 'br', 'div'], attributes: ['src']).html_safe %>
+</div>

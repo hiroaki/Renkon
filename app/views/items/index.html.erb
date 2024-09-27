@@ -1,0 +1,39 @@
+<header class="contaner">
+  <h2>Items</h2>
+</header>
+
+<nav class="container">
+  <%= link_to "New item", new_channel_item_path %> |
+  <%= link_to "Show this channel", channel_path(@channel) %> |
+  <%= link_to "Back to channels", channels_path %>
+</nav>
+
+<hr>
+
+<%= turbo_frame_tag 'items' do %>
+  <ul id="items" class="container" data-controller="keyevent">
+    <% @items.each do |item| %>
+      <li id="<%= dom_id item %>" tabindex="-1" class="container box-border border-2 border-transparent focus:border-gray-400 text-xs"
+        data-model="item"
+        data-action="keydown->keyevent#handlerKeydown keyup->keyevent#handlerKeyup"
+        data-url="<%= item.url %>"
+      >
+        <div class="container px-2">
+          <p class="overflow-hidden text-nowrap">
+            <span>[<%= item.unread? ? '●' : '　' %>]</span>
+            <%=
+              link_to(item.title, channel_item_path(item.channel, item),
+                'tabindex' => '-1',
+                'data-listen-keyevent' => 'right',
+                'data-turbo-frame' => turbo_frame_if_turbo_frame_request('contents'),
+              )
+            %>
+          </p>
+          <p class="text-sm text-gray-400">
+            <%= item.pub_date %>
+          </p>
+        </div>
+      </li>
+    <% end %>
+  </ul>
+<% end %>
