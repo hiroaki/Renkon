@@ -15,7 +15,7 @@ export default class extends Controller {
 
   hideOnSubmit(event) {
     if (event.detail.success) {
-      this.hide();
+      this.hide(event);
     }
   }
 

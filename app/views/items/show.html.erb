@@ -3,7 +3,7 @@
 </header>
 
 <turbo-frame id="contents">
-  <div class="contaner">
+  <div id="contents" class="contaner">
     <%= render @item %>
   </div>
 </turbo-frame>
@@ -31,7 +31,7 @@
 
   <% if @item.disabled? %>
     <%= link_to 'Back to items', channel_items_path(@channel) %> |
-    <%= link_to 'Back to Trash', trash_channels_path %>
+    <%= link_to 'Back to Trash', trash_path %>
 
     <%= read_unread %>
 

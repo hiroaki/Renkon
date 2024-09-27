@@ -1,40 +1,43 @@
-<%= turbo_frame_tag dom_id(channel) do %>
-  <% if params[:short].present? %>
-    <div class="container">
-      <p>
+<% if params[:short] %>
+  <div class="relative w-full">
+    <div class="flex justify-between">
+      <span class="left text-nowrap overflow-hidden ">
         <%= channel.title %>
-      </p>
+      </span>
+      <span class="right ml-2 px-2 py-1 font-semibold leading-none text-green-700 bg-green-100 rounded-full dark:bg-green-700 dark:text-green-100">
+        <%= channel.respond_to?(:items_count) ? channel.items_count : channel.items.count %>
+      </span>
     </div>
-  <% else %>
-    <div class="container">
-      <p>
-        <strong>Title:</strong>
-        <%= channel.title %>
-      </p>
-      <p>
-        <strong>Src:</strong>
-        <%= channel.src %>
-      </p>
+  </div>
+<% else %>
+  <div class="container">
+    <p>
+      <strong>Title:</strong>
+      <%= channel.title %>
+    </p>
+    <p>
+      <strong>Src:</strong>
+      <%= channel.src %>
+    </p>
 
-      <p>
-        <strong>Description:</strong>
-        <%= channel.description %>
-      </p>
+    <p>
+      <strong>Description:</strong>
+      <%= channel.description %>
+    </p>
 
-      <p>
-        <strong>Last build date:</strong>
-        <%= channel.last_build_date %>
-      </p>
+    <p>
+      <strong>Last build date:</strong>
+      <%= channel.last_build_date %>
+    </p>
 
-      <p>
-        <strong>Unread:</strong>
-        <%= channel.items.count %>
-      </p>
+    <p>
+      <strong>Unread:</strong>
+      <%= channel.respond_to?(:items_count) ? channel.items_count : channel.items.count %>
+    </p>
 
-      <p>
-        <strong>URL:</strong>
-        <%= channel.url %>
-      </p>
-    </div>
-  <% end %>
+    <p>
+      <strong>URL:</strong>
+      <%= channel.url %>
+    </p>
+  </div>
 <% end %>

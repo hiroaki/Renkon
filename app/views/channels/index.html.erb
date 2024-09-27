@@ -2,11 +2,39 @@
   <h2>Channels</h2>
 </header>
 
+<nav class="container">
+  <%= link_to link_to 'New channel', new_channel_path, 'data-turbo-frame' => turbo_frame_if_turbo_frame_request('modal') %>
+</nav>
+
+<hr>
+
 <%= turbo_frame_tag 'channels' do %>
-  <ul id="channels" class="container" data-controller="keyevent">
+<div class="flex flex-col h-full">
+  <%# there are fixed items %>
+  <ul id="trash" class="container">
+    <li tabindex="-1" class="container box-border border-2 border-transparent focus:border-gray-400 text-xs">
+      <div class="container pl-2 pr-1 overflow-hidden text-nowrap">
+        <a href="<%= trash_path %>" data-turbo-frame="<%= turbo_frame_if_turbo_frame_request('items') %>">
+          <div class="relative w-full">
+            <div class="flex justify-between">
+              <span class="left text-nowrap overflow-hidden ">
+                Trash
+              </span>
+              <span class="right ml-2 px-2 py-1 font-semibold leading-none">
+                &nbsp;
+              </span>
+            </div>
+          </div>
+        </a>
+      </div>
+    </li>
+    <hr class="p-0 m-0">
+  </ul>
+
+  <ul id="channel_list" class="container" data-controller="keyevent">
     <% @channels.each do |channel| %>
       <%# FIXME: box-border が効かない？ため border-transparent を指定しています %>
-      <li tabindex="-1" class="container box-border border-2 border-transparent focus:border-gray-400"
+      <li tabindex="-1" class="container box-border border-2 border-transparent focus:border-gray-400 text-xs"
         data-model="item"
         data-action="
           keydown->keyevent#handlerKeydown
@@ -14,9 +42,11 @@
         "
         data-url="<%= channel.url %>"
       >
-        <div class="container p-2 overflow-hidden text-nowrap">
+        <div class="container pl-2 pr-1 overflow-hidden text-nowrap">
           <a href="<%= channel_items_path(channel) %>" data-turbo-frame="<%= turbo_frame_if_turbo_frame_request('items') %>">
-            <%= render channel %>
+            <%= turbo_frame_tag(dom_id(channel), data: { 'url-for-refresh' => fetch_channel_path(channel, short: true), 'method' => 'patch' } ) do %>
+              <%= render channel %>
+            <% end %>
           </a>
 
           <%= capture_unless_turbo_frame_request do %>
@@ -39,21 +69,9 @@
             </p>
           <% end %>
         </div>
+        <hr class="p-0 m-0">
       </li>
     <% end %>
   </ul>
-
-  <hr>
-
-  <div class="contaner">
-    <p>
-      <%= link_to('Trash', trash_channels_path, 'data-turbo-frame' => turbo_frame_if_turbo_frame_request('items')) %>
-    </p>
-  </div>
-
-  <hr>
-
-  <div class="contaner">
-    <%= link_to 'New channel', new_channel_path, 'data-turbo-frame' => turbo_frame_if_turbo_frame_request('modal') %>
-  </div>
+</div>
 <% end %>

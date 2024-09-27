@@ -5,13 +5,13 @@ class ChannelsController < ApplicationController
 
   # FOR DEVELOPMENT
   def main
-    @channels = Channel.all_with_count_items(true, 'items_count')
+    @channels = Channel.all_with_count_items(unread: true, as_name: 'items_count')
     render layout: 'viewport_full'
   end
 
   # GET /channels
   def index
-    @channels = Channel.all_with_count_items(true, 'items_count')
+    @channels = Channel.all_with_count_items(unread: true, as_name: 'items_count')
   end
 
   # GET /channels/1
@@ -57,12 +57,7 @@ class ChannelsController < ApplicationController
   # fetch_channel GET /channels/:id/fetch(.:format)
   def fetch
     fetch_and_merge_feed_entries_for_channel(@channel)
-    redirect_to @channel
-  end
-
-  # trash_channels GET /channels/trash(.:format)
-  def trash
-    @items = Item.where(disabled: true).all
+    redirect_to channel_url(@channel, short: !!params[:short]), status: :see_other
   end
 
   private

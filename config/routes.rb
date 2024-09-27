@@ -8,6 +8,10 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   # root "posts#index"
 
+  root to: 'channels#main'
+
+  get 'trash', to: 'items#trash'
+
   resources :channels do
     resources :items do
       member do
@@ -20,11 +24,6 @@ Rails.application.routes.draw do
 
     member do
       patch :fetch
-    end
-
-    collection do
-      get :trash
-      get :main # FOR DEVELOPMENT
     end
   end
 end

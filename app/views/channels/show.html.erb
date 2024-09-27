@@ -3,7 +3,9 @@
     <h2>Show channel</h2>
   </header>
 
-  <%= render @channel %>
+  <%= turbo_frame_tag dom_id(@channel) do %>
+    <%= render @channel %>
+  <% end %>
 
 <% else %>
   <turbo-frame id="modal">
@@ -24,7 +26,9 @@
       <div class="relative z-20 w-full max-w-2xl max-h-screen overflow-y-auto bg-white shadow-lg rounded-md p-8">
         <h2>Created channel</h2>
 
-        <%= render @channel %>
+        <%= turbo_frame_tag dom_id(@channel) do %>
+          <%= render @channel %>
+        <% end %>
 
         <%= button_tag('Close',
           type: :button,
