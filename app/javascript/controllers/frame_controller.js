@@ -87,4 +87,12 @@ export default class extends Controller {
     // console.log("new_width="+ new_width, this)
     this.movablePaneTarget.style.width = parseInt(new_width) +'px'
   }
+
+  handlerBeforeFrameRenderItems(evt) {
+    this.clearContentsPane();
+  }
+
+  clearContentsPane() {
+    document.getElementById('contents').innerHTML = '';
+  }
 }
