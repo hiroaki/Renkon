@@ -14,7 +14,10 @@
   <ul id="trash" class="container">
     <li tabindex="-1" class="container box-border border-2 border-transparent focus:border-gray-400 text-xs">
       <div class="container pl-2 pr-1 overflow-hidden text-nowrap">
-        <a href="<%= trash_path %>" data-turbo-frame="<%= turbo_frame_if_turbo_frame_request('items') %>">
+        <a href="<%= trash_path %>" 
+          class="no-underline text-inherit hover:no-underline hover:text-inherit"
+          data-turbo-frame="<%= turbo_frame_if_turbo_frame_request('items') %>"
+        >
           <div class="relative w-full">
             <div class="flex justify-between">
               <span class="left text-nowrap overflow-hidden ">
@@ -43,8 +46,15 @@
         data-url="<%= channel.url %>"
       >
         <div class="container pl-2 pr-1 overflow-hidden text-nowrap">
-          <a href="<%= channel_items_path(channel) %>" data-turbo-frame="<%= turbo_frame_if_turbo_frame_request('items') %>">
-            <%= turbo_frame_tag(dom_id(channel), data: { 'url-for-refresh' => fetch_channel_path(channel, short: true), 'method' => 'patch' } ) do %>
+          <a href="<%= channel_items_path(channel) %>"
+            class="no-underline text-inherit hover:no-underline hover:text-inherit"
+            data-turbo-frame="<%= turbo_frame_if_turbo_frame_request('items') %>"
+          >
+            <%=
+              turbo_frame_tag(dom_id(channel),
+                data: { 'url-for-refresh' => fetch_channel_path(channel, short: true), 'method' => 'patch' }
+              ) do
+            %>
               <%= render channel %>
             <% end %>
           </a>
