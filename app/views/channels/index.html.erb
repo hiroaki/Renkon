@@ -9,10 +9,19 @@
 <hr>
 
 <%= turbo_frame_tag 'channels' do %>
-<div class="flex flex-col h-full">
+<div class="flex flex-col h-full" data-controller="selected-li keyevent scroll">
   <%# there are fixed items %>
   <ul id="trash" class="container">
-    <li tabindex="-1" class="container box-border border-2 border-transparent focus:border-gray-400 text-xs">
+    <li tabindex="-1" class="container p-0.5 text-xs"
+      data-action="
+        keydown.up->scroll#cancelWindowScrolling
+        keydown.down->scroll#cancelWindowScrolling
+        keyup.up->selected-li#selectPrevItem
+        keyup.down->selected-li#selectNextItem
+        click->selected-li#select
+      "
+      data-selected-li-target="item"
+    >
       <div class="container pl-2 pr-1 overflow-hidden text-nowrap">
         <a href="<%= trash_path %>" 
           class="no-underline text-inherit hover:no-underline hover:text-inherit"
@@ -31,18 +40,19 @@
         </a>
       </div>
     </li>
-    <hr class="p-0 m-0">
   </ul>
 
-  <ul id="channel_list" class="container" data-controller="keyevent">
+  <ul id="channel_list" class="container">
     <% @channels.each do |channel| %>
-      <%# FIXME: box-border が効かない？ため border-transparent を指定しています %>
-      <li tabindex="-1" class="container box-border border-2 border-transparent focus:border-gray-400 text-xs"
-        data-model="item"
+      <li tabindex="-1" class="container p-0.5 text-xs"
         data-action="
-          keydown->keyevent#handlerKeydown
-          keyup->keyevent#handlerKeyup
+          keydown.up->scroll#cancelWindowScrolling
+          keydown.down->scroll#cancelWindowScrolling
+          keyup.up->selected-li#selectPrevItem
+          keyup.down->selected-li#selectNextItem
+          click->selected-li#select
         "
+        data-selected-li-target="item"
         data-url="<%= channel.url %>"
       >
         <div class="container pl-2 pr-1 overflow-hidden text-nowrap">
@@ -79,7 +89,6 @@
             </p>
           <% end %>
         </div>
-        <hr class="p-0 m-0">
       </li>
     <% end %>
   </ul>
