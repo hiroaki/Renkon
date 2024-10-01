@@ -18,20 +18,25 @@
         data-action="keydown->keyevent#handlerKeydown keyup->keyevent#handlerKeyup"
         data-url="<%= item.url %>"
       >
-        <div class="container px-2">
-          <p class="overflow-hidden text-nowrap">
-            <span>[<%= item.unread? ? '●' : '　' %>]</span>
+        <div class="container px-2 flex flex-row">
+          <div class="w-4 flex-shrink-0"><%= item.unread? ? '●' : '　' %></div>
+          <div class="container flex-grow">
             <%=
-              link_to(item.title, channel_item_path(item.channel, item),
+              link_to(channel_item_path(item.channel, item),
                 'tabindex' => '-1',
                 'data-listen-keyevent' => 'right',
                 'data-turbo-frame' => turbo_frame_if_turbo_frame_request('contents'),
-              )
+                'class' => 'no-underline text-inherit hover:no-underline hover:text-inherit',
+              ) do
             %>
-          </p>
-          <p class="text-sm text-gray-400">
-            <%= item.pub_date %>
-          </p>
+              <p class="overflow-hidden text-nowrap">
+                <span><%= item.title %></span>
+              </p>
+              <p class="text-xs text-gray-400 overflow-hidden text-nowrap">
+                <%= item.pub_date %>
+              </p>
+            <% end %>
+          </div>
         </div>
       </li>
     <% end %>
