@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["item"];
+  static targets = ['item'];
 
   connect() {
     console.info('selected_li_controller');
@@ -28,7 +28,6 @@ export default class extends Controller {
     }
     if (prev_item != null && 0 <= prev_item) {
       const elem = this.itemTargets[prev_item]
-      console.info('selected_li_controller#selectPrevItem', elem);
       elem.focus();
       elem.getElementsByTagName('A').item(0).click();
       return elem;
@@ -49,7 +48,6 @@ export default class extends Controller {
     }
     if (next_item != null && next_item < len) {
       const elem = this.itemTargets[next_item]
-      console.info('selected_li_controller#selectNextItem', elem);
       elem.focus();
       elem.getElementsByTagName('A').item(0).click();
       return elem;
@@ -57,5 +55,9 @@ export default class extends Controller {
     else {
       return null;
     }
+  }
+
+  openUrl(evt) {
+    window.open(evt.currentTarget.dataset.url, '_blank', 'noreferrer');
   }
 }

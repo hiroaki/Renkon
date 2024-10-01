@@ -9,13 +9,16 @@
 <hr>
 
 <%= turbo_frame_tag 'channels' do %>
-<div class="flex flex-col h-full" data-controller="selected-li keyevent scroll">
-  <%# there are fixed items %>
+<div class="flex flex-col h-full"
+  data-controller="selected-li scroll"
+  data-action="
+    keydown.up->scroll#cancelWindowScrolling
+    keydown.down->scroll#cancelWindowScrolling
+  "
+>
   <ul id="trash" class="container">
     <li tabindex="-1" class="container p-0.5 text-xs"
       data-action="
-        keydown.up->scroll#cancelWindowScrolling
-        keydown.down->scroll#cancelWindowScrolling
         keyup.up->selected-li#selectPrevItem
         keyup.down->selected-li#selectNextItem
         click->selected-li#select
@@ -46,10 +49,9 @@
     <% @channels.each do |channel| %>
       <li tabindex="-1" class="container p-0.5 text-xs"
         data-action="
-          keydown.up->scroll#cancelWindowScrolling
-          keydown.down->scroll#cancelWindowScrolling
           keyup.up->selected-li#selectPrevItem
           keyup.down->selected-li#selectNextItem
+          keyup.enter->selected-li#openUrl
           click->selected-li#select
         "
         data-selected-li-target="item"
@@ -82,7 +84,6 @@
               |
               <%=
                 link_to('items of this channel', channel_items_path(channel), data: {
-                  listen_keyevent: 'right',
                   turbo_frame: '_top',
                 })
               %>
