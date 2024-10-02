@@ -11,10 +11,10 @@ export default class extends Controller {
     console.info('selected_li_controller#select');
 
     this.itemTargets.forEach(item => {
-      item.classList.remove('bg-neutral-300');
+      item.classList.remove('text-white', '!bg-neutral-600');
     });
 
-    event.currentTarget.classList.add('bg-neutral-300');
+    event.currentTarget.classList.add('text-white', '!bg-neutral-600');
   }
 
   selectPrevItem(evt) {

@@ -20,7 +20,7 @@
   >
     <ul id="items" class="container">
       <% @items.each do |item| %>
-        <li id="<%= dom_id item %>" tabindex="-1" class="container p-0.5 text-xs"
+        <li id="<%= dom_id item %>" tabindex="-1" class="container p-0.5 text-xs even:bg-gray-100"
           data-action="
             keyup.up->selected-li#selectPrevItem
             keyup.down->selected-li#selectNextItem
