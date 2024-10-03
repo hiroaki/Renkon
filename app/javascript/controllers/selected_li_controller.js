@@ -3,18 +3,13 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
   static targets = ['item'];
 
-  connect() {
-    console.info('selected_li_controller');
-  }
-
-  select(evt) {
-    console.info('selected_li_controller#select');
-
+  toggleHighlight(evt) {
     this.itemTargets.forEach(item => {
       item.classList.remove('text-white', '!bg-neutral-600');
+      if (item.contains(evt.currentTarget)) {
+        item.classList.add('text-white', '!bg-neutral-600');
+      }
     });
-
-    event.currentTarget.classList.add('text-white', '!bg-neutral-600');
   }
 
   selectPrevItem(evt) {
@@ -23,17 +18,11 @@ export default class extends Controller {
     for (let i = 0; i < len; ++i) {
       if (this.itemTargets[i] == evt.currentTarget) {
         prev_item = i - 1;
+        if (prev_item != null && 0 <= prev_item) {
+          this.#enterItem(this.itemTargets[prev_item]);
+        }
         break;
       }
-    }
-    if (prev_item != null && 0 <= prev_item) {
-      const elem = this.itemTargets[prev_item]
-      elem.focus();
-      elem.getElementsByTagName('A').item(0).click();
-      return elem;
-    }
-    else {
-      return null;
     }
   }
 
@@ -43,21 +32,40 @@ export default class extends Controller {
     for (let i = 0; i < len; ++i) {
       if (this.itemTargets[i] == evt.currentTarget) {
         next_item = i + 1;
+        if (next_item != null && next_item < len) {
+          this.#enterItem(this.itemTargets[next_item]);
+        }
         break;
       }
     }
-    if (next_item != null && next_item < len) {
-      const elem = this.itemTargets[next_item]
-      elem.focus();
-      elem.getElementsByTagName('A').item(0).click();
-      return elem;
+  }
+
+  selectItem(evt) {
+    const li = document.getElementById('items').querySelectorAll('li').item(0);
+    if (li) {
+      this.#enterItem(li);
     }
-    else {
-      return null;
+  }
+
+  selectUnreadItem(evt) {
+    const items = document.getElementById('items').querySelectorAll('li');
+    for (const item of items) {
+      if (item.dataset['unread'] == 'true') {
+        this.#enterItem(item);
+        break;
+      }
     }
   }
 
   openUrl(evt) {
     window.open(evt.currentTarget.dataset.url, '_blank', 'noreferrer');
+  }
+
+  // private
+
+  #enterItem(li) {
+    console.log("enterItem", li);
+    li.focus();
+    li.getElementsByTagName('A').item(0).click();
   }
 }
