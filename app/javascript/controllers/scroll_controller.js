@@ -6,13 +6,7 @@ export default class extends Controller {
   }
 
   cancelWindowScrolling(evt) {
-    switch(evt.keyCode) {
-      case 38:
-      case 40:
-        // cancel window scrolling
-        evt.preventDefault();
-        evt.stopPropagation();
-        break;
-    }
+    evt.preventDefault();
+    evt.stopPropagation();
   }
 }

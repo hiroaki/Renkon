@@ -49,9 +49,17 @@ export default class extends Controller {
 
   selectUnreadItem(evt) {
     const items = document.getElementById('items').querySelectorAll('li');
-    for (const item of items) {
-      if (item.dataset['unread'] == 'true') {
-        this.#enterItem(item);
+    let pos = -1;
+    for (let i = 0; i < items.length; ++i) {
+      if (items[i] == evt.currentTarget) {
+        pos = i;
+        break;
+      }
+    }
+
+    for (let i = pos + 1; i < items.length; ++i) {
+      if (items[i].dataset['unread'] == 'true') {
+        this.#enterItem(items[i]);
         break;
       }
     }
@@ -64,7 +72,6 @@ export default class extends Controller {
   // private
 
   #enterItem(li) {
-    console.log("enterItem", li);
     li.focus();
     li.getElementsByTagName('A').item(0).click();
   }
