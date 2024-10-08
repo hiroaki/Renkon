@@ -12,7 +12,7 @@
 
 <%= turbo_frame_tag 'items' do %>
   <div class="flex flex-col h-full"
-    data-controller="selected-li scroll"
+    data-controller="items scroll"
     data-action="
       keydown.up->scroll#cancelWindowScrolling
       keydown.down->scroll#cancelWindowScrolling
@@ -23,12 +23,12 @@
       <% @items.each do |item| %>
         <li id="<%= dom_id item %>" tabindex="-1" class="container even:bg-gray-100 focus:outline-none"
           data-action="
-            keyup.up->selected-li#selectPrevItem
-            keyup.down->selected-li#selectNextItem
-            keyup.enter->selected-li#openUrl
-            keyup.space->selected-li#selectUnreadItem
+            keyup.up->items#selectPrevItem
+            keyup.down->items#selectNextItem
+            keyup.enter->items#openUrl
+            keyup.space->items#selectUnreadItem
           "
-          data-selected-li-target="item"
+          data-items-target="item"
           data-url="<%= item.url %>"
           data-unread="<%= item.unread? ? 'true' : 'false' %>"
         >
@@ -38,7 +38,7 @@
                 'tabindex' => '-1',
                 'data-turbo-frame' => turbo_frame_if_turbo_frame_request('contents'),
                 'class' => 'pl-2 pr-1 py-0.5 block no-underline text-inherit hover:no-underline hover:text-inherit',
-                'data-action' => 'click->selected-li#changeSelected'
+                'data-action' => 'click->items#changeSelected'
               ) do
             %>
               <div class="container flex flex-row text-xs items-center">

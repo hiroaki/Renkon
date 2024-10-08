@@ -27,7 +27,7 @@ export default class extends Controller {
       if (this.itemTargets[i] == evt.currentTarget) {
         prev_item = i - 1;
         if (prev_item != null && 0 <= prev_item) {
-          this.#enterItem(this.itemTargets[prev_item]);
+          this.enterItem(this.itemTargets[prev_item]);
         }
         break;
       }
@@ -46,37 +46,8 @@ export default class extends Controller {
         if (next_item != null && next_item < len) {
           console.log("-- selectNextItem: next_item: "+ next_item);
 
-          this.#enterItem(this.itemTargets[next_item]);
+          this.enterItem(this.itemTargets[next_item]);
         }
-        break;
-      }
-    }
-  }
-
-  // RIGHT key from selected LI tag on channel
-  selectItem(evt) {
-    console.log("-- selectItem()")
-    const li = document.getElementById('items').querySelectorAll('li').item(0);
-    if (li) {
-      this.#enterItem(li);
-    }
-  }
-
-  // SPACE key from selected LI tag on channel
-  selectUnreadItem(evt) {
-    console.log("-- selectUnreadItem()")
-    const items = document.getElementById('items').querySelectorAll('li');
-    let pos = -1;
-    for (let i = 0; i < items.length; ++i) {
-      if (items[i] == evt.currentTarget) {
-        pos = i;
-        break;
-      }
-    }
-
-    for (let i = pos + 1; i < items.length; ++i) {
-      if (items[i].dataset['unread'] == 'true') {
-        this.#enterItem(items[i]);
         break;
       }
     }
@@ -88,10 +59,8 @@ export default class extends Controller {
     window.open(evt.currentTarget.dataset.url, '_blank', 'noreferrer');
   }
 
-  // private
-
-  #enterItem(li) {
-    console.log("-- #enterItem()")
+  enterItem(li) {
+    console.log("-- enterItem()")
     li.focus(); // Important for being the base point for next and previous
     const aTag = li.getElementsByTagName('A').item(0);
     aTag.click(); // This is going to invoke changeSelected()

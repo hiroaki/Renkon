@@ -10,7 +10,7 @@
 
 <%= turbo_frame_tag 'channels' do %>
 <div class="flex flex-col h-full"
-  data-controller="selected-li scroll"
+  data-controller="channels scroll"
   data-action="
     keydown.up->scroll#cancelWindowScrolling
     keydown.down->scroll#cancelWindowScrolling
@@ -20,18 +20,18 @@
   <ul class="container">
     <li tabindex="-1" class="container"
       data-action="
-        keyup.up->selected-li#selectPrevItem
-        keyup.down->selected-li#selectNextItem
-        keyup.right->selected-li#selectItem
-        keyup.space->selected-li#selectUnreadItem
+        keyup.up->channels#selectPrevItem
+        keyup.down->channels#selectNextItem
+        keyup.right->channels#selectItem
+        keyup.space->channels#selectUnreadItem
       "
-      data-selected-li-target="item"
+      data-channels-target="item"
     >
       <div class="container overflow-hidden text-nowrap text-xs">
         <a href="<%= trash_path %>" 
           class="pl-2 pr-1 py-0.5 block no-underline text-inherit hover:no-underline hover:text-inherit"
           data-turbo-frame="<%= turbo_frame_if_turbo_frame_request('items') %>"
-          data-action="click->selected-li#changeSelected"
+          data-action="click->channels#changeSelected"
         >
           <div class="relative w-full">
             <div class="flex justify-between">
@@ -52,20 +52,20 @@
     <% @channels.each do |channel| %>
       <li tabindex="-1" class="container focus:outline-none"
         data-action="
-          keyup.up->selected-li#selectPrevItem
-          keyup.down->selected-li#selectNextItem
-          keyup.enter->selected-li#openUrl
-          keyup.right->selected-li#selectItem
-          keyup.space->selected-li#selectUnreadItem
+          keyup.up->channels#selectPrevItem
+          keyup.down->channels#selectNextItem
+          keyup.enter->channels#openUrl
+          keyup.right->channels#selectItem
+          keyup.space->channels#selectUnreadItem
         "
-        data-selected-li-target="item"
+        data-channels-target="item"
         data-url="<%= channel.url %>"
       >
         <div class="container overflow-hidden text-nowrap text-xs">
           <a href="<%= channel_items_path(channel) %>"
             class="pl-2 pr-1 py-0.5 block no-underline text-inherit hover:no-underline hover:text-inherit"
             data-turbo-frame="<%= turbo_frame_if_turbo_frame_request('items') %>"
-            data-action="click->selected-li#changeSelected"
+            data-action="click->channels#changeSelected"
           >
             <%=
               turbo_frame_tag(dom_id(channel),
