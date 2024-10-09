@@ -22,8 +22,6 @@
       data-action="
         keyup.up->channels#selectPrevItem
         keyup.down->channels#selectNextItem
-        keyup.right->channels#selectItem
-        keyup.space->channels#selectUnreadItem
       "
       data-channels-target="item"
     >
@@ -55,8 +53,6 @@
           keyup.up->channels#selectPrevItem
           keyup.down->channels#selectNextItem
           keyup.enter->channels#openUrl
-          keyup.right->channels#selectItem
-          keyup.space->channels#selectUnreadItem
         "
         data-channels-target="item"
         data-url="<%= channel.url %>"

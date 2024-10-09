@@ -25,6 +25,10 @@
       data-frame-target="movablePane"
       data-frame-storage-key-value="channelsPane"
       data-pane-focus-target="pane"
+      data-action="
+        keyup.right->pane-focus#forwardToItemPane
+        keyup.space->pane-focus#forwardToUnreadItemPane
+      "
     >
       <div class="flex-1 bg-blue-100 overflow-y-auto overflow-x-hidden pt-2">
         <turbo-frame id="channels" src="<%= channels_path(short: true) %>">
@@ -46,7 +50,7 @@
       data-frame-target="movablePane"
       data-frame-storage-key-value="itemsPane"
       data-pane-focus-target="pane"
-      data-action="keyup.left->pane-focus#backToChannel"
+      data-action="keyup.left->pane-focus#backToChannelPane"
     >
       <div class="flex-1 bg-white-100 overflow-y-auto overflow-x-hidden pt-2">
         <turbo-frame id="items" data-action="turbo:frame-render->frame#handlerBeforeFrameRenderItems">
