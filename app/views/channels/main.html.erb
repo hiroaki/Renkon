@@ -18,12 +18,17 @@
     </div>
   </nav>
 
-  <main class="flex flex-row flex-1 overflow-hidden">
+  <main class="flex flex-row flex-1 overflow-hidden" data-controller="pane-focus">
     <!-- -->
     <div class="flex flex-row flex-shrink-0 min-w-8" style="width: 8rem;"
       data-controller="frame"
       data-frame-target="movablePane"
       data-frame-storage-key-value="channelsPane"
+      data-pane-focus-target="pane"
+      data-action="
+        keyup.right->pane-focus#forwardToItemPane
+        keyup.space->pane-focus#forwardToUnreadItemPane
+      "
     >
       <div class="flex-1 bg-blue-100 overflow-y-auto overflow-x-hidden pt-2">
         <turbo-frame id="channels" src="<%= channels_path(short: true) %>">
@@ -44,6 +49,8 @@
       data-controller="frame"
       data-frame-target="movablePane"
       data-frame-storage-key-value="itemsPane"
+      data-pane-focus-target="pane"
+      data-action="keyup.left->pane-focus#backToChannelPane"
     >
       <div class="flex-1 bg-white-100 overflow-y-auto overflow-x-hidden pt-2">
         <turbo-frame id="items" data-action="turbo:frame-render->frame#handlerBeforeFrameRenderItems">
@@ -60,7 +67,9 @@
     </div>
 
     <!-- -->
-    <div class="flex-1 overflow-y-auto min-w-8">
+    <div class="flex-1 overflow-y-auto min-w-8"
+      data-pane-focus-target="pane"
+    >
       <div class="bg-white p-2">
         <turbo-frame id="contents">
         </turbo-frame>
