@@ -54,10 +54,10 @@ class ChannelsController < ApplicationController
     redirect_to channels_url, notice: "Channel was successfully destroyed.", status: :see_other
   end
 
-  # fetch_channel GET /channels/:id/fetch(.:format)
+  # fetch_channel PATCH /channels/:id/fetch(.:format)
   def fetch
     fetch_and_merge_feed_entries_for_channel(@channel)
-    redirect_to channel_url(@channel, short: !!params[:short]), status: :see_other
+    redirect_to channel_url(@channel, short: !!params[:short]), notice: "Channel was successfully refreshed.", status: :see_other
   end
 
   private

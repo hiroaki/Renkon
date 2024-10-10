@@ -1,4 +1,4 @@
-<% if params[:short] %>
+<% if params[:short] == 'true' %>
   <div class="relative w-full">
     <div class="flex justify-between">
       <span class="left text-nowrap overflow-hidden ">
@@ -33,6 +33,9 @@
     <p>
       <strong>Unread:</strong>
       <%= channel.respond_to?(:items_count) ? channel.items_count : channel.items.count %>
+      <span style="color: green"><%= notice %></span>
+    </div>
+
     </p>
 
     <p>
