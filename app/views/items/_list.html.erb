@@ -8,7 +8,7 @@
 >
   <ul class="container" data-controller="items">
     <% @items.each do |item| %>
-      <li id="<%= dom_id item %>" tabindex="-1" class="container even:bg-gray-100 focus:outline-none"
+      <li id="<%= dom_id item %>" tabindex="0" class="container even:bg-gray-100 focus:outline-none"
         data-action="
           keyup.up->items#selectPrevItem
           keyup.down->items#selectNextItem

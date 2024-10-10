@@ -20,7 +20,7 @@
 
   <main class="flex flex-row flex-1 overflow-hidden" data-controller="pane-focus">
     <!-- -->
-    <div class="flex flex-row flex-shrink-0 min-w-8" style="width: 8rem;"
+    <div tabindex="-1" class="flex flex-row flex-shrink-0 min-w-8 focus:outline-none" style="width: 8rem;"
       data-controller="frame"
       data-frame-target="movablePane"
       data-frame-storage-key-value="channelsPane"
@@ -45,7 +45,7 @@
     </div>
 
     <!-- -->
-    <div class="flex flex-row flex-shrink-0 min-w-8" style="width: 8rem;"
+    <div tabindex="-1" class="flex flex-row flex-shrink-0 min-w-8 focus:outline-none" style="width: 8rem;"
       data-controller="frame"
       data-frame-target="movablePane"
       data-frame-storage-key-value="itemsPane"
@@ -67,7 +67,7 @@
     </div>
 
     <!-- -->
-    <div class="flex-1 overflow-y-auto min-w-8"
+    <div tabindex="-1" class="flex-1 overflow-y-auto min-w-8 focus:outline-none"
       data-pane-focus-target="pane"
     >
       <div class="bg-white p-2">
