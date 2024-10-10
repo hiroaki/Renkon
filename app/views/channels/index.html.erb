@@ -9,14 +9,27 @@
 <hr>
 
 <%= turbo_frame_tag 'channels' do %>
-<div class="flex flex-col h-full">
-  <%# there are fixed items %>
-  <ul id="trash" class="container">
-    <li tabindex="-1" class="container box-border border-2 border-transparent focus:border-gray-400 text-xs">
-      <div class="container pl-2 pr-1 overflow-hidden text-nowrap">
+<div class="flex flex-col h-full"
+  data-controller="selected-li scroll"
+  data-action="
+    keydown.up->scroll#cancelWindowScrolling
+    keydown.down->scroll#cancelWindowScrolling
+    keydown.space->scroll#cancelWindowScrolling
+  "
+>
+  <ul class="container">
+    <li tabindex="-1" class="container"
+      data-action="
+        keyup.up->selected-li#selectPrevItem
+        keyup.down->selected-li#selectNextItem
+      "
+      data-selected-li-target="item"
+    >
+      <div class="container overflow-hidden text-nowrap text-xs">
         <a href="<%= trash_path %>" 
-          class="no-underline text-inherit hover:no-underline hover:text-inherit"
+          class="pl-2 pr-1 py-0.5 block no-underline text-inherit hover:no-underline hover:text-inherit"
           data-turbo-frame="<%= turbo_frame_if_turbo_frame_request('items') %>"
+          data-action="click->selected-li#toggleHighlight"
         >
           <div class="relative w-full">
             <div class="flex justify-between">
@@ -31,24 +44,26 @@
         </a>
       </div>
     </li>
-    <hr class="p-0 m-0">
   </ul>
 
-  <ul id="channel_list" class="container" data-controller="keyevent">
+  <ul class="container">
     <% @channels.each do |channel| %>
-      <%# FIXME: box-border が効かない？ため border-transparent を指定しています %>
-      <li tabindex="-1" class="container box-border border-2 border-transparent focus:border-gray-400 text-xs"
-        data-model="item"
+      <li tabindex="-1" class="container focus:outline-none"
         data-action="
-          keydown->keyevent#handlerKeydown
-          keyup->keyevent#handlerKeyup
+          keyup.up->selected-li#selectPrevItem
+          keyup.down->selected-li#selectNextItem
+          keyup.enter->selected-li#openUrl
+          keyup.right->selected-li#selectItem
+          keyup.space->selected-li#selectUnreadItem
         "
+        data-selected-li-target="item"
         data-url="<%= channel.url %>"
       >
-        <div class="container pl-2 pr-1 overflow-hidden text-nowrap">
+        <div class="container overflow-hidden text-nowrap text-xs">
           <a href="<%= channel_items_path(channel) %>"
-            class="no-underline text-inherit hover:no-underline hover:text-inherit"
+            class="pl-2 pr-1 py-0.5 block no-underline text-inherit hover:no-underline hover:text-inherit"
             data-turbo-frame="<%= turbo_frame_if_turbo_frame_request('items') %>"
+            data-action="click->selected-li#toggleHighlight"
           >
             <%=
               turbo_frame_tag(dom_id(channel),
@@ -72,14 +87,12 @@
               |
               <%=
                 link_to('items of this channel', channel_items_path(channel), data: {
-                  listen_keyevent: 'right',
                   turbo_frame: '_top',
                 })
               %>
             </p>
           <% end %>
         </div>
-        <hr class="p-0 m-0">
       </li>
     <% end %>
   </ul>

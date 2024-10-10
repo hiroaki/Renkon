@@ -11,29 +11,46 @@
 <hr>
 
 <%= turbo_frame_tag 'items' do %>
-  <ul id="items" class="container" data-controller="keyevent">
-    <% @items.each do |item| %>
-      <li id="<%= dom_id item %>" tabindex="-1" class="container box-border border-2 border-transparent focus:border-gray-400 text-xs"
-        data-model="item"
-        data-action="keydown->keyevent#handlerKeydown keyup->keyevent#handlerKeyup"
-        data-url="<%= item.url %>"
-      >
-        <div class="container px-2">
-          <p class="overflow-hidden text-nowrap">
-            <span>[<%= item.unread? ? '●' : '　' %>]</span>
-            <%=
-              link_to(item.title, channel_item_path(item.channel, item),
-                'tabindex' => '-1',
-                'data-listen-keyevent' => 'right',
-                'data-turbo-frame' => turbo_frame_if_turbo_frame_request('contents'),
-              )
-            %>
-          </p>
-          <p class="text-sm text-gray-400">
-            <%= item.pub_date %>
-          </p>
-        </div>
-      </li>
-    <% end %>
-  </ul>
+  <div class="flex flex-col h-full"
+    data-controller="selected-li scroll"
+    data-action="
+      keydown.up->scroll#cancelWindowScrolling
+      keydown.down->scroll#cancelWindowScrolling
+    "
+  >
+    <ul id="items" class="container">
+      <% @items.each do |item| %>
+        <li id="<%= dom_id item %>" tabindex="-1" class="container p-0.5 text-xs"
+          data-action="
+            keyup.up->selected-li#selectPrevItem
+            keyup.down->selected-li#selectNextItem
+            keyup.enter->selected-li#openUrl
+            click->selected-li#select
+          "
+          data-selected-li-target="item"
+          data-url="<%= item.url %>"
+        >
+          <div class="container px-2 flex flex-row">
+            <div class="w-4 flex-shrink-0"><%= item.unread? ? '●' : '　' %></div>
+            <div class="container flex-grow">
+              <%=
+                link_to(channel_item_path(item.channel, item),
+                  'tabindex' => '-1',
+                  'data-turbo-frame' => turbo_frame_if_turbo_frame_request('contents'),
+                  'class' => 'no-underline text-inherit hover:no-underline hover:text-inherit',
+                ) do
+              %>
+                <p class="overflow-hidden text-nowrap">
+                  <span><%= item.title %></span>
+                </p>
+                <p class="text-xs text-gray-400 overflow-hidden text-nowrap">
+                  <%= item.pub_date %>
+                </p>
+              <% end %>
+            </div>
+          </div>
+        </li>
+      <% end %>
+    </ul>
+  </div>
 <% end %>
