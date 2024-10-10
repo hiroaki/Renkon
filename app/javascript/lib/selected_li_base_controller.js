@@ -3,9 +3,12 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
   static targets = ['item'];
 
+  connect() {
+    this.element[this.identifier] = this;
+  }
+
   // A tag click
   changeSelected(evt) {
-    console.log("-- changeSelected()")
     this.updateListSelectionStatus(evt.currentTarget);
   }
 
@@ -20,7 +23,6 @@ export default class extends Controller {
 
   // LI tag selected
   selectPrevItem(evt) {
-    console.log("-- selectPrevItem()")
     let prev_item = null;
     const len = this.itemTargets.length;
     for (let i = 0; i < len; ++i) {
@@ -36,16 +38,12 @@ export default class extends Controller {
 
   // LI tag selected
   selectNextItem(evt) {
-    console.log("-- selectNextItem")
     let next_item = null;
     const len = this.itemTargets.length;
     for (let i = 0; i < len; ++i) {
-      console.log("-- selectNextItem: "+ i);
       if (this.itemTargets[i] == evt.currentTarget) {
         next_item = i + 1;
         if (next_item != null && next_item < len) {
-          console.log("-- selectNextItem: next_item: "+ next_item);
-
           this.enterItem(this.itemTargets[next_item]);
         }
         break;
@@ -55,12 +53,10 @@ export default class extends Controller {
 
   // ENTER key from selected LI tag
   openUrl(evt) {
-    console.log("-- openUrl()")
     window.open(evt.currentTarget.dataset.url, '_blank', 'noreferrer');
   }
 
   enterItem(li) {
-    console.log("-- enterItem()")
     li.focus(); // Important for being the base point for next and previous
     const aTag = li.getElementsByTagName('A').item(0);
     aTag.click(); // This is going to invoke changeSelected()

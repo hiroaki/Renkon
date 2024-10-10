@@ -10,14 +10,14 @@
 
 <%= turbo_frame_tag 'channels' do %>
 <div class="flex flex-col h-full"
-  data-controller="channels scroll"
+  data-controller="scroll"
   data-action="
     keydown.up->scroll#cancelWindowScrolling
     keydown.down->scroll#cancelWindowScrolling
     keydown.space->scroll#cancelWindowScrolling
   "
 >
-  <ul class="container">
+  <ul class="container" data-controller="channels">
     <li tabindex="-1" class="container"
       data-action="
         keyup.up->channels#selectPrevItem
@@ -44,9 +44,7 @@
         </a>
       </div>
     </li>
-  </ul>
 
-  <ul class="container">
     <% @channels.each do |channel| %>
       <li tabindex="-1" class="container focus:outline-none"
         data-action="

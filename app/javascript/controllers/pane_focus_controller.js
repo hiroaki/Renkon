@@ -29,21 +29,17 @@ export default class extends Controller {
     const selectedItems = document.getElementById('items').querySelectorAll('li[data-selected="true"]');
     if (0 < selectedItems.length) {
       selectedItems.item(selectedItems.length - 1).focus();
-    } else {
-
+    }
+    else {
       const li = document.getElementById('items').querySelectorAll('li').item(0);
       if (li) {
-        // this.enterItem(li);
-        li.focus(); // Important for being the base point for next and previous
-        const aTag = li.getElementsByTagName('A').item(0);
-        aTag.click(); // This is going to invoke changeSelected()
+        li.closest('ul').items.enterItem(li);
       }
     }
   }
 
   // keyup SPACE on channels pane
   forwardToUnreadItemPane(evt) {
-    console.log("forwardToUnreadItemPane", evt)
     this.focusPane(this.paneTargets[1]);
 
     const items = document.getElementById('items').querySelectorAll('li');
@@ -58,10 +54,8 @@ export default class extends Controller {
     for (let i = pos + 1; i < items.length; ++i) {
       let li = items[i];
       if (li.dataset['unread'] == 'true') {
-        // this.enterItem(items[i]);
-        li.focus(); // Important for being the base point for next and previous
-        const aTag = li.getElementsByTagName('A').item(0);
-        aTag.click(); // This is going to invoke changeSelected()
+        // call a method of items controller (based selected-li controller)
+        li.closest('ul').items.enterItem(li);
         break;
       }
     }

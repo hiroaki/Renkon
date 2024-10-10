@@ -1,12 +1,12 @@
 <div class="flex flex-col h-full"
-  data-controller="items scroll"
+  data-controller="scroll"
   data-action="
     keydown.up->scroll#cancelWindowScrolling
     keydown.down->scroll#cancelWindowScrolling
     keydown.space->scroll#cancelWindowScrolling
   "
 >
-  <ul class="container">
+  <ul class="container" data-controller="items">
     <% @items.each do |item| %>
       <li id="<%= dom_id item %>" tabindex="-1" class="container even:bg-gray-100 focus:outline-none"
         data-action="
