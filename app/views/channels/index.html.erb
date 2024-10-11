@@ -20,8 +20,8 @@
   <ul class="container" data-controller="channels">
     <li tabindex="0" class="container focus:outline-none"
       data-action="
-        keyup.up->channels#selectPrevItem
-        keyup.down->channels#selectNextItem
+        keyup.up->channels#selectPrevItem:stop
+        keyup.down->channels#selectNextItem:stop
       "
       data-channels-target="item"
     >
@@ -49,8 +49,8 @@
     <% @channels.each do |channel| %>
       <li tabindex="0" class="container focus:outline-none"
         data-action="
-          keyup.up->channels#selectPrevItem
-          keyup.down->channels#selectNextItem
+          keyup.up->channels#selectPrevItem:stop
+          keyup.down->channels#selectNextItem:stop
           keyup.enter->channels#openUrl
         "
         data-channels-target="item"
