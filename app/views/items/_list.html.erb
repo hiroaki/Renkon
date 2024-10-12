@@ -20,26 +20,31 @@
         data-unread="<%= item.unread? ? 'true' : 'false' %>"
       >
         <div class="container overflow-hidden text-nowrap text-xs">
-          <%=
-            link_to(channel_item_path(item.channel, item),
-              'tabindex' => '-1',
-              'data-turbo-frame' => turbo_frame_if_turbo_frame_request('contents'),
-              'class' => 'pl-2 pr-1 py-0.5 block no-underline text-inherit hover:no-underline hover:text-inherit',
-              'data-action' => 'click->items#changeSelected'
-            ) do
-          %>
             <div class="container flex flex-row text-xs items-center">
-              <div class="w-6 flex-shrink-0"><%= item.unread? ? '●' : '　' %></div>
-              <div class="container flex-grow">
-                <p class="overflow-hidden text-nowrap">
-                  <span><%= item.title %></span>
-                </p>
-                <p class="text-xs text-gray-400 overflow-hidden text-nowrap">
-                  <%= item.pub_date %>
-                </p>
+
+              <div class="w-6 flex-shrink-0 flex justify-center items-center">
+                <%= item.unread? ? '●' : '　' %>
               </div>
+
+              <div class="container flex-grow">
+                <%=
+                  link_to(channel_item_path(item.channel, item),
+                    'tabindex' => '-1',
+                    'data-turbo-frame' => turbo_frame_if_turbo_frame_request('contents'),
+                    'class' => 'pl-2 pr-1 py-0.5 block no-underline text-inherit hover:no-underline hover:text-inherit',
+                    'data-action' => 'click->items#changeSelected'
+                  ) do
+                %>
+                  <p class="overflow-hidden text-nowrap">
+                    <span><%= item.title %></span>
+                  </p>
+                  <p class="text-xs text-gray-400 overflow-hidden text-nowrap">
+                    <%= item.pub_date %>
+                  </p>
+                <% end %>
+              </div>
+
             </div>
-          <% end %>
         </div>
       </li>
     <% end %>
