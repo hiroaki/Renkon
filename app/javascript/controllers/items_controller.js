@@ -17,8 +17,70 @@ export default class extends SelectedLiBaseController {
     for (let i = pos + 1; i < items.length; ++i) {
       if (items[i].dataset['unread'] == 'true') {
         this.enterItem(items[i]);
+
+        if (pos != -1 && items[pos].dataset['unread'] == 'true') {
+          // items ペイン上からこのイベントが発生している場合は、
+          // 次の未読を選択すると同時に、現在位置が未読の場合はそれを既読に変えます。
+
+          const targetElement = items[pos].querySelector('button');
+          const me = this;
+          this.toggleReadStatus(items[pos])
+          .then(() => {
+              me.resetReadStatus(targetElement);
+          });
+
+        }
+
         break;
       }
     }
+  }
+
+  //
+  resetReadStatus(targetElement) {
+    const li = targetElement.closest('li');
+    if (li.dataset.unread == 'true') {
+       targetElement.textContent = '●'
+    } else {
+      targetElement.textContent = '　'
+    }
+  }
+
+  //
+  handlerToggleReadStatus(evt) {
+    const targetElement = evt.currentTarget;
+    const li = targetElement.closest('li');
+    const me = this;
+    this.toggleReadStatus(li)
+    .then(() => {
+      me.resetReadStatus(targetElement);
+    });
+  }
+
+  toggleReadStatus(li) {
+    const isUnread = li.dataset.unread == 'true';
+    const url = li.dataset[ isUnread ? 'urlRead' : 'urlUnread' ];
+
+    return fetch(url, {
+      method: 'PATCH',
+      headers: {
+        'X-CSRF-Token': document.querySelector('meta[name=csrf-token]').content
+      }
+    })
+    .then(response => {
+      console.log("received a response")
+      if (response.ok) {
+        if (isUnread) {
+          li.dataset.unread = 'false';
+        }
+        else {
+          li.dataset.unread = 'true';
+        }
+      }
+      else {
+        console.error('Failed to update read status');
+      }
+    })
+    .catch(error => console.error('Error:', error));
   }
 }

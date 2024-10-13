@@ -18,13 +18,20 @@
         data-items-target="item"
         data-url="<%= item.url %>"
         data-unread="<%= item.unread? ? 'true' : 'false' %>"
+        data-url-read="<%= read_channel_item_path(item.channel, item) %>"
+        data-url-unread="<%= unread_channel_item_path(item.channel, item) %>"
       >
         <div class="container overflow-hidden text-nowrap text-xs">
             <div class="container flex flex-row text-xs items-center">
 
-              <div class="w-6 flex-shrink-0 flex justify-center items-center">
+              <button class="w-6 flex-shrink-0 flex justify-center items-center cursor-pointer"
+                data-action="
+                  click->items#handlerToggleReadStatus
+                  click->items#focusLastSelectedLi
+                "
+              >
                 <%= item.unread? ? '●' : '　' %>
-              </div>
+              </button>
 
               <div class="container flex-grow">
                 <%=

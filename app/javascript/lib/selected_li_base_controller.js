@@ -70,4 +70,22 @@ export default class extends Controller {
     const aTag = li.getElementsByTagName('A').item(0);
     aTag.click(); // This is going to invoke changeSelected()
   }
+
+  // li 以外をクリックしてフォーカスが移動すると、 li に選択状態にありながらも
+  // キーイベントがそこでは発生しなくなってしまうため、
+  // このメソッドにより "selected" の最後のものにフォーカスを移動させます。
+  // NOTE: 複数選択状態は現在のところ未実装ですが、今後実装が予定されています。
+  focusLastSelectedLi() {
+    let lastSelected = null;
+
+    this.itemTargets.forEach(li => {
+      if (li.dataset.selected == 'true') {
+        lastSelected = li;
+      }
+    });
+
+    if (lastSelected) {
+      lastSelected.focus({ preventScroll: true, focusVisible: false });
+    }
+  }
 }
