@@ -21,4 +21,66 @@ export default class extends SelectedLiBaseController {
       }
     }
   }
+
+  //
+  handlerMakeItemRead(evt) {
+    const li = evt.currentTarget;
+
+    if (li.dataset['unread'] == 'true') {
+      const targetElement = li.querySelector('button');
+      const me = this;
+      this.toggleReadStatus(li)
+      .then(() => {
+        me.resetReadStatus(targetElement);
+      });
+    }
+  }
+
+  //
+  resetReadStatus(targetElement) {
+    const li = targetElement.closest('li');
+    if (li.dataset.unread == 'true') {
+       targetElement.textContent = '●'
+    } else {
+      targetElement.textContent = '　'
+    }
+  }
+
+  //
+  handlerToggleReadStatus(evt) {
+    const targetElement = evt.currentTarget;
+    const li = targetElement.closest('li');
+    const me = this;
+    this.toggleReadStatus(li)
+    .then(() => {
+      me.resetReadStatus(targetElement);
+    });
+  }
+
+  toggleReadStatus(li) {
+    const isUnread = li.dataset.unread == 'true';
+    const url = li.dataset[ isUnread ? 'urlRead' : 'urlUnread' ];
+
+    return fetch(url, {
+      method: 'PATCH',
+      headers: {
+        'X-CSRF-Token': document.querySelector('meta[name=csrf-token]').content
+      }
+    })
+    .then(response => {
+      // TODO: channels pane にある当該チャンネルの未読カウンター（バッヂ）の更新
+      if (response.ok) {
+        if (isUnread) {
+          li.dataset.unread = 'false';
+        }
+        else {
+          li.dataset.unread = 'true';
+        }
+      }
+      else {
+        console.error('Failed to update read status');
+      }
+    })
+    .catch(error => console.error('Error:', error));
+  }
 }
