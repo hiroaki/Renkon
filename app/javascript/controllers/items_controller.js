@@ -17,22 +17,22 @@ export default class extends SelectedLiBaseController {
     for (let i = pos + 1; i < items.length; ++i) {
       if (items[i].dataset['unread'] == 'true') {
         this.enterItem(items[i]);
-
-        if (pos != -1 && items[pos].dataset['unread'] == 'true') {
-          // items ペイン上からこのイベントが発生している場合は、
-          // 次の未読を選択すると同時に、現在位置が未読の場合はそれを既読に変えます。
-
-          const targetElement = items[pos].querySelector('button');
-          const me = this;
-          this.toggleReadStatus(items[pos])
-          .then(() => {
-              me.resetReadStatus(targetElement);
-          });
-
-        }
-
         break;
       }
+    }
+  }
+
+  //
+  handlerMakeItemRead(evt) {
+    const li = evt.currentTarget;
+
+    if (li.dataset['unread'] == 'true') {
+      const targetElement = li.querySelector('button');
+      const me = this;
+      this.toggleReadStatus(li)
+      .then(() => {
+        me.resetReadStatus(targetElement);
+      });
     }
   }
 
@@ -68,7 +68,7 @@ export default class extends SelectedLiBaseController {
       }
     })
     .then(response => {
-      console.log("received a response")
+      // TODO: channels pane にある当該チャンネルの未読カウンター（バッヂ）の更新
       if (response.ok) {
         if (isUnread) {
           li.dataset.unread = 'false';
