@@ -5,7 +5,7 @@
         <%= channel.title %>
       </span>
       <span class="right ml-2 px-2 py-1 font-semibold leading-none text-green-700 bg-green-100 rounded-full dark:bg-green-700 dark:text-green-100">
-        <%= channel.respond_to?(:items_count) ? channel.items_count : channel.items.count %>
+        <%= channel.respond_to?(:count_items) ? channel.count_items : channel.items.count %>
       </span>
     </div>
   </div>
@@ -32,7 +32,7 @@
 
     <p>
       <strong>Unread:</strong>
-      <%= channel.respond_to?(:items_count) ? channel.items_count : channel.items.count %>
+      <%= channel.respond_to?(:count_items) ? channel.count_items : channel.items.count %>
       <span style="color: green"><%= notice %></span>
     </p>
 
