@@ -16,6 +16,7 @@
           keyup.space->items#handlerMakeItemRead
           keyup.space->items#selectUnreadItem
         "
+        data-channel="<%= item.channel_id %>"
         data-items-target="item"
         data-url="<%= item.url %>"
         data-unread="<%= item.unread? ? 'true' : 'false' %>"

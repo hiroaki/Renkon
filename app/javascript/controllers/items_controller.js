@@ -61,6 +61,8 @@ export default class extends SelectedLiBaseController {
     const isUnread = li.dataset.unread == 'true';
     const url = li.dataset[ isUnread ? 'urlRead' : 'urlUnread' ];
 
+    const me = this;
+
     return fetch(url, {
       method: 'PATCH',
       headers: {
@@ -68,19 +70,22 @@ export default class extends SelectedLiBaseController {
       }
     })
     .then(response => {
-      // TODO: channels pane にある当該チャンネルの未読カウンター（バッヂ）の更新
       if (response.ok) {
-        if (isUnread) {
-          li.dataset.unread = 'false';
-        }
-        else {
-          li.dataset.unread = 'true';
-        }
+        li.dataset.unread = isUnread ? 'false' : 'true';
+        me.fireChangeReadStatusEvent(li);
       }
       else {
         console.error('Failed to update read status');
       }
     })
     .catch(error => console.error('Error:', error));
+  }
+
+  fireChangeReadStatusEvent(li) {
+    const event = new CustomEvent('changeReadStatus', {
+      detail: { message: 'Hello from custom event!' },
+      bubbles: true,
+    });
+    li.dispatchEvent(event);
   }
 }

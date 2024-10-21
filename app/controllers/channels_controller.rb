@@ -56,7 +56,11 @@ class ChannelsController < ApplicationController
 
   # fetch_channel PATCH /channels/:id/fetch(.:format)
   def fetch
-    fetch_and_merge_feed_entries_for_channel(@channel)
+    logger.info("params[:dry_run]=[#{params[:dry_run] ? 'true' : 'false'}]")
+    unless params[:dry_run]
+      fetch_and_merge_feed_entries_for_channel(@channel)
+    end
+
     redirect_to channel_url(@channel, short: !!params[:short]), notice: "Channel was successfully refreshed.", status: :see_other
   end
 
