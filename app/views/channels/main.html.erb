@@ -1,10 +1,14 @@
 <div class="flex flex-col h-screen text-gray-700">
   <nav class="flex-shrink-0 h-12 bg-gray-200 px-1 flex flex-row place-items-center">
+    <%= image_tag('renkon.png', size: '46x46') %>
+
     <div class="ml-1 mr-2 max-w-20">
-      <h2 class="m-0 p-0 my-0 text-gray-400">Renkon</h2>
-      <p class="text-xs m-0 p-0 text-nowrap overflow-hidden"><%= 123 %> unread</p>
+      <h2 class="m-0 p-0 my-0 text-gray-400">
+        <span>Renkon</span>
+      </h2>
     </div>
-    <div class="mx-1">
+
+    <div class="mx-2">
       <button class="px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-blue-600 border border-transparent rounded-md active:bg-blue-600 hover:bg-blue-700 focus:outline-none focus:shadow-outline-blue"
         data-controller="refresh"
         data-action="click->refresh#all"
@@ -13,7 +17,8 @@
         Refresh
       </button>
     </div>
-    <div class="mx-1">
+
+    <div class="mx-2">
       <%= link_to 'New channel', new_channel_path, 'data-turbo-frame' => 'modal' %>
     </div>
   </nav>
