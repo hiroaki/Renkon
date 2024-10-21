@@ -1,4 +1,8 @@
 import { Controller } from "@hotwired/stimulus";
+import TurboFrameDelegator from "lib/turbo_frame_delegator"
+
+class RefreshChannelDelegator extends TurboFrameDelegator {
+}
 
 export default class extends Controller {
   static targets = ['pane'];
@@ -89,5 +93,18 @@ export default class extends Controller {
         pane.getElementsByTagName('ul').item(0).selectedLi.enterItem(li.item(0));
       }
     }
+  }
+
+  onChangeReadStatus(evt) {
+    const channelId = evt.target.dataset['channel'];
+    const targetChannel = document.getElementById('channels').querySelector('li[data-channel="'+ channelId +'"]');
+
+    const channel_frame = targetChannel.querySelector('turbo-frame');
+    const url_for_refresh = channel_frame.dataset['urlForRefresh'];
+    const method = channel_frame.dataset['method'];
+    const frame_id = channel_frame.id
+
+    console.log('onChangeReadStatus requests: '+ url_for_refresh);
+    new RefreshChannelDelegator(url_for_refresh, method, frame_id, new URLSearchParams({short: true, dry_run: true})).perform();
   }
 }
