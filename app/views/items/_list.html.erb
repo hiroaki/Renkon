@@ -15,6 +15,7 @@
           keyup.enter->items#openUrl
           keyup.space->items#handlerMakeItemRead
           keyup.space->items#selectUnreadItem
+          dblclick->items#openUrl
         "
         data-channel="<%= item.channel_id %>"
         data-items-target="item"

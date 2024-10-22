@@ -52,6 +52,7 @@
           keyup.up->channels#selectPrevItem:stop
           keyup.down->channels#selectNextItem:stop
           keyup.enter->channels#openUrl
+          dblclick->channels#openUrl
         "
         data-channel="<%= channel.id %>"
         data-channels-target="item"
