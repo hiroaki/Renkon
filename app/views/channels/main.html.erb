@@ -25,7 +25,7 @@
 
   <main class="flex flex-row flex-1 overflow-hidden" data-controller="pane-focus" data-action="changeReadStatus->pane-focus#onChangeReadStatus">
     <!-- -->
-    <div tabindex="-1" class="flex flex-row flex-shrink-0 min-w-8 focus:outline-none" style="width: 8rem;"
+    <div id="channels-pane" tabindex="-1" class="flex flex-row flex-shrink-0 min-w-8 focus:outline-none" style="width: 8rem;"
       data-controller="frame"
       data-frame-target="movablePane"
       data-frame-storage-key-value="channelsPane"
@@ -38,8 +38,7 @@
       "
     >
       <div class="flex-1 bg-blue-100 overflow-y-auto overflow-x-hidden pt-2">
-        <turbo-frame id="channels" src="<%= channels_path(short: true) %>">
-        </turbo-frame>
+        <%= turbo_frame_tag('channels', src: channels_path(short: true)) %>
       </div>
       <div class="w-0.5 bg-gray-200 cursor-col-resize" draggable="true"
         data-action="
@@ -52,7 +51,7 @@
     </div>
 
     <!-- -->
-    <div tabindex="-1" class="flex flex-row flex-shrink-0 min-w-8 focus:outline-none" style="width: 8rem;"
+    <div id="items-pane" tabindex="-1" class="flex flex-row flex-shrink-0 min-w-8 focus:outline-none" style="width: 8rem;"
       data-controller="frame"
       data-frame-target="movablePane"
       data-frame-storage-key-value="itemsPane"
@@ -64,8 +63,7 @@
       "
     >
       <div class="flex-1 bg-white-100 overflow-y-auto overflow-x-hidden pt-2">
-        <turbo-frame id="items" data-action="turbo:frame-render->frame#handlerBeforeFrameRenderItems">
-        </turbo-frame>
+        <%= turbo_frame_tag('items', data: { action: 'turbo:frame-render->frame#handlerBeforeFrameRenderItems' } ) %>
       </div>
       <div class="w-0.5 bg-gray-200 cursor-col-resize" draggable="true"
       data-action="
@@ -78,12 +76,11 @@
     </div>
 
     <!-- -->
-    <div tabindex="-1" class="flex-1 overflow-y-auto min-w-8 focus:outline-none"
+    <div id="contents-pane" tabindex="-1" class="flex-1 overflow-y-auto min-w-8 focus:outline-none"
       data-pane-focus-target="pane"
     >
       <div class="bg-white p-2">
-        <turbo-frame id="contents">
-        </turbo-frame>
+        <%= turbo_frame_tag('contents', autoscroll: true, data: { autoscroll_block: 'start' } ) %>
       </div>
       <div class="w-0.5 bg-gray-200 cursor-col-resize">
       </div>

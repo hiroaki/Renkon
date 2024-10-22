@@ -13,6 +13,16 @@ export default class extends SelectedLiBaseController {
         break;
       }
     }
+    const isFiredOnItem = pos != -1;
+
+    if (isFiredOnItem) {
+      const contentsPane = document.getElementById('contents-pane');
+      const maxScroll = contentsPane.scrollHeight - contentsPane.clientHeight;
+      if (contentsPane.scrollTop < maxScroll) {
+        contentsPane.scrollBy({top: contentsPane.clientHeight, behavior: 'smooth'});
+        return false;
+      }
+    }
 
     for (let i = pos + 1; i < items.length; ++i) {
       if (items[i].dataset['unread'] == 'true') {
