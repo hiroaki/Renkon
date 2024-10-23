@@ -68,10 +68,9 @@ export default class extends SelectedLiBaseController {
   }
 
   toggleReadStatus(li) {
+    const me = this;
     const isUnread = li.dataset.unread == 'true';
     const url = li.dataset[ isUnread ? 'urlRead' : 'urlUnread' ];
-
-    const me = this;
 
     return fetch(url, {
       method: 'PATCH',
@@ -85,7 +84,7 @@ export default class extends SelectedLiBaseController {
         me.fireChangeReadStatusEvent(li);
       }
       else {
-        console.error('Failed to update read status');
+        console.error('Failed to update read status', response);
       }
     })
     .catch(error => console.error('Error:', error));
@@ -97,5 +96,29 @@ export default class extends SelectedLiBaseController {
       bubbles: true,
     });
     li.dispatchEvent(event);
+  }
+
+  //
+  deleteItem(evt) {
+    const me = this;
+    const li = evt.currentTarget;
+    const url = li.dataset['urlDisable'];
+
+    return fetch(url, {
+      method: 'PATCH',
+      headers: {
+        'X-CSRF-Token': document.querySelector('meta[name=csrf-token]').content
+      }
+    })
+    .then(response => {
+      if (response.ok) {
+        me.fireChangeReadStatusEvent(li);
+        li.remove();
+      }
+      else {
+        console.error('Failed to delete the item', response);
+      }
+    })
+    .catch(error => console.error('Error:', error));
   }
 }

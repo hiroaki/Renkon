@@ -52,11 +52,16 @@
           keyup.up->channels#selectPrevItem:stop
           keyup.down->channels#selectNextItem:stop
           keyup.enter->channels#openUrl
+          keyup.backspace->channels#confirmDestroy
+          keyup.backspace->channels#destroyChannel
+          keyup.backspace->channels#selectNextItem
           dblclick->channels#openUrl
         "
         data-channel="<%= channel.id %>"
         data-channels-target="item"
         data-url="<%= channel.url %>"
+        data-url-destroy="<%= channel_path(channel) %>"
+        data-text-for-confirm-destroy="Are you sure you want to delete this channel?"
       >
         <div class="container overflow-hidden text-nowrap text-xs">
           <a href="<%= channel_items_path(channel) %>"

@@ -15,6 +15,8 @@
           keyup.enter->items#openUrl
           keyup.space->items#handlerMakeItemRead
           keyup.space->items#selectUnreadItem
+          keyup.backspace->items#deleteItem
+          keyup.backspace->items#selectNextItem
           dblclick->items#openUrl
           dblclick->items#handlerMakeItemRead
         "
@@ -24,6 +26,7 @@
         data-unread="<%= item.unread? ? 'true' : 'false' %>"
         data-url-read="<%= read_channel_item_path(item.channel, item) %>"
         data-url-unread="<%= unread_channel_item_path(item.channel, item) %>"
+        data-url-disable="<%= disable_channel_item_path(item.channel, item) %>"
       >
         <div class="container overflow-hidden text-nowrap text-xs">
             <div class="container flex flex-row text-xs items-center">
