@@ -11,6 +11,7 @@ Rails.application.routes.draw do
   root to: 'channels#main'
 
   get 'trash', to: 'items#trash'
+  delete 'trash', to: 'items#empty_trash'
 
   resources :channels do
     resources :items do

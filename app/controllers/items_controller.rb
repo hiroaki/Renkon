@@ -1,29 +1,26 @@
 class ItemsController < ApplicationController
-  before_action :set_channel, except: %i[ trash]
+  before_action :set_channel, except: %i[ trash empty_trash ]
   before_action :set_item, only: %i[ show edit update destroy disable enable unread read ]
 
-  # GET /items
+  # channel_items GET /channels/:channel_id/items(.:format)
   def index
-    if turbo_frame_request?
-      logger.info("TURBO_FRAME_REQUEST")
-    end
     @items = @channel.items.enabled.all.order(pub_date: :desc)
   end
 
-  # GET /items/1
+  # channel_item GET /channels/:channel_id/items/:id(.:format)
   def show
   end
 
-  # GET /items/new
+  # new_channel_item GET /channels/:channel_id/items/new(.:format)
   def new
     @item = @channel.items.build
   end
 
-  # GET /items/1/edit
+  # edit_channel_item GET /channels/:channel_id/items/:id/edit(.:format)
   def edit
   end
 
-  # POST /items
+  # channel_items POST /channels/:channel_id/items(.:format)
   def create
     @item = @channel.items.build(item_params)
 
@@ -34,12 +31,12 @@ class ItemsController < ApplicationController
     end
   end
 
-  # PATCH/PUT /items/1
+  # channel_item PATCH|PUT /channels/:channel_id/items/:id(.:format)
   def update
     common_action_for_update(item_params)
   end
 
-  # DELETE /items/1
+  # channel_item DELETE /channels/:channel_id/items/:id(.:format)
   def destroy
     @item.destroy!
     redirect_to channel_items_url(@channel), notice: "Item was successfully destroyed.", status: :see_other
@@ -68,6 +65,16 @@ class ItemsController < ApplicationController
   # trash GET /trash(.:format)
   def trash
     @items = Item.where(disabled: true).all
+  end
+
+  # trash DELETE /trash(.:format)
+  def empty_trash
+    number_of_deleted = Item.empty_trash
+
+    redirect_to(root_path,
+      notice: "#{number_of_deleted} items were successfully deleted.",
+      status: :see_other,
+    )
   end
 
   private

@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { clearContentsPane } from 'lib/schema'
 
 export default class extends Controller {
   static targets = ['movablePane'];
@@ -89,10 +90,6 @@ export default class extends Controller {
   }
 
   handlerBeforeFrameRenderItems(evt) {
-    this.clearContentsPane();
-  }
-
-  clearContentsPane() {
-    document.getElementById('contents').innerHTML = '';
+    clearContentsPane();
   }
 }
