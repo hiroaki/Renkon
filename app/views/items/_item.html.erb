@@ -1,9 +1,9 @@
 <header class="contaner">
-  <h3><span>[<%= item.unread? ? '●' : '　' %>]</span> <%= item.title %></h3>
+  <h3><%= item.title %></h3>
 </header>
 
 <div class="contaner">
-  <%= link_to item.url, item.url %>
+  <%= link_to(item.url, item.url, target: '_blank', rel: 'noopener noreferrer') %>
 </div>
 
 <div class="contaner">
