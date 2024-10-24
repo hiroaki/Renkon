@@ -21,6 +21,21 @@
     <div class="mx-2">
       <%= link_to 'New channel', new_channel_path, 'data-turbo-frame' => 'modal' %>
     </div>
+
+    <div class="mx-2">
+      <button class="px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-blue-300 border border-transparent rounded-md active:bg-blue-300 hover:bg-blue-400 focus:outline-none focus:shadow-outline-blue"
+        data-controller="items"
+        data-action="
+          click->items#confirmEmptyTrash
+          click->items#emptyTrash
+          click->items#clearItemsPaneIfTrashSelected
+        "
+        data-url-empty-trash="<%= trash_path %>"
+        data-text-for-confirm-empty-trash="Are you sure you want to empty the trash?"
+      >
+        Empty Trash
+      </button>
+    </div>
   </nav>
 
   <main class="flex flex-row flex-1 overflow-hidden" data-controller="pane-focus" data-action="changeReadStatus->pane-focus#onChangeReadStatus">
