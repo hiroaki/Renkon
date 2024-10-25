@@ -1,5 +1,5 @@
 import SelectedLiBaseController from "lib/selected_li_base_controller"
-import { clearItemsPane, clearContentsPane } from 'lib/schema'
+import { clearItemsPane, clearContentsPane, getCsrfToken } from 'lib/schema'
 
 export default class extends SelectedLiBaseController {
   selectUnreadItem(evt) {
@@ -75,9 +75,7 @@ export default class extends SelectedLiBaseController {
 
     return fetch(url, {
       method: 'PATCH',
-      headers: {
-        'X-CSRF-Token': document.querySelector('meta[name=csrf-token]').content
-      }
+      headers: { 'X-CSRF-Token': getCsrfToken() }
     })
     .then(response => {
       if (response.ok) {
@@ -107,9 +105,7 @@ export default class extends SelectedLiBaseController {
 
     return fetch(url, {
       method: 'PATCH',
-      headers: {
-        'X-CSRF-Token': document.querySelector('meta[name=csrf-token]').content
-      }
+      headers: { 'X-CSRF-Token': getCsrfToken() }
     })
     .then(response => {
       if (response.ok) {
@@ -137,9 +133,7 @@ export default class extends SelectedLiBaseController {
 
     return fetch(url, {
       method: 'DELETE',
-      headers: {
-        'X-CSRF-Token': document.querySelector('meta[name=csrf-token]').content
-      }
+      headers: { 'X-CSRF-Token': getCsrfToken() }
     })
     .then(response => {
       if (response.ok) {
