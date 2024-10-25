@@ -1,7 +1,20 @@
 import { Controller } from "@hotwired/stimulus";
 import TurboFrameDelegator from "lib/turbo_frame_delegator"
+import { getCsrfToken } from 'lib/schema'
 
 class RefreshChannelDelegator extends TurboFrameDelegator {
+  // override
+  prepareRequest(request) {
+    super.prepareRequest(request)
+    console.log("request", request)
+
+    if (!request.isSafe) {
+      const token = getCsrfToken()
+      if (token) {
+        request.headers["X-CSRF-Token"] = token
+      }
+    }
+  }
 }
 
 export default class extends Controller {

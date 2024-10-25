@@ -1,12 +1,20 @@
 import { Controller } from "@hotwired/stimulus"
 import Queue from "promise-queue"
 import TurboFrameDelegator from "lib/turbo_frame_delegator"
+import { getCsrfToken } from 'lib/schema'
 
 class RefreshChanelsDelegator extends TurboFrameDelegator {
   // override
   prepareRequest(request) {
     super.prepareRequest(request)
     console.log("request", request)
+
+    if (!request.isSafe) {
+      const token = getCsrfToken()
+      if (token) {
+        request.headers["X-CSRF-Token"] = token
+      }
+    }
   }
 }
 
@@ -43,7 +51,7 @@ export default class extends Controller {
         return await Turbo.fetch(urlRefresh, {
           method: method,
           headers: {
-            'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
+            'X-CSRF-Token': getCsrfToken(),
             'Turbo-Frame': frame_id,
             'Accept': 'text/vnd.turbo-stream.html, text/html, application/xhtml+xml'
           }
