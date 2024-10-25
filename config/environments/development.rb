@@ -1,4 +1,5 @@
 require "active_support/core_ext/integer/time"
+require_relative "../../lib/middleware/short_request_id"
 
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
@@ -54,4 +55,8 @@ Rails.application.configure do
 
   # Raise error when a before_action's only/except options reference missing actions.
   config.action_controller.raise_on_missing_callback_actions = true
+
+  #
+  config.middleware.insert_before Rails::Rack::Logger, Middleware::ShortRequestId
+  config.log_tags = [->(req) { req.env["X_SHORT_REQUEST_ID"] || "no-id" }]
 end
