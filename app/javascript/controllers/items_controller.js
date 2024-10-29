@@ -1,5 +1,5 @@
 import SelectedLiBaseController from "lib/selected_li_base_controller"
-import { clearItemsPane, clearContentsPane, getCsrfToken } from 'lib/schema'
+import { getCsrfToken, clearContentsPane } from 'lib/schema'
 
 export default class extends SelectedLiBaseController {
   connect() {
@@ -122,40 +122,5 @@ export default class extends SelectedLiBaseController {
       }
     })
     .catch(error => console.error('Error:', error));
-  }
-
-  //
-  confirmEmptyTrash(evt) {
-    const message = evt.currentTarget.dataset['textForConfirmEmptyTrash'] || 'Sure?';
-    if (!confirm(message)) {
-      evt.stopImmediatePropagation()
-    }
-  }
-
-  //
-  emptyTrash(evt) {
-    const url = evt.currentTarget.dataset['urlEmptyTrash'];
-
-    return fetch(url, {
-      method: 'DELETE',
-      headers: { 'X-CSRF-Token': getCsrfToken() }
-    })
-    .then(response => {
-      if (response.ok) {
-        console.log('response ok, nothing to do', response);
-      }
-      else {
-        console.error('Failed to delete the item', response);
-      }
-    })
-    .catch(error => console.error('Error:', error));
-  }
-
-  clearItemsPaneIfTrashSelected(evt) {
-    const selectedChannel = document.getElementById('channels').querySelector('li[data-selected="true"]');
-    if (selectedChannel && selectedChannel.id == 'trash') {
-      clearContentsPane()
-      clearItemsPane()
-    }
   }
 }

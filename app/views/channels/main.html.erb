@@ -24,11 +24,11 @@
 
     <div class="mx-2">
       <button class="px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-blue-300 border border-transparent rounded-md active:bg-blue-300 hover:bg-blue-400 focus:outline-none focus:shadow-outline-blue"
-        data-controller="items"
+        data-controller="trash"
         data-action="
-          click->items#confirmEmptyTrash
-          click->items#emptyTrash
-          click->items#clearItemsPaneIfTrashSelected
+          click->trash#confirmEmptyTrash
+          click->trash#emptyTrash
+          click->trash#clearItemsPaneIfTrashSelected
         "
         data-url-empty-trash="<%= trash_path %>"
         data-text-for-confirm-empty-trash="Are you sure you want to empty the trash?"
