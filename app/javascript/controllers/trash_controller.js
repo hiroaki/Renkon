@@ -1,5 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
-import { getCsrfToken, clearItemsPane, clearContentsPane } from 'lib/schema'
+import { getCsrfToken } from 'lib/schema'
 
 export default class extends Controller {
   //
