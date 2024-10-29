@@ -10,11 +10,11 @@
     <% @items.each do |item| %>
       <li id="<%= dom_id item %>" tabindex="0" class="container even:bg-gray-100 focus:outline-none"
         data-action="
-          keyup.enter->items#openUrl
-          keyup.space->items#handlerMakeItemRead
-          keyup.space->items#selectUnreadItem
-          keyup.backspace->items#deleteItem
-          keyup.backspace->items#selectNextItem
+          keydown.enter->items#openUrl
+          keydown.space->items#handlerMakeItemRead
+          keydown.space->items#selectUnreadItem
+          keydown.backspace->items#deleteItem
+          keydown.backspace->items#selectNextItem
           dblclick->items#openUrl
           dblclick->items#handlerMakeItemRead
         "

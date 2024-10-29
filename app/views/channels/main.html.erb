@@ -52,10 +52,10 @@
       data-frame-storage-key-value="channels-width"
       data-pane-focus-target="channelsPane"
       data-action="
-        keyup.right->pane-focus#forwardToItemPane
-        keyup.space->pane-focus#forwardToUnreadItemPane
-        keyup.up->pane-focus#selectPrevItem
-        keyup.down->pane-focus#selectNextItem
+        keydown.right->pane-focus#forwardToItemPane
+        keydown.space->pane-focus#forwardToUnreadItemPane
+        keydown.up->pane-focus#selectPrevItem
+        keydown.down->pane-focus#selectNextItem
       "
     >
       <div class="flex-1 bg-blue-100 overflow-y-auto overflow-x-hidden pt-2">
@@ -78,9 +78,9 @@
       data-frame-storage-key-value="items-width"
       data-pane-focus-target="itemsPane"
       data-action="
-        keyup.left->pane-focus#backToChannelPane
-        keyup.up->pane-focus#selectPrevItem
-        keyup.down->pane-focus#selectNextItem
+        keydown.left->pane-focus#backToChannelPane
+        keydown.up->pane-focus#selectPrevItem
+        keydown.down->pane-focus#selectNextItem
       "
     >
       <div class="flex-1 bg-white-100 overflow-y-auto overflow-x-hidden pt-2">

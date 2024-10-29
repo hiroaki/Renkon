@@ -45,10 +45,10 @@
     <% @channels.each do |channel| %>
       <li tabindex="0" class="container focus:outline-none"
         data-action="
-          keyup.enter->channels#openUrl
-          keyup.backspace->channels#confirmDestroy
-          keyup.backspace->channels#destroyChannel
-          keyup.backspace->channels#selectNextItem
+          keydown.enter->channels#openUrl
+          keydown.backspace->channels#confirmDestroy
+          keydown.backspace->channels#destroyChannel
+          keydown.backspace->channels#selectNextItem
           dblclick->channels#openUrl
         "
         data-channel="<%= channel.id %>"
