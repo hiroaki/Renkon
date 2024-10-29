@@ -10,8 +10,6 @@
     <% @items.each do |item| %>
       <li id="<%= dom_id item %>" tabindex="0" class="container even:bg-gray-100 focus:outline-none"
         data-action="
-          keyup.up->items#selectPrevItem:stop
-          keyup.down->items#selectNextItem:stop
           keyup.enter->items#openUrl
           keyup.space->items#handlerMakeItemRead
           keyup.space->items#selectUnreadItem

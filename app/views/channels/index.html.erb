@@ -19,10 +19,6 @@
 >
   <ul class="container" data-controller="channels">
     <li id="trash" tabindex="0" class="container focus:outline-none"
-      data-action="
-        keyup.up->channels#selectPrevItem:stop
-        keyup.down->channels#selectNextItem:stop
-      "
       data-channels-target="item"
     >
       <div class="container overflow-hidden text-nowrap text-xs">
@@ -49,8 +45,6 @@
     <% @channels.each do |channel| %>
       <li tabindex="0" class="container focus:outline-none"
         data-action="
-          keyup.up->channels#selectPrevItem:stop
-          keyup.down->channels#selectNextItem:stop
           keyup.enter->channels#openUrl
           keyup.backspace->channels#confirmDestroy
           keyup.backspace->channels#destroyChannel
