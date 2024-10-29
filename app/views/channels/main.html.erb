@@ -48,8 +48,8 @@
     <!-- -->
     <div id="channels-pane" tabindex="-1" class="flex flex-row flex-shrink-0 min-w-8 focus:outline-none" style="width: 8rem;"
       data-controller="frame"
-      data-frame-target="movablePane"
-      data-frame-storage-key-value="channelsPane"
+      data-frame-target="adjustable"
+      data-frame-storage-key-value="channels-width"
       data-pane-focus-target="channelsPane"
       data-action="
         keyup.right->pane-focus#forwardToItemPane
@@ -74,8 +74,8 @@
     <!-- -->
     <div id="items-pane" tabindex="-1" class="flex flex-row flex-shrink-0 min-w-8 focus:outline-none" style="width: 8rem;"
       data-controller="frame"
-      data-frame-target="movablePane"
-      data-frame-storage-key-value="items-pane"
+      data-frame-target="adjustable"
+      data-frame-storage-key-value="items-width"
       data-pane-focus-target="itemsPane"
       data-action="
         keyup.left->pane-focus#backToChannelPane
