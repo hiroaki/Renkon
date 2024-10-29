@@ -2,6 +2,11 @@ import SelectedLiBaseController from "lib/selected_li_base_controller"
 import { clearItemsPane, clearContentsPane, getCsrfToken } from 'lib/schema'
 
 export default class extends SelectedLiBaseController {
+  connect() {
+    super.connect();
+    clearContentsPane();
+  }
+
   selectUnreadItem(evt) {
     const items = document.getElementById('items').querySelectorAll('li');
 

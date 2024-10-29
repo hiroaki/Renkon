@@ -1,5 +1,4 @@
 import { Controller } from "@hotwired/stimulus"
-import { clearContentsPane } from 'lib/schema'
 
 export default class extends Controller {
   static targets = ['movablePane'];
@@ -87,9 +86,5 @@ export default class extends Controller {
     const new_width = this.start_width + delta_x;
     // console.log("new_width="+ new_width, this)
     this.movablePaneTarget.style.width = parseInt(new_width) +'px'
-  }
-
-  handlerBeforeFrameRenderItems(evt) {
-    clearContentsPane();
   }
 }
