@@ -21,6 +21,7 @@ export default class extends Controller {
     .then(response => {
       if (response.ok) {
         console.log('response ok, nothing to do', response);
+        this.fireEmptyTrash();
       }
       else {
         console.error('Failed to delete the item', response);
@@ -29,11 +30,12 @@ export default class extends Controller {
     .catch(error => console.error('Error:', error));
   }
 
-  clearItemsPaneIfTrashSelected(evt) {
-    const selectedChannel = document.getElementById('channels').querySelector('li[data-selected="true"]');
-    if (selectedChannel && selectedChannel.id == 'trash') {
-      clearContentsPane()
-      clearItemsPane()
-    }
+  fireEmptyTrash() {
+    console.log("create emptyTrash event")
+    const event = new CustomEvent('emptyTrash', {
+      detail: { message: 'Hello from custom event!' },
+      bubbles: true,
+    });
+    this.element.dispatchEvent(event);
   }
 }

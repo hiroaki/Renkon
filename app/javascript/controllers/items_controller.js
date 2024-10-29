@@ -1,10 +1,19 @@
 import SelectedLiBaseController from "lib/selected_li_base_controller"
-import { getCsrfToken, clearContentsPane } from 'lib/schema'
+import { getCsrfToken } from 'lib/schema'
 
 export default class extends SelectedLiBaseController {
   connect() {
     super.connect();
-    clearContentsPane();
+
+    // NOTE: アイテムリストが取り除かれた時、どちらかといえば disconnect 時に（イベントを bubble-up して）、
+    // pane-controller に取り除かれたことを検知してもらいたいところですが、
+    // disconnect 時この要素は既に無くなっているためここでイベントを作っても、それが伝播しません。
+    // 要素が取り除かれたことを祖先要素で検知するには祖先要素の方で MutationObserver の実装を検討してください。
+    const event = new CustomEvent('connectItems', {
+      detail: { message: 'Hello from custom event!' },
+      bubbles: true,
+    });
+    this.element.dispatchEvent(event);
   }
 
   selectUnreadItem(evt) {

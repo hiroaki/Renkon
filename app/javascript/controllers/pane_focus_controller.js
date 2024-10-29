@@ -1,6 +1,6 @@
 import { Controller } from "@hotwired/stimulus";
 import TurboFrameDelegator from "lib/turbo_frame_delegator"
-import { getCsrfToken } from 'lib/schema'
+import { getCsrfToken, clearItemsPane, clearContentsPane } from 'lib/schema'
 
 class RefreshChannelDelegator extends TurboFrameDelegator {
   // override
@@ -117,6 +117,20 @@ export default class extends Controller {
         li.dataset['urlRefresh'], 'PATCH', turboFrame.id, new URLSearchParams({short: true, dry_run: true})
       )
       .perform();
+    }
+  }
+
+  onConnectItems(evt) {
+    clearContentsPane();
+  }
+
+  onEmptyTrash(evt) {
+    console.log("onEmptyTrash", evt);
+
+    const selectedChannel = document.getElementById('channels').querySelector('li[data-selected="true"]');
+    if (selectedChannel && selectedChannel.id == 'trash') {
+      clearContentsPane()
+      clearItemsPane()
     }
   }
 }
