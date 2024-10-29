@@ -53,9 +53,9 @@
       data-pane-focus-target="channelsPane"
       data-action="
         keydown.right->pane-focus#forwardToItemPane
-        keydown.space->pane-focus#forwardToUnreadItemPane
-        keydown.up->pane-focus#selectPrevItem
-        keydown.down->pane-focus#selectNextItem
+        keydown.space->pane-focus#forwardToUnreadItemPane:prevent
+        keydown.up->pane-focus#selectPrevItem:prevent
+        keydown.down->pane-focus#selectNextItem:prevent
       "
     >
       <div class="flex-1 bg-blue-100 overflow-y-auto overflow-x-hidden pt-2">
@@ -79,8 +79,8 @@
       data-pane-focus-target="itemsPane"
       data-action="
         keydown.left->pane-focus#backToChannelPane
-        keydown.up->pane-focus#selectPrevItem
-        keydown.down->pane-focus#selectNextItem
+        keydown.up->pane-focus#selectPrevItem:prevent
+        keydown.down->pane-focus#selectNextItem:prevent
       "
     >
       <div class="flex-1 bg-white-100 overflow-y-auto overflow-x-hidden pt-2">

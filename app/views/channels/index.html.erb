@@ -9,14 +9,7 @@
 <hr>
 
 <%= turbo_frame_tag 'channels' do %>
-<div class="flex flex-col h-full"
-  data-controller="scroll"
-  data-action="
-    keydown.up->scroll#cancelWindowScrolling
-    keydown.down->scroll#cancelWindowScrolling
-    keydown.space->scroll#cancelWindowScrolling
-  "
->
+<div class="flex flex-col h-full">
   <ul class="container" data-controller="channels">
     <li id="trash" tabindex="0" class="container focus:outline-none"
       data-channels-target="item"
