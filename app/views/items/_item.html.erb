@@ -1,11 +1,10 @@
-<header class="contaner">
+<header class="contaner mb-4">
   <h3><%= item.title %></h3>
+  <div class="contaner text-xs">
+    <%= link_to(item.url, item.url, target: '_blank', rel: 'noopener noreferrer') %>
+  </div>
 </header>
-
+<hr>
 <div class="contaner">
-  <%= link_to(item.url, item.url, target: '_blank', rel: 'noopener noreferrer') %>
-</div>
-
-<div class="contaner">
-  <%= sanitize(item.description, tags: ['img', 'p', 'br', 'div'], attributes: ['src']).html_safe %>
+  <%= sanitize(item.description, tags: ['img', 'p', 'br', 'div'], attributes: ['src']).gsub(/\n|\r|\r\n/, '<br>').html_safe %>
 </div>
