@@ -62,7 +62,7 @@ export default class extends Controller {
 
   // ENTER key from selected LI tag
   openUrl(evt) {
-    window.open(evt.currentTarget.dataset.url, '_blank', 'noreferrer');
+    window.open(evt.currentTarget.dataset.urlSource, '_blank', 'noopener noreferrer');
   }
 
   enterItem(li) {

@@ -9,20 +9,9 @@
 <hr>
 
 <%= turbo_frame_tag 'channels' do %>
-<div class="flex flex-col h-full"
-  data-controller="scroll"
-  data-action="
-    keydown.up->scroll#cancelWindowScrolling
-    keydown.down->scroll#cancelWindowScrolling
-    keydown.space->scroll#cancelWindowScrolling
-  "
->
+<div class="flex flex-col h-full">
   <ul class="container" data-controller="channels">
     <li id="trash" tabindex="0" class="container focus:outline-none"
-      data-action="
-        keyup.up->channels#selectPrevItem:stop
-        keyup.down->channels#selectNextItem:stop
-      "
       data-channels-target="item"
     >
       <div class="container overflow-hidden text-nowrap text-xs">
@@ -49,19 +38,18 @@
     <% @channels.each do |channel| %>
       <li tabindex="0" class="container focus:outline-none"
         data-action="
-          keyup.up->channels#selectPrevItem:stop
-          keyup.down->channels#selectNextItem:stop
-          keyup.enter->channels#openUrl
-          keyup.backspace->channels#confirmDestroy
-          keyup.backspace->channels#destroyChannel
-          keyup.backspace->channels#selectNextItem
+          keydown.enter->channels#openUrl
+          keydown.backspace->channels#confirmDestroy
+          keydown.backspace->channels#destroyChannel
+          keydown.backspace->channels#selectNextItem
           dblclick->channels#openUrl
         "
         data-channel="<%= channel.id %>"
         data-channels-target="item"
-        data-url="<%= channel.url %>"
+        data-url-source="<%= channel.url %>"
         data-url-destroy="<%= channel_path(channel) %>"
         data-text-for-confirm-destroy="Are you sure you want to delete this channel?"
+        data-url-refresh="<%= fetch_channel_path(channel, short: true) %>"
       >
         <div class="container overflow-hidden text-nowrap text-xs">
           <a href="<%= channel_items_path(channel) %>"
@@ -71,9 +59,7 @@
             data-action="click->channels#changeSelected"
           >
             <%=
-              turbo_frame_tag(dom_id(channel),
-                data: { 'url-for-refresh' => fetch_channel_path(channel, short: true), 'method' => 'patch' }
-              ) do
+              turbo_frame_tag(dom_id(channel)) do
             %>
               <%= render channel %>
             <% end %>

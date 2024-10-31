@@ -1,7 +1,21 @@
 import SelectedLiBaseController from "lib/selected_li_base_controller"
-import { clearItemsPane, clearContentsPane } from 'lib/schema'
+import { getCsrfToken } from 'lib/schema'
 
 export default class extends SelectedLiBaseController {
+  connect() {
+    super.connect();
+
+    // NOTE: アイテムリストが取り除かれた時、どちらかといえば disconnect 時に（イベントを bubble-up して）、
+    // pane-controller に取り除かれたことを検知してもらいたいところですが、
+    // disconnect 時この要素は既に無くなっているためここでイベントを作っても、それが伝播しません。
+    // 要素が取り除かれたことを祖先要素で検知するには祖先要素の方で MutationObserver の実装を検討してください。
+    const event = new CustomEvent('connectItems', {
+      detail: { message: 'Hello from custom event!' },
+      bubbles: true,
+    });
+    this.element.dispatchEvent(event);
+  }
+
   selectUnreadItem(evt) {
     const items = document.getElementById('items').querySelectorAll('li');
 
@@ -75,9 +89,7 @@ export default class extends SelectedLiBaseController {
 
     return fetch(url, {
       method: 'PATCH',
-      headers: {
-        'X-CSRF-Token': document.querySelector('meta[name=csrf-token]').content
-      }
+      headers: { 'X-CSRF-Token': getCsrfToken() }
     })
     .then(response => {
       if (response.ok) {
@@ -107,9 +119,7 @@ export default class extends SelectedLiBaseController {
 
     return fetch(url, {
       method: 'PATCH',
-      headers: {
-        'X-CSRF-Token': document.querySelector('meta[name=csrf-token]').content
-      }
+      headers: { 'X-CSRF-Token': getCsrfToken() }
     })
     .then(response => {
       if (response.ok) {
@@ -121,42 +131,5 @@ export default class extends SelectedLiBaseController {
       }
     })
     .catch(error => console.error('Error:', error));
-  }
-
-  //
-  confirmEmptyTrash(evt) {
-    const message = evt.currentTarget.dataset['textForConfirmEmptyTrash'] || 'Sure?';
-    if (!confirm(message)) {
-      evt.stopImmediatePropagation()
-    }
-  }
-
-  //
-  emptyTrash(evt) {
-    const url = evt.currentTarget.dataset['urlEmptyTrash'];
-
-    return fetch(url, {
-      method: 'DELETE',
-      headers: {
-        'X-CSRF-Token': document.querySelector('meta[name=csrf-token]').content
-      }
-    })
-    .then(response => {
-      if (response.ok) {
-        console.log('response ok, nothing to do', response);
-      }
-      else {
-        console.error('Failed to delete the item', response);
-      }
-    })
-    .catch(error => console.error('Error:', error));
-  }
-
-  clearItemsPaneIfTrashSelected(evt) {
-    const selectedChannel = document.getElementById('channels').querySelector('li[data-selected="true"]');
-    if (selectedChannel && selectedChannel.id == 'trash') {
-      clearContentsPane()
-      clearItemsPane()
-    }
   }
 }

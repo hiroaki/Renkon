@@ -1,23 +1,3 @@
-function getMetaElement(name) {
-  return document.querySelector(`meta[name="${name}"]`);
-}
-
-function getMetaContent(name) {
-  const element = getMetaElement(name);
-  return element && element.content;
-}
-
-function getCookieValue(cookieName) {
-  if (cookieName != null) {
-    const cookies = document.cookie ? document.cookie.split("; ") : []
-    const cookie = cookies.find((cookie) => cookie.startsWith(cookieName))
-    if (cookie) {
-      const value = cookie.split("=").slice(1).join("=")
-      return value ? decodeURIComponent(value) : undefined
-    }
-  }
-}
-
 export default class {
   constructor(location, method, target_frame_id, requestBody = new URLSearchParams()) {
     this.location = location
@@ -38,12 +18,6 @@ export default class {
   // (1)
   prepareRequest(request) {
     this.#logit("prepareRequest")
-    if (!request.isSafe) {
-      const token = getCookieValue(getMetaContent("csrf-param")) || getMetaContent("csrf-token")
-      if (token) {
-        request.headers["X-CSRF-Token"] = token
-      }
-    }
   }
 
   // (2)

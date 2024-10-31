@@ -1,4 +1,11 @@
-<div class="flex flex-col h-screen text-gray-700">
+<div class="flex flex-col h-screen text-gray-700"
+  data-controller="pane-focus"
+  data-action="
+    changeReadStatus->pane-focus#onChangeReadStatus
+    connectItems->pane-focus#onConnectItems
+    emptyTrash->pane-focus#onEmptyTrash
+  "
+>
   <nav class="flex-shrink-0 h-12 bg-gray-200 px-1 flex flex-row place-items-center">
     <%= image_tag('renkon.png', size: '46x46') %>
 
@@ -24,11 +31,10 @@
 
     <div class="mx-2">
       <button class="px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-blue-300 border border-transparent rounded-md active:bg-blue-300 hover:bg-blue-400 focus:outline-none focus:shadow-outline-blue"
-        data-controller="items"
+        data-controller="trash"
         data-action="
-          click->items#confirmEmptyTrash
-          click->items#emptyTrash
-          click->items#clearItemsPaneIfTrashSelected
+          click->trash#confirmEmptyTrash
+          click->trash#emptyTrash
         "
         data-url-empty-trash="<%= trash_path %>"
         data-text-for-confirm-empty-trash="Are you sure you want to empty the trash?"
@@ -38,18 +44,18 @@
     </div>
   </nav>
 
-  <main class="flex flex-row flex-1 overflow-hidden" data-controller="pane-focus" data-action="changeReadStatus->pane-focus#onChangeReadStatus">
+  <main class="flex flex-row flex-1 overflow-hidden">
     <!-- -->
     <div id="channels-pane" tabindex="-1" class="flex flex-row flex-shrink-0 min-w-8 focus:outline-none" style="width: 8rem;"
       data-controller="frame"
-      data-frame-target="movablePane"
-      data-frame-storage-key-value="channelsPane"
-      data-pane-focus-target="pane"
+      data-frame-target="adjustable"
+      data-frame-storage-key-value="channels-width"
+      data-pane-focus-target="channelsPane"
       data-action="
-        keyup.right->pane-focus#forwardToItemPane
-        keyup.space->pane-focus#forwardToUnreadItemPane
-        keyup.up->pane-focus#selectPrevItem
-        keyup.down->pane-focus#selectNextItem
+        keydown.right->pane-focus#forwardToItemPane
+        keydown.space->pane-focus#forwardToUnreadItemPane:prevent
+        keydown.up->pane-focus#selectPrevItem:prevent
+        keydown.down->pane-focus#selectNextItem:prevent
       "
     >
       <div class="flex-1 bg-blue-100 overflow-y-auto overflow-x-hidden pt-2">
@@ -68,17 +74,17 @@
     <!-- -->
     <div id="items-pane" tabindex="-1" class="flex flex-row flex-shrink-0 min-w-8 focus:outline-none" style="width: 8rem;"
       data-controller="frame"
-      data-frame-target="movablePane"
-      data-frame-storage-key-value="itemsPane"
-      data-pane-focus-target="pane"
+      data-frame-target="adjustable"
+      data-frame-storage-key-value="items-width"
+      data-pane-focus-target="itemsPane"
       data-action="
-        keyup.left->pane-focus#backToChannelPane
-        keyup.up->pane-focus#selectPrevItem
-        keyup.down->pane-focus#selectNextItem
+        keydown.left->pane-focus#backToChannelPane
+        keydown.up->pane-focus#selectPrevItem:prevent
+        keydown.down->pane-focus#selectNextItem:prevent
       "
     >
       <div class="flex-1 bg-white-100 overflow-y-auto overflow-x-hidden pt-2">
-        <%= turbo_frame_tag('items', data: { action: 'turbo:frame-render->frame#handlerBeforeFrameRenderItems' } ) %>
+        <%= turbo_frame_tag('items') %>
       </div>
       <div class="w-0.5 bg-gray-200 cursor-col-resize" draggable="true"
       data-action="
@@ -92,7 +98,7 @@
 
     <!-- -->
     <div id="contents-pane" tabindex="-1" class="flex-1 overflow-y-auto min-w-8 focus:outline-none"
-      data-pane-focus-target="pane"
+      data-pane-focus-target="contentsPane"
     >
       <div class="bg-white p-2">
         <%= turbo_frame_tag('contents', autoscroll: true, data: { autoscroll_block: 'start' } ) %>
