@@ -69,34 +69,40 @@ RSpec.describe Channel, type: :model do
 
     describe 'count of items of channel#1' do
       context do
-        let!(:rel) { Channel.all_with_count_items(unread: true) }
-        it { expect(rel.find { |r| r.id == channel1.id }.count_items).to eq 1 }
+        let!(:unread) { true }
+        let!(:rel) { Channel.all_with_count_items(unread: unread) }
+        it { expect(rel.find { |r| r.id == channel1.id }.count_items(unread: unread)).to eq 1 }
       end
       context do
-        let!(:rel) { Channel.all_with_count_items(unread: false) }
-        it { expect(rel.find { |r| r.id == channel1.id }.count_items).to eq 2 }
+        let!(:unread) { false }
+        let!(:rel) { Channel.all_with_count_items(unread: unread) }
+        it { expect(rel.find { |r| r.id == channel1.id }.count_items(unread: unread)).to eq 2 }
       end
     end
 
     describe 'count of items of channel#2' do
       context do
-        let!(:rel) { Channel.all_with_count_items(unread: true) }
-        it { expect(rel.find { |r| r.id == channel2.id }.count_items).to eq 0 }
+        let!(:unread) { true }
+        let!(:rel) { Channel.all_with_count_items(unread: unread) }
+        it { expect(rel.find { |r| r.id == channel2.id }.count_items(unread: unread)).to eq 0 }
       end
       context do
-        let!(:rel) { Channel.all_with_count_items(unread: false) }
-        it { expect(rel.find { |r| r.id == channel2.id }.count_items).to eq 0 }
+        let!(:unread) { false }
+        let!(:rel) { Channel.all_with_count_items(unread: unread) }
+        it { expect(rel.find { |r| r.id == channel2.id }.count_items(unread: unread)).to eq 0 }
       end
     end
 
     describe 'count of items of channel#3' do
       context do
-        let!(:rel) { Channel.all_with_count_items(unread: true) }
-        it { expect(rel.find { |r| r.id == channel3.id }.count_items).to eq 2 }
+        let!(:unread) { true }
+        let!(:rel) { Channel.all_with_count_items(unread: unread) }
+        it { expect(rel.find { |r| r.id == channel3.id }.count_items(unread: unread)).to eq 2 }
       end
       context do
-        let!(:rel) { Channel.all_with_count_items(unread: false) }
-        it { expect(rel.find { |r| r.id == channel3.id }.count_items).to eq 2 }
+        let!(:unread) { false }
+        let!(:rel) { Channel.all_with_count_items(unread: unread) }
+        it { expect(rel.find { |r| r.id == channel3.id }.count_items(unread: unread)).to eq 2 }
       end
     end
   end
