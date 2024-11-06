@@ -59,4 +59,7 @@ Rails.application.configure do
   #
   config.middleware.insert_before Rails::Rack::Logger, Middleware::ShortRequestId
   config.log_tags = [->(req) { req.env["X_SHORT_REQUEST_ID"] || "no-id" }]
+
+  #
+  config.active_storage.service = :local
 end
