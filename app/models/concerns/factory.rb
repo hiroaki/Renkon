@@ -11,22 +11,12 @@ module Factory
       end
     end
 
-    if feed.image.url
-      logger.info("The channel (#{channel.id}) has image: #{feed.image.url}")
-      # FeedImageUpdateJob.perform_lator(channel.id, feed.image.url)
-
-      response = HTTP.get(feed.image.url)
-
-      if response.status.success?
-        filename = File.basename(URI.parse(feed.image.url).path)
-
-        channel.favicon.attach(
-          io: StringIO.new(response.body.to_s),
-          filename: filename,
-          content_type: response.content_type.to_s,
-        )
+    unless channel.favicon.attached?
+      if feed.respond_to?(:image) && feed.image && feed.image.url
+        DownloadChannelFaviconJob.perform_later(channel, feed.image.url)
       else
-        logger.error("(Ignore) Failed to download [#{feed.image.url}]: #{response.status}")
+        # try to download favicon.ico instead
+        DownloadChannelFaviconJob.perform_later(channel, generate_favicon_url_from(feed.url))
       end
     end
   end
@@ -40,5 +30,18 @@ module Factory
       description: entry.content&.strip || entry.summary&.strip,
       pub_date: entry.published,
     }
+  end
+
+  def generate_favicon_url_from(url)
+    uri = URI.parse(url)
+    host = uri.host
+    port = uri.port
+    base_url = if (uri.scheme == 'http' && port != 80) || (uri.scheme == 'https' && port != 443)
+                 "#{uri.scheme}://#{host}:#{port}"
+               else
+                 "#{uri.scheme}://#{host}"
+               end
+
+    "#{base_url}/favicon.ico"
   end
 end
