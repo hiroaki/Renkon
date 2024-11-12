@@ -1,5 +1,6 @@
 class Channel < ApplicationRecord
   has_many :items, dependent: :delete_all
+  has_one_attached :favicon
 
   validates :title, presence: true
   validates :src, presence: true
