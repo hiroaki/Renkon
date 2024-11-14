@@ -18,12 +18,23 @@ class RefreshChannelDelegator extends TurboFrameDelegator {
 }
 
 export default class extends Controller {
-  static targets = ['channelsPane', 'itemsPane', 'contentsPane'];
+  static targets = ['channelsPane', 'itemsPane', 'contentsPane', 'linkEditChannel'];
 
   connect() {
     this.allPaneTargets().forEach((pane) => {
       pane.addEventListener('click', () => this.focusPane(pane));
     });
+
+    // initialize state for Edit channel button
+    this.#resetEditChannelLinkByChannelListItem(this.getSelectedChannelListItem())
+  }
+
+  getSelectedChannelListItem() {
+    return this.channelsPaneTarget.querySelector('li[data-selected="true"]');
+  }
+
+  getChannelListItemById(channelId) {
+    return this.channelsPaneTarget.querySelector('li[data-channel="'+ channelId +'"]');
   }
 
   allPaneTargets() {
@@ -37,10 +48,8 @@ export default class extends Controller {
 
   // keyup LEFT on items pane
   backToChannelPane(evt) {
-    this.focusPane(this.channelsPaneTarget);
-
-    const selectedChannel = this.channelsPaneTarget.querySelector('li[data-selected="true"]');
-    selectedChannel.focus();
+    this.focusPane(this.channelsPaneTarget)
+    this.getSelectedChannelListItem().focus()
   }
 
   // keyup RIGHT on channels pane
@@ -113,8 +122,7 @@ export default class extends Controller {
   }
 
   onChangeReadStatus(evt) {
-    const channelId = evt.target.dataset['channel'];
-    const li = this.channelsPaneTarget.querySelector('li[data-channel="'+ channelId +'"]');
+    const li = this.getChannelListItemById(evt.target.dataset['channel']);
     const turboFrame = li.querySelector('turbo-frame');
     if (turboFrame) {
       new RefreshChannelDelegator(
@@ -124,12 +132,39 @@ export default class extends Controller {
     }
   }
 
+  onChangeSelectedChannelListItem(evt) {
+    const li = evt.detail.selected
+    this.#resetEditChannelLinkByChannelListItem(li);
+  }
+
+  #resetEditChannelLinkByChannelListItem(li) {
+    let settingHref = null;
+    if (li) {
+      const urlEdit = li.dataset['urlEdit']
+      if (urlEdit) {
+         settingHref = urlEdit;
+      }
+    }
+    this.#resetEditChannelLinkHref(settingHref)
+  }
+
+  #resetEditChannelLinkHref(settingHref) {
+    if (settingHref == null) {
+      this.linkEditChannelTarget.href = '#'
+      this.linkEditChannelTarget.dataset['disabled'] = true
+    }
+    else {
+      this.linkEditChannelTarget.href = settingHref
+      this.linkEditChannelTarget.dataset['disabled'] = false
+    }
+  }
+
   onConnectItems(evt) {
     this.clearContentsPane();
   }
 
   onEmptyTrash(evt) {
-    const selectedChannel = this.channelsPaneTarget.querySelector('li[data-selected="true"]');
+    const selectedChannel = this.getSelectedChannelListItem();
     if (selectedChannel && selectedChannel.id == 'trash') {
       this.clearContentsPane();
       this.clearItemsPane();

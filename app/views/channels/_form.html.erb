@@ -36,6 +36,21 @@
     <%= form.text_field :url, class: 'input-text' %>
   </div>
 
+  <div>
+    <%= form.label :favicon, class: 'block text-sm' %>
+    <%= form.file_field :favicon, multiple: false, class: 'block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100' %>
+    <div>
+      <% if form.object.favicon.attached? %>
+        <%= image_tag form.object.favicon, width: 16, height: 16, class: 'inline' %>
+
+        <%= form.check_box :remove_favicon %>
+        <%= form.label :remove_favicon, "Remove favicon" %>
+      <% else %>
+        (no favicon)
+      <% end %>
+    </div>
+  </div>
+
   <div class="my-4">
     <%= form.submit nil, class: 'button-notice' %>
   </div>

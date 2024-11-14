@@ -41,7 +41,16 @@ class ChannelsController < ApplicationController
 
   # PATCH/PUT /channels/1
   def update
+    purge_after_update = @channel.favicon.attached? && params[:channel][:remove_favicon] == "1"
+
+    # avoid warning "Unpermitted parameter"
+    params[:channel].delete(:remove_favicon)
+
     if @channel.update(channel_params)
+      if purge_after_update
+        @channel.favicon.purge_later
+      end
+
       redirect_to @channel, notice: "Channel was successfully updated.", status: :see_other
     else
       render :edit, status: :unprocessable_entity
@@ -72,6 +81,6 @@ class ChannelsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def channel_params
-      params.require(:channel).permit(:title, :src, :description, :last_build_date, :url)
+      params.require(:channel).permit(:title, :src, :description, :last_build_date, :url, :favicon)
     end
 end

@@ -24,7 +24,7 @@
       ) %>
 
       <div class="relative z-20 w-full max-w-2xl max-h-screen overflow-y-auto bg-white shadow-lg rounded-md p-8">
-        <h2>Created channel</h2>
+        <h2><%= @channel.created? ? 'Created' : 'Updated' %> channel</h2>
 
         <%= turbo_frame_tag dom_id(@channel) do %>
           <%= render @channel %>

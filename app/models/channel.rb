@@ -1,5 +1,6 @@
 class Channel < ApplicationRecord
   has_many :items, dependent: :delete_all
+  has_one_attached :favicon
 
   validates :title, presence: true
   validates :src, presence: true
@@ -26,5 +27,9 @@ class Channel < ApplicationRecord
     end
 
     rel.length
+  end
+
+  def created?
+    updated_at == created_at
   end
 end
