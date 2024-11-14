@@ -55,6 +55,7 @@
         data-url-destroy="<%= channel_path(channel) %>"
         data-text-for-confirm-destroy="Are you sure you want to delete this channel?"
         data-url-refresh="<%= fetch_channel_path(channel, short: true) %>"
+        data-url-edit="<%= edit_channel_path(channel) %>"
       >
         <div class="container overflow-hidden text-nowrap text-xs">
           <a href="<%= channel_items_path(channel) %>"

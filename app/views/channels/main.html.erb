@@ -26,11 +26,25 @@
     </div>
 
     <div class="mx-2">
-      <%= link_to 'New channel', new_channel_path, 'data-turbo-frame' => 'modal' %>
+      <%=
+        link_to('New channel', new_channel_path,
+          'data-turbo-frame' => 'modal',
+          'class' => 'px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-green-600 border border-transparent rounded-md active:bg-green-600 hover:bg-green-700 focus:outline-none focus:shadow-outline-green inline-block hover:text-white'
+        )
+      %>
+    </div>
+    <div class="mx-2">
+      <%=
+        link_to('Edit channel', '#',
+          'data-turbo-frame' => 'modal',
+          'data-pane-focus-target' => 'linkEditChannel',
+          'class' => 'px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-green-600 border border-transparent rounded-md active:bg-green-600 hover:bg-green-700 focus:outline-none focus:shadow-outline-green inline-block hover:text-white data-[disabled=true]:bg-gray-400',
+        )
+      %>
     </div>
 
     <div class="mx-2">
-      <button class="px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-blue-300 border border-transparent rounded-md active:bg-blue-300 hover:bg-blue-400 focus:outline-none focus:shadow-outline-blue"
+      <button class="px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-orange-300 border border-transparent rounded-md active:bg-orange-300 hover:bg-orange-400 focus:outline-none focus:shadow-outline-orange"
         data-controller="trash"
         data-action="
           click->trash#confirmEmptyTrash
@@ -56,6 +70,7 @@
         keydown.space->pane-focus#forwardToUnreadItemPane:prevent
         keydown.up->pane-focus#selectPrevItem:prevent
         keydown.down->pane-focus#selectNextItem:prevent
+        changeSelectedLi->pane-focus#onChangeSelectedChannelListItem
       "
     >
       <div class="flex-1 bg-blue-100 overflow-y-auto overflow-x-hidden pt-2">

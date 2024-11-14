@@ -28,4 +28,8 @@ class Channel < ApplicationRecord
 
     rel.length
   end
+
+  def created?
+    updated_at == created_at
+  end
 end
