@@ -4,6 +4,7 @@
       <li id="<%= dom_id item %>" tabindex="0" class="container even:bg-gray-100 focus:outline-none"
         data-action="
           keydown.enter->items#openUrl
+          keydown.enter->items#handlerMakeItemRead
           keydown.space->items#handlerMakeItemRead:prevent
           keydown.space->items#selectUnreadItem:prevent
           keydown.backspace->items#deleteItem
