@@ -6,5 +6,12 @@
 </header>
 <hr>
 <div class="contaner">
-  <%= sanitize(item.description, tags: ['img', 'p', 'br', 'div'], attributes: ['src']).gsub(/\n|\r|\r\n/, '<br>').html_safe %>
+  <%=
+    sanitize(item.description,
+      tags: ['img', 'p', 'br', 'div', 'pre', 'code', 'h1', 'h2', 'h3'],
+      attributes: ['src'],
+    )
+    .gsub(/\n|\r|\r\n/, '<br>')
+    .html_safe
+  %>
 </div>
