@@ -34,7 +34,7 @@ export default class extends SelectedLiBaseController {
       const contentsPane = document.getElementById('contents-pane');
       const maxScroll = contentsPane.scrollHeight - contentsPane.clientHeight;
       if (contentsPane.scrollTop + 1 < maxScroll) {
-        contentsPane.scrollBy({top: contentsPane.clientHeight, behavior: 'smooth'});
+        contentsPane.scrollBy({top: contentsPane.clientHeight, behavior: 'auto'});
         return false;
       }
     }
