@@ -60,12 +60,12 @@
 
 @layer utilities {
   /* フォーカスされたペイン内の <li> に対する濃いハイライト */
-  [data-pane-focus-target="pane"].focused [data-selected="true"] {
+  [data-pane-focus-target].focused [data-selected="true"] {
     @apply bg-gray-500 text-white;
   }
 
   /* 非フォーカスペイン内の <li> に対する薄いハイライト */
-  [data-pane-focus-target="pane"]:not(.focused) [data-selected="true"] {
+  [data-pane-focus-target]:not(.focused) [data-selected="true"] {
     @apply bg-gray-300;
   }
 }

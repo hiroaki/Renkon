@@ -1,20 +1,29 @@
 import { Controller } from "@hotwired/stimulus"
-import { clearContentsPane } from 'lib/schema'
 
 export default class extends Controller {
-  static targets = ['movablePane'];
+  static targets = ['adjustable'];
   static values = {
     storageKey: String
   };
 
+  static EMPTY_IMAGE_ID = '__workaroundDisappearingDragImage__';
+
   connect() {
-    console.info('frame_controller');
+    // ストレージのキーを変更したため、古い名前があれば消します。
+    // TODO: あとで消す
+    localStorage.removeItem('channels-pane');
+    localStorage.removeItem('items-pane');
+    localStorage.removeItem('channelsPane');
+    localStorage.removeItem('itemsPane');
+
+    this.reset();
   }
 
   initialize() {
-    console.log('initialize frame_controller');
+    // NOTE: これよりのちのタイミングでは this.constructor の this が他のコンテキストを指す可能性があるため、
+    // この最初の時点で定数のコピーを保持しておきます
+    this.emptyImageId = this.constructor.EMPTY_IMAGE_ID;
     this.workaroundDisappearingDragImage();
-    this.reset();
   }
 
   // 特定のペインのサイズ幅をコントロールできるように、ドラッグ可能な DIV を設けていますが、これをドラッグする際、
@@ -29,13 +38,22 @@ export default class extends Controller {
   // ただし、レイアウトに影響が出ないようにするにはサイズを 0px にしたいところですが、そうするとドラッグイメージが表示されず？
   // "妙な挙動" が再現してしまうため、それを避けるために style の値を工夫しています。
   workaroundDisappearingDragImage() {
-    this.emptyImage = new Image();
-    this.emptyImage.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==';
+    if (!!this.getEmptyImage()) {
+      return;
+    }
+
+    const emptyImage = new Image();
+    emptyImage.id = this.emptyImageId;
+    emptyImage.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==';
 
     const div = document.createElement('div');
     div.setAttribute('style', 'height: 0px; width: 1px; position: absolute; display: block; overflow: hidden');
-    div.append(this.emptyImage);
+    div.append(emptyImage);
     document.body.append(div);
+  }
+
+  getEmptyImage() {
+    return document.getElementById(this.emptyImageId)
   }
 
   storeWidth(storageKey, value) {
@@ -54,18 +72,18 @@ export default class extends Controller {
 
     const width = this.restoreWidth(this.storageKeyValue);
     if (width) {
-      this.movablePaneTarget.style.width = parseInt(width) + 'px';
+      this.adjustableTarget.style.width = parseInt(width) + 'px';
     }
   }
 
   handlerDragStart(evt) {
     this.start_x = evt.x;
-    this.start_width = this.movablePaneTarget.offsetWidth;
-    evt.dataTransfer.setDragImage(this.emptyImage, 4, 4);
+    this.start_width = this.adjustableTarget.offsetWidth;
+    evt.dataTransfer.setDragImage(this.getEmptyImage(), 4, 4);
   }
 
   handlerDrag(evt) {
-    // WORKAROUND:  drag を終了して dragend になる最後の drag イベントの evt.x が 0 になります（なぜ？バグ？）
+    // WORKAROUND: Chrome: drag を終了して dragend になる最後の drag イベントの evt.x が 0 になります（なぜ？バグ？）
     // このことから、 evt.x == 0 は無視します。
     // ちなみに dragend 時の evt.x は 0 ではなく、ちゃんとした位置になっています。
     if (evt.x != 0) {
@@ -79,17 +97,13 @@ export default class extends Controller {
   }
 
   handlerDragEnd(evt) {
-    this.storeWidth(this.storageKeyValue, this.movablePaneTarget.offsetWidth);
+    this.storeWidth(this.storageKeyValue, this.adjustableTarget.offsetWidth);
     this.reset();
   }
 
   updateWidthOfTarget(delta_x) {
     const new_width = this.start_width + delta_x;
     // console.log("new_width="+ new_width, this)
-    this.movablePaneTarget.style.width = parseInt(new_width) +'px'
-  }
-
-  handlerBeforeFrameRenderItems(evt) {
-    clearContentsPane();
+    this.adjustableTarget.style.width = parseInt(new_width) +'px'
   }
 }

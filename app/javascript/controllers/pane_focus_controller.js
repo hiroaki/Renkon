@@ -1,41 +1,67 @@
 import { Controller } from "@hotwired/stimulus";
 import TurboFrameDelegator from "lib/turbo_frame_delegator"
+import { getCsrfToken } from 'lib/schema'
 
 class RefreshChannelDelegator extends TurboFrameDelegator {
+  // override
+  prepareRequest(request) {
+    super.prepareRequest(request)
+    console.log('request', request)
+
+    if (!request.isSafe) {
+      const token = getCsrfToken()
+      if (token) {
+        request.headers['X-CSRF-Token'] = token
+      }
+    }
+  }
 }
 
 export default class extends Controller {
-  static targets = ['pane'];
+  static targets = ['channelsPane', 'itemsPane', 'contentsPane', 'linkEditChannel'];
 
   connect() {
-    this.paneTargets.forEach((pane) => {
+    this.allPaneTargets().forEach((pane) => {
       pane.addEventListener('click', () => this.focusPane(pane));
     });
+
+    // initialize state for Edit channel button
+    this.#resetEditChannelLinkByChannelListItem(this.getSelectedChannelListItem())
+  }
+
+  getSelectedChannelListItem() {
+    return this.channelsPaneTarget.querySelector('li[data-selected="true"]');
+  }
+
+  getChannelListItemById(channelId) {
+    return this.channelsPaneTarget.querySelector('li[data-channel="'+ channelId +'"]');
+  }
+
+  allPaneTargets() {
+    return [this.channelsPaneTarget, this.itemsPaneTarget, this.contentsPaneTarget]
   }
 
   focusPane(pane) {
-    this.paneTargets.forEach((pane) => pane.classList.remove('focused'));
+    this.allPaneTargets().forEach((pane) => pane.classList.remove('focused'));
     pane.classList.add('focused');
   }
 
   // keyup LEFT on items pane
   backToChannelPane(evt) {
-    this.focusPane(this.paneTargets[0]);
-
-    const selectedChannel = document.getElementById('channels').querySelector('li[data-selected="true"]');
-    selectedChannel.focus();
+    this.focusPane(this.channelsPaneTarget)
+    this.getSelectedChannelListItem().focus()
   }
 
   // keyup RIGHT on channels pane
   forwardToItemPane(evt) {
-    this.focusPane(this.paneTargets[1]);
+    this.focusPane(this.itemsPaneTarget);
 
-    const selectedItems = document.getElementById('items').querySelectorAll('li[data-selected="true"]');
+    const selectedItems = this.itemsPaneTarget.querySelectorAll('li[data-selected="true"]');
     if (0 < selectedItems.length) {
       selectedItems.item(selectedItems.length - 1).focus();
     }
     else {
-      const li = document.getElementById('items').querySelectorAll('li').item(0);
+      const li = this.itemsPaneTarget.querySelectorAll('li').item(0);
       if (li) {
         li.closest('ul').items.enterItem(li);
       }
@@ -44,9 +70,9 @@ export default class extends Controller {
 
   // keyup SPACE on channels pane
   forwardToUnreadItemPane(evt) {
-    this.focusPane(this.paneTargets[1]);
+    this.focusPane(this.itemsPaneTarget);
 
-    const items = document.getElementById('items').querySelectorAll('li');
+    const items = this.itemsPaneTarget.querySelectorAll('li');
     let pos = -1;
     for (let i = 0; i < items.length; ++i) {
       if (items[i] == evt.currentTarget) {
@@ -96,15 +122,60 @@ export default class extends Controller {
   }
 
   onChangeReadStatus(evt) {
-    const channelId = evt.target.dataset['channel'];
-    const targetChannel = document.getElementById('channels').querySelector('li[data-channel="'+ channelId +'"]');
+    const li = this.getChannelListItemById(evt.target.dataset['channel']);
+    const turboFrame = li.querySelector('turbo-frame');
+    if (turboFrame) {
+      new RefreshChannelDelegator(
+        li.dataset['urlRefresh'], 'PATCH', turboFrame.id, new URLSearchParams({short: true, dry_run: true})
+      )
+      .perform();
+    }
+  }
 
-    const channel_frame = targetChannel.querySelector('turbo-frame');
-    const url_for_refresh = channel_frame.dataset['urlForRefresh'];
-    const method = channel_frame.dataset['method'];
-    const frame_id = channel_frame.id
+  onChangeSelectedChannelListItem(evt) {
+    const li = evt.detail.selected
+    this.#resetEditChannelLinkByChannelListItem(li);
+  }
 
-    console.log('onChangeReadStatus requests: '+ url_for_refresh);
-    new RefreshChannelDelegator(url_for_refresh, method, frame_id, new URLSearchParams({short: true, dry_run: true})).perform();
+  #resetEditChannelLinkByChannelListItem(li) {
+    let settingHref = null;
+    if (li) {
+      const urlEdit = li.dataset['urlEdit']
+      if (urlEdit) {
+         settingHref = urlEdit;
+      }
+    }
+    this.#resetEditChannelLinkHref(settingHref)
+  }
+
+  #resetEditChannelLinkHref(settingHref) {
+    if (settingHref == null) {
+      this.linkEditChannelTarget.href = '#'
+      this.linkEditChannelTarget.dataset['disabled'] = true
+    }
+    else {
+      this.linkEditChannelTarget.href = settingHref
+      this.linkEditChannelTarget.dataset['disabled'] = false
+    }
+  }
+
+  onConnectItems(evt) {
+    this.clearContentsPane();
+  }
+
+  onEmptyTrash(evt) {
+    const selectedChannel = this.getSelectedChannelListItem();
+    if (selectedChannel && selectedChannel.id == 'trash') {
+      this.clearContentsPane();
+      this.clearItemsPane();
+    }
+  }
+
+  clearItemsPane() {
+    this.itemsPaneTarget.querySelector('turbo-frame#items').innerHTML = '';
+  }
+
+  clearContentsPane() {
+    this.contentsPaneTarget.querySelector('turbo-frame#contents').innerHTML = '';
   }
 }

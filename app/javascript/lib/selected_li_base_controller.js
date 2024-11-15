@@ -10,16 +10,28 @@ export default class extends Controller {
 
   // A tag click
   changeSelected(evt) {
-    this.updateListSelectionStatus(evt.currentTarget);
+    const li = this.#updateListSelectionStatus(evt.currentTarget);
+
+    const event = new CustomEvent('changeSelectedLi', {
+      detail: { message: 'Hello from custom event!', selected: li },
+      bubbles: true,
+    });
+
+    this.element.dispatchEvent(event);
   }
 
-  updateListSelectionStatus(aTag) {
+  #updateListSelectionStatus(aTag) {
+    let newSelectedLi = null;
+
     this.itemTargets.forEach(li => {
       delete li.dataset.selected;
       if (li.contains(aTag)) {
         li.dataset.selected = 'true';
+        newSelectedLi = li;
       }
     });
+
+    return newSelectedLi;
   }
 
   // LI tag selected
@@ -62,7 +74,7 @@ export default class extends Controller {
 
   // ENTER key from selected LI tag
   openUrl(evt) {
-    window.open(evt.currentTarget.dataset.url, '_blank', 'noreferrer');
+    window.open(evt.currentTarget.dataset.urlSource, '_blank', 'noopener noreferrer');
   }
 
   enterItem(li) {

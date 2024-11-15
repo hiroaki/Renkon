@@ -1,4 +1,5 @@
 import SelectedLiBaseController from "lib/selected_li_base_controller"
+import { getCsrfToken } from 'lib/schema'
 
 export default class extends SelectedLiBaseController {
   confirmDestroy(evt) {
@@ -15,9 +16,7 @@ export default class extends SelectedLiBaseController {
 
     return fetch(url, {
       method: 'DELETE',
-      headers: {
-        'X-CSRF-Token': document.querySelector('meta[name=csrf-token]').content
-      }
+      headers: { 'X-CSRF-Token': getCsrfToken() }
     })
     .then(response => {
       if (response.ok) {

@@ -1,28 +1,20 @@
-<div class="flex flex-col h-full"
-  data-controller="scroll"
-  data-action="
-    keydown.up->scroll#cancelWindowScrolling
-    keydown.down->scroll#cancelWindowScrolling
-    keydown.space->scroll#cancelWindowScrolling
-  "
->
+<div class="flex flex-col h-full">
   <ul class="container" data-controller="items">
     <% @items.each do |item| %>
       <li id="<%= dom_id item %>" tabindex="0" class="container even:bg-gray-100 focus:outline-none"
         data-action="
-          keyup.up->items#selectPrevItem:stop
-          keyup.down->items#selectNextItem:stop
-          keyup.enter->items#openUrl
-          keyup.space->items#handlerMakeItemRead
-          keyup.space->items#selectUnreadItem
-          keyup.backspace->items#deleteItem
-          keyup.backspace->items#selectNextItem
+          keydown.enter->items#openUrl
+          keydown.enter->items#handlerMakeItemRead
+          keydown.space->items#handlerMakeItemRead:prevent
+          keydown.space->items#selectUnreadItem:prevent
+          keydown.backspace->items#deleteItem
+          keydown.backspace->items#selectNextItem
           dblclick->items#openUrl
           dblclick->items#handlerMakeItemRead
         "
         data-channel="<%= item.channel_id %>"
         data-items-target="item"
-        data-url="<%= item.url %>"
+        data-url-source="<%= item.url %>"
         data-unread="<%= item.unread? ? 'true' : 'false' %>"
         data-url-read="<%= read_channel_item_path(item.channel, item) %>"
         data-url-unread="<%= unread_channel_item_path(item.channel, item) %>"
