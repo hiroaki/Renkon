@@ -1,23 +1,22 @@
 # Renkon レンコン
 
-Renkon is a simple RSS reader. This project is being undertaken as my own Rails practice, and is basically not of a quality that can be offered to everyone.
+Renkon is a simple RSS reader. This project is being developed as my personal practice with Rails and is not of a quality that is suitable for general use.
 
-Renkon はシンプルな RSS リーダーです。このプロジェクトは私自身の Rails の練習として取り掛かっているもので、基本的には万人に提供できる品質のものではありません。
+Renkon はシンプルな RSS リーダーです。このプロジェクトは Rails を使うことの個人的な練習として開発しているもので、一般的な利用に適した品質ではありません。
 
 
 ## Requirements 要件
 
-SQLite3 is used for the database. Other than that, there is nothing special, but we are aware of the latest version of Ruby.
+SQLite3 is used for the database. Aside from that, there’s nothing particularly special.
 
-データベースには SQLite3 を用います。そのほかは特にありませんが、 Ruby は最新版を意識しています。
+データベースには SQLite3 が使われています。それ以外は特に特別なことはありません。
 
 
 ## Usage 使い方
 
-It is just a web server, so start it with `rails s` and access the top page with your browser.
+It’s just a web server, so start it with `rails s` and open the top page in your browser.
 
 ただの Web サーバですので、 `rails s` で起動し、ブラウザーでトップページにアクセスしてください。
-
 
 
 ## License ライセンス
