@@ -25,6 +25,16 @@ export default class extends SelectedLiBaseController {
     })
     .then(response => {
       if (response.ok) {
+        // 選択状態であった <li> を remove するので、選択状態がなくなった（変化した）ことを通知します。
+        // イベントを dispatch する要素 li を先に remove してしまうと通知できなくなるため、
+        // イベントを通知してから削除してます。
+        // 他の（上層の）要素で dispatch して通知を送ればよいのですが、
+        // どの要素が適切かの見極めができていないため、とりあえずの処置です。
+        const event = new CustomEvent('changeSelectedLi', {
+          detail: { selected: null },
+          bubbles: true,
+        });
+        li.dispatchEvent(event);
         li.remove();
       }
       else {
