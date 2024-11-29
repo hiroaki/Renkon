@@ -1,17 +1,19 @@
 <div class="flex flex-col h-full">
-  <ul class="container" data-controller="items">
+  <ul class="container"
+    data-controller="items"
+    data-action="
+      keydown.enter->items#openUrl
+      keydown.enter->items#handlerMakeItemRead
+      keydown.space->items#handlerMakeItemRead:prevent
+      keydown.space->items#selectUnreadItem:prevent
+      keydown.backspace->items#deleteItem
+      keydown.backspace->items#selectNextItem
+      dblclick->items#openUrl
+      dblclick->items#handlerMakeItemRead
+    "
+  >
     <% @items.each do |item| %>
       <li id="<%= dom_id item %>" tabindex="0" class="container even:bg-gray-100 focus:outline-none"
-        data-action="
-          keydown.enter->items#openUrl
-          keydown.enter->items#handlerMakeItemRead
-          keydown.space->items#handlerMakeItemRead:prevent
-          keydown.space->items#selectUnreadItem:prevent
-          keydown.backspace->items#deleteItem
-          keydown.backspace->items#selectNextItem
-          dblclick->items#openUrl
-          dblclick->items#handlerMakeItemRead
-        "
         data-channel="<%= item.channel_id %>"
         data-items-target="item"
         data-url-source="<%= item.url %>"

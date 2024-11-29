@@ -17,13 +17,14 @@ export default class extends SelectedLiBaseController {
   }
 
   selectUnreadItem(evt) {
+    const li = this.detectLiFrom(evt.target)
     const items = document.getElementById('items').querySelectorAll('li');
 
     // items ペイン上からこのイベントが発生している場合は、
     // 現在の選択位置以降から未読を探すようにします（ channels ペインでは先頭から）
     let pos = -1;
     for (let i = 0; i < items.length; ++i) {
-      if (items[i] == evt.currentTarget) {
+      if (items[i] == li) {
         pos = i;
         break;
       }
@@ -49,7 +50,7 @@ export default class extends SelectedLiBaseController {
 
   //
   handlerMakeItemRead(evt) {
-    const li = evt.currentTarget;
+    const li = this.detectLiFrom(evt.target)
 
     if (li.dataset['unread'] == 'true') {
       const targetElement = li.querySelector('button');
@@ -114,7 +115,7 @@ export default class extends SelectedLiBaseController {
   //
   deleteItem(evt) {
     const me = this;
-    const li = evt.currentTarget;
+    const li = this.detectLiFrom(evt.target);
     const url = li.dataset['urlDisable'];
 
     return fetch(url, {
