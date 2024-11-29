@@ -8,7 +8,6 @@ export default class extends Controller {
     this.element['selectedLi'] = this;
   }
 
-  // A tag click
   changeSelected(evt) {
     const li = this.#updateListSelectionStatus(evt.currentTarget);
 
@@ -34,7 +33,6 @@ export default class extends Controller {
     return newSelectedLi;
   }
 
-  // LI tag selected
   selectPrevItem(evt) {
     this.selectPrevLi(evt.currentTarget);
   }
@@ -53,9 +51,9 @@ export default class extends Controller {
     }
   }
 
-  // LI tag selected
   selectNextItem(evt) {
-    this.selectNextLi(evt.currentTarget);
+    const li = this.detectLiFrom(evt.target)
+    this.selectNextLi(li);
   }
 
   selectNextLi(li) {
@@ -72,9 +70,9 @@ export default class extends Controller {
     }
   }
 
-  // ENTER key from selected LI tag
   openUrl(evt) {
-    window.open(evt.currentTarget.dataset.urlSource, '_blank', 'noopener noreferrer');
+    const li = this.detectLiFrom(evt.target)
+    window.open(li.dataset.urlSource, '_blank', 'noopener noreferrer')
   }
 
   enterItem(li) {
@@ -99,5 +97,9 @@ export default class extends Controller {
     if (lastSelected) {
       lastSelected.focus({ preventScroll: true, focusVisible: false });
     }
+  }
+
+  detectLiFrom(elem) {
+    return elem.closest('li')
   }
 }
