@@ -74,7 +74,8 @@ export default class extends Controller {
 
   // ENTER key from selected LI tag
   openUrl(evt) {
-    window.open(evt.currentTarget.dataset.urlSource, '_blank', 'noopener noreferrer');
+    const li = this.detectLiFrom(evt.target)
+    window.open(li.dataset.urlSource, '_blank', 'noopener noreferrer')
   }
 
   enterItem(li) {
@@ -99,5 +100,9 @@ export default class extends Controller {
     if (lastSelected) {
       lastSelected.focus({ preventScroll: true, focusVisible: false });
     }
+  }
+
+  detectLiFrom(elem) {
+    return elem.closest('li')
   }
 }
