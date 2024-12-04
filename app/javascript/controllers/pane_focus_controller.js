@@ -37,6 +37,7 @@ export default class extends Controller {
     return this.channelsPaneTarget.querySelector('li[data-channel="'+ channelId +'"]');
   }
 
+  // 何らかのアクションが発生する要素が存在する pane の全てのリスト
   allPaneTargets() {
     return [this.navigationPaneTarget, this.channelsPaneTarget, this.itemsPaneTarget, this.contentsPaneTarget]
   }

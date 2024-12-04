@@ -10,8 +10,9 @@
 
 <%= turbo_frame_tag 'channels' do %>
 <div class="flex flex-col h-full">
-  <ul class="container" data-controller="channels"
+  <ul class="container h-full" tabindex="-1" data-controller="channels"
     data-action="
+      click->channels#focusLastSelectedLi
       keydown.enter->channels#openUrl
       dblclick->channels#openUrl
       keydown.backspace->channels#confirmDestroy

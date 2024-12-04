@@ -72,7 +72,19 @@ export default class extends Controller {
 
   openUrl(evt) {
     const li = this.detectLiFrom(evt.target)
-    window.open(li.dataset.urlSource, '_blank', 'noopener noreferrer')
+    if (li) {
+      window.open(li.dataset.urlSource, '_blank', 'noopener noreferrer')
+    } else {
+      // このブロックへ来るのは、たとえばイベントをリッスンしている <ul> の中で発生したイベントであるも、
+      // <li> の上ではない部分（いわゆる余白部分）で発生したとき。
+      // ただし <ul> に class="h-full" などで高さを確保しておかないと、
+      // <ul> はすべての <li> のサイズに（コンパクトに）なるので余白部分がない状態になり、
+      // 見た目の余白部分でキーイベントのイベントが発生しなくなります。
+      // 見た目の選択状態との兼ね合いに注意してください。
+      // 現状は、余白をクリックしたあと、ある <li> が選択状態であれば、
+      // キー Enter イベントは #open を実行し、またダブルクリックは実行せずにこのブロックへ来るようにしています。
+      console.warn('<li> was undetected from the event target')
+    }
   }
 
   enterItem(li) {
