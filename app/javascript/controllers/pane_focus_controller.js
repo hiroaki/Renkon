@@ -18,7 +18,7 @@ class RefreshChannelDelegator extends TurboFrameDelegator {
 }
 
 export default class extends Controller {
-  static targets = ['channelsPane', 'itemsPane', 'contentsPane', 'linkEditChannel'];
+  static targets = ['navigationPane', 'channelsPane', 'itemsPane', 'contentsPane', 'linkEditChannel'];
 
   connect() {
     this.allPaneTargets().forEach((pane) => {
@@ -38,7 +38,7 @@ export default class extends Controller {
   }
 
   allPaneTargets() {
-    return [this.channelsPaneTarget, this.itemsPaneTarget, this.contentsPaneTarget]
+    return [this.navigationPaneTarget, this.channelsPaneTarget, this.itemsPaneTarget, this.contentsPaneTarget]
   }
 
   focusPane(pane) {
