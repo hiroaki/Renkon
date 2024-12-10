@@ -8,15 +8,17 @@ export default class extends Controller {
     this.element['selectedLi'] = this;
   }
 
-  changeSelected(evt) {
-    const li = this.#updateListSelectionStatus(evt.currentTarget);
-
+  fireChangeSelectedLiEvent(elem, newSelectedLi) {
     const event = new CustomEvent('changeSelectedLi', {
-      detail: { message: 'Hello from custom event!', selected: li },
+      detail: { selected: newSelectedLi },
       bubbles: true,
     });
 
-    this.element.dispatchEvent(event);
+    elem.dispatchEvent(event);
+  }
+
+  changeSelected(evt) {
+    this.fireChangeSelectedLiEvent(this.element, this.#updateListSelectionStatus(evt.currentTarget));
   }
 
   #updateListSelectionStatus(aTag) {

@@ -1,5 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 import { getCsrfToken } from 'lib/schema'
+import { fireEmptyTrashEvent } from 'lib/pane_focus_events'
 
 export default class extends Controller {
   //
@@ -31,11 +32,6 @@ export default class extends Controller {
   }
 
   fireEmptyTrash() {
-    console.log("create emptyTrash event")
-    const event = new CustomEvent('emptyTrash', {
-      detail: { message: 'Hello from custom event!' },
-      bubbles: true,
-    });
-    this.element.dispatchEvent(event);
+    fireEmptyTrashEvent(this.element)
   }
 }

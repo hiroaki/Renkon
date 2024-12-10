@@ -1,5 +1,6 @@
 import SelectedLiBaseController from "lib/selected_li_base_controller"
 import { getCsrfToken } from 'lib/schema'
+import { fireConnectItemsEvent, fireChangeReadStatusEvent } from 'lib/pane_focus_events'
 
 export default class extends SelectedLiBaseController {
   connect() {
@@ -9,11 +10,7 @@ export default class extends SelectedLiBaseController {
     // pane-controller に取り除かれたことを検知してもらいたいところですが、
     // disconnect 時この要素は既に無くなっているためここでイベントを作っても、それが伝播しません。
     // 要素が取り除かれたことを祖先要素で検知するには祖先要素の方で MutationObserver の実装を検討してください。
-    const event = new CustomEvent('connectItems', {
-      detail: { message: 'Hello from custom event!' },
-      bubbles: true,
-    });
-    this.element.dispatchEvent(event);
+    fireConnectItemsEvent(this.element)
   }
 
   selectUnreadItem(evt) {
@@ -95,21 +92,13 @@ export default class extends SelectedLiBaseController {
     .then(response => {
       if (response.ok) {
         li.dataset.unread = isUnread ? 'false' : 'true';
-        me.fireChangeReadStatusEvent(li);
+        fireChangeReadStatusEvent(li);
       }
       else {
         console.error('Failed to update read status', response);
       }
     })
     .catch(error => console.error('Error:', error));
-  }
-
-  fireChangeReadStatusEvent(li) {
-    const event = new CustomEvent('changeReadStatus', {
-      detail: { message: 'Hello from custom event!' },
-      bubbles: true,
-    });
-    li.dispatchEvent(event);
   }
 
   //
@@ -124,7 +113,7 @@ export default class extends SelectedLiBaseController {
     })
     .then(response => {
       if (response.ok) {
-        me.fireChangeReadStatusEvent(li);
+        fireChangeReadStatusEvent(li);
         li.remove();
       }
       else {
