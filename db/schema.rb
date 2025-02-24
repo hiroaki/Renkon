@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2024_11_14_110051) do
+ActiveRecord::Schema[8.0].define(version: 2025_02_24_093858) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -49,6 +49,15 @@ ActiveRecord::Schema[8.0].define(version: 2024_11_14_110051) do
     t.string "url"
   end
 
+  create_table "feed_caches", force: :cascade do |t|
+    t.integer "channel_id", null: false
+    t.text "contents"
+    t.datetime "cached_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["channel_id"], name: "index_feed_caches_on_channel_id"
+  end
+
   create_table "items", force: :cascade do |t|
     t.string "title"
     t.string "url"
@@ -72,5 +81,6 @@ ActiveRecord::Schema[8.0].define(version: 2024_11_14_110051) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "feed_caches", "channels"
   add_foreign_key "items", "channels"
 end
