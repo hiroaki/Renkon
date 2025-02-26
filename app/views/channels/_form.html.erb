@@ -48,6 +48,9 @@
       <% else %>
         (no favicon)
       <% end %>
+
+        <%= form.check_box :fetch_favicon %>
+        <%= form.label :fetch_favicon, "Fetch favicon" %>
     </div>
   </div>
 
