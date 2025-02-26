@@ -41,14 +41,21 @@ class ChannelsController < ApplicationController
 
   # PATCH/PUT /channels/1
   def update
-    purge_after_update = @channel.favicon.attached? && params[:channel][:remove_favicon] == "1"
+    purge_after_update = @channel.favicon.attached? && params[:channel][:remove_favicon] == '1'
+    fetch_favicon = params[:channel][:fetch_favicon] == '1'
 
     # avoid warning "Unpermitted parameter"
     params[:channel].delete(:remove_favicon)
+    params[:channel].delete(:fetch_favicon)
 
     if @channel.update(channel_params)
       if purge_after_update
         @channel.favicon.purge_later
+      end
+
+      if fetch_favicon
+        # TODO: purge が後になった場合...
+        fetch_favicon_and_update_for(@channel)
       end
 
       redirect_to @channel, notice: "Channel was successfully updated.", status: :see_other
