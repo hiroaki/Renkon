@@ -1,5 +1,5 @@
-class Channel < ApplicationRecord
-  has_many :items, dependent: :delete_all
+class Subscription < ApplicationRecord
+  has_many :articles, dependent: :delete_all
   has_one_attached :favicon
 
   validates :title, presence: true
@@ -9,19 +9,23 @@ class Channel < ApplicationRecord
     unread = options.fetch(:unread, false)
     as_name = options[:as_name].presence || 'count_items'
 
-    additional_condition = unread ? 'AND items.unread = true' : ''
+    additional_condition = unread ? 'AND articles.unread = true' : ''
 
     self
-      .left_joins(:items)
-      .select("channels.*, COUNT(CASE WHEN items.disabled = false #{additional_condition} THEN 1 END) AS #{sanitize_sql(as_name)}")
+      .left_joins(:articles)
+      .select("channels.*, COUNT(CASE WHEN articles.disabled = false #{additional_condition} THEN 1 END) AS #{sanitize_sql(as_name)}")
       .group('channels.id')
+  end
+
+  def count_articles(options = {})
+    count_items(options)
   end
 
   def count_items(options = {})
     unread = options.fetch(:unread, false)
     as_name = options[:as_name].presence || 'count_items'
 
-    rel = items.where(disabled: false)
+    rel = articles.where(disabled: false)
     if unread
       rel = rel.where(unread: true)
     end
