@@ -2,7 +2,7 @@ import SelectedLiBaseController from 'lib/selected_li_base_controller'
 import { getCsrfToken } from 'lib/schema'
 
 export default class extends SelectedLiBaseController {
-  // Channel の削除処理の前提として、この確認の動作を発動させるイベントに続いて、
+  // Subscription の削除処理の前提として、この確認の動作を発動させるイベントに続いて、
   // 実際の destroy の処理へ進むイベントが、連続して仕込まれていることが期待されています。
   // その前提のもと、 confirm が No を返したときは、 destroy へ進むことをキャンセルするために
   // stopImmediatePropagation を呼び出すことにしています。
@@ -14,8 +14,8 @@ export default class extends SelectedLiBaseController {
     }
   }
 
-  // Channel の削除処理をリクエストします。
-  destroyChannel(evt) {
+  // Subscription の削除処理をリクエストします。
+  destroySubscription(evt) {
     const li = this.detectLiFrom(evt.target)
     const url = li.dataset['urlDestroy'];
 
@@ -38,7 +38,7 @@ export default class extends SelectedLiBaseController {
         li.remove();
       }
       else {
-        console.error('Failed to delete the channel', response);
+        console.error('Failed to delete the subscription', response);
       }
     })
     .catch(error => console.error('Error:', error));

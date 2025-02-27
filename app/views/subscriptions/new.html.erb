@@ -1,7 +1,7 @@
-<% form = capture { render "form", channel: @channel } %>
+<% form = capture { render "form", subscription: @subscription } %>
 
 <% unless turbo_frame_request? %>
-  <h2>Editing channel</h2>
+  <h2>New subscription</h2>
 
   <%= form %>
 <% else %>
@@ -21,7 +21,7 @@
       ) %>
 
       <div class="relative z-20 w-full max-w-2xl max-h-screen overflow-y-auto bg-white shadow-lg rounded-md p-8">
-        <h2>Editing channel</h2>
+        <h2>New subscription</h2>
 
         <%= form %>
 
@@ -38,7 +38,6 @@
 
 <hr>
 
-<div class="container">
-  <%= link_to "Show this channel", @channel %> |
-  <%= link_to "Back to channels", channels_path %>
+<div class="contaner">
+  <%= link_to "Back to subscriptions", subscriptions_path %>
 </div>

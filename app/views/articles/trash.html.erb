@@ -1,0 +1,13 @@
+<header class="contaner">
+  <h2>Disabled article</h2>
+</header>
+
+<nav class="container">
+  <%= link_to "Back to subscriptions", subscriptions_path %>
+</nav>
+
+<hr>
+
+<%= turbo_frame_tag 'articles' do %>
+  <%= render 'list' %>
+<% end %>

@@ -15,13 +15,13 @@ export default class extends SelectedLiBaseController {
 
   selectUnreadItem(evt) {
     const li = this.detectLiFrom(evt.target)
-    const items = document.getElementById('items').querySelectorAll('li');
+    const articles = document.getElementById('articles').querySelectorAll('li');
 
-    // items ペイン上からこのイベントが発生している場合は、
-    // 現在の選択位置以降から未読を探すようにします（ channels ペインでは先頭から）
+    // articles ペイン上からこのイベントが発生している場合は、
+    // 現在の選択位置以降から未読を探すようにします（ subscriptions ペインでは先頭から）
     let pos = -1;
-    for (let i = 0; i < items.length; ++i) {
-      if (items[i] == li) {
+    for (let i = 0; i < articles.length; ++i) {
+      if (articles[i] == li) {
         pos = i;
         break;
       }
@@ -37,9 +37,9 @@ export default class extends SelectedLiBaseController {
       }
     }
 
-    for (let i = pos + 1; i < items.length; ++i) {
-      if (items[i].dataset['unread'] == 'true') {
-        this.enterItem(items[i]);
+    for (let i = pos + 1; i < articles.length; ++i) {
+      if (articles[i].dataset['unread'] == 'true') {
+        this.enterItem(articles[i]);
         break;
       }
     }

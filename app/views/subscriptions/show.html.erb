@@ -1,10 +1,10 @@
 <% unless turbo_frame_request? %>
   <header class="contaner">
-    <h2>Show channel</h2>
+    <h2>Show subscription</h2>
   </header>
 
-  <%= turbo_frame_tag dom_id(@channel) do %>
-    <%= render @channel %>
+  <%= turbo_frame_tag dom_id(@subscription) do %>
+    <%= render @subscription %>
   <% end %>
 
 <% else %>
@@ -24,10 +24,10 @@
       ) %>
 
       <div class="relative z-20 w-full max-w-2xl max-h-screen overflow-y-auto bg-white shadow-lg rounded-md p-8">
-        <h2><%= @channel.created? ? 'Created' : 'Updated' %> channel</h2>
+        <h2><%= @subscription.created? ? 'Created' : 'Updated' %> subscription</h2>
 
-        <%= turbo_frame_tag dom_id(@channel) do %>
-          <%= render @channel %>
+        <%= turbo_frame_tag dom_id(@subscription) do %>
+          <%= render @subscription %>
         <% end %>
 
         <%= button_tag('Close',
@@ -44,15 +44,15 @@
 <hr>
 
 <p>
-  <%= link_to "Refresh channel", fetch_channel_path(@channel), data: { turbo_method: :patch, turbo_frame: dom_id(@channel) } %> |
-  <%= link_to "items of this channel", channel_items_path(@channel) %>
+  <%= link_to "Refresh subscription", fetch_subscription_path(@subscription), data: { turbo_method: :patch, turbo_frame: dom_id(@subscription) } %> |
+  <%= link_to "articles of this subscription", subscription_articles_path(@subscription) %>
 </p>
 
 <hr>
 
 <div class="contaner">
-  <%= link_to "Edit this channel", edit_channel_path(@channel) %> |
-  <%= link_to "Back to channels", channels_path %>
+  <%= link_to "Edit this subscription", edit_subscription_path(@subscription) %> |
+  <%= link_to "Back to subscriptions", subscriptions_path %>
 
-  <%= button_to "Destroy this channel", @channel, method: :delete, data: { 'turbo-confirm': 'Are you sure?' }, class: 'button-danger' %>
+  <%= button_to "Destroy this subscription", @subscription, method: :delete, data: { 'turbo-confirm': 'Are you sure?' }, class: 'button-danger' %>
 </div>
