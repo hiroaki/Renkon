@@ -51,7 +51,7 @@
     <% @subscriptions.each do |subscription| %>
       <li tabindex="0" class="container focus:outline-none"
         data-subscription="<%= subscription.id %>"
-        data-subscriptions-target="item"
+        data-subscriptions-target="listItem"
         data-url-source="<%= subscription.url %>"
         data-url-destroy="<%= subscription_path(subscription) %>"
         data-text-for-confirm-destroy="Are you sure you want to delete this subscription?<%= "\n#{subscription.title}" %>"

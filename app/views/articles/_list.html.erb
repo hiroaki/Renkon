@@ -15,7 +15,7 @@
     <% @articles.each do |article| %>
       <li id="<%= dom_id article %>" tabindex="0" class="container even:bg-gray-100 focus:outline-none"
         data-subscription="<%= article.subscription_id %>"
-        data-articles-target="item"
+        data-articles-target="listItem"
         data-url-source="<%= article.url %>"
         data-unread="<%= article.unread? ? 'true' : 'false' %>"
         data-url-read="<%= read_subscription_article_path(article.subscription, article) %>"

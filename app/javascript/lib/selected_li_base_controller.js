@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ['item'];
+  static targets = ['listItem'];
 
   connect() {
     this.element[this.identifier] = this;
@@ -24,7 +24,7 @@ export default class extends Controller {
   #updateListSelectionStatus(aTag) {
     let newSelectedLi = null;
 
-    this.itemTargets.forEach(li => {
+    this.listItemTargets.forEach(li => {
       delete li.dataset.selected;
       if (li.contains(aTag)) {
         li.dataset.selected = 'true';
@@ -41,12 +41,12 @@ export default class extends Controller {
 
   selectPrevLi(li) {
     let prev_item = null;
-    const len = this.itemTargets.length;
+    const len = this.listItemTargets.length;
     for (let i = 0; i < len; ++i) {
-      if (this.itemTargets[i] == li) {
+      if (this.listItemTargets[i] == li) {
         prev_item = i - 1;
         if (prev_item != null && 0 <= prev_item) {
-          this.enterItem(this.itemTargets[prev_item]);
+          this.enterItem(this.listItemTargets[prev_item]);
         }
         break;
       }
@@ -60,12 +60,12 @@ export default class extends Controller {
 
   selectNextLi(li) {
     let next_item = null;
-    const len = this.itemTargets.length;
+    const len = this.listItemTargets.length;
     for (let i = 0; i < len; ++i) {
-      if (this.itemTargets[i] == li) {
+      if (this.listItemTargets[i] == li) {
         next_item = i + 1;
         if (next_item != null && next_item < len) {
-          this.enterItem(this.itemTargets[next_item]);
+          this.enterItem(this.listItemTargets[next_item]);
         }
         break;
       }
@@ -102,7 +102,7 @@ export default class extends Controller {
   focusLastSelectedLi() {
     let lastSelected = null;
 
-    this.itemTargets.forEach(li => {
+    this.listItemTargets.forEach(li => {
       if (li.dataset.selected == 'true') {
         lastSelected = li;
       }
