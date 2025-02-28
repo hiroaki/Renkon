@@ -1,0 +1,12 @@
+<header class="contaner">
+  <h2>Editing article</h2>
+</header>
+
+<%= render "form", article: @article %>
+
+<hr>
+
+<div class="container">
+  <%= link_to "Show this article", subscription_article_path(@subscription, @article) %> |
+  <%= link_to "Back to articles", subscription_articles_path(@subscription) %>
+</div>

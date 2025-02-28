@@ -1,64 +1,64 @@
 <header class="contaner">
-  <h2>Show item</h2>
+  <h2>Show article</h2>
 </header>
 
 <turbo-frame id="contents">
   <div id="contents" class="contaner">
-    <%= render @item %>
+    <%= render @article %>
   </div>
 </turbo-frame>
 
 <hr>
 
 <div class="container">
-  <%= link_to 'Edit', edit_channel_item_path(@channel, @item) %> |
+  <%= link_to 'Edit', edit_subscription_article_path(@subscription, @article) %> |
 
   <% read_unread = capture do %>
-    <% if @item.unread? %>
+    <% if @article.unread? %>
       <%=
-        button_to('Mark Read', read_channel_item_path(@channel, @item),
+        button_to('Mark Read', read_subscription_article_path(@subscription, @article),
           method: :patch, data: { 'turbo-confirm': 'Are you sure?' }, class: 'button-notice',
         )
       %>
     <% else %>
       <%=
-        button_to('Mark Unead', unread_channel_item_path(@channel, @item),
+        button_to('Mark Unead', unread_subscription_article_path(@subscription, @article),
           method: :patch, data: { 'turbo-confirm': 'Are you sure?' }, class: 'button-notice',
         )
       %>
     <% end %>
   <% end %>
 
-  <% if @item.disabled? %>
-    <%= link_to 'Back to items', channel_items_path(@channel) %> |
+  <% if @article.disabled? %>
+    <%= link_to 'Back to articles', subscription_articles_path(@subscription) %> |
     <%= link_to 'Back to Trash', trash_path %>
 
     <%= read_unread %>
 
     <%=
       button_to(
-        'Enable', enable_channel_item_path(@channel, @item),
+        'Enable', enable_subscription_article_path(@subscription, @article),
         method: :patch, data: { 'turbo-confirm': 'Are you sure?' }, class: 'button-notice',
       )
     %>
     <%=
       button_to(
-        'Destroy', channel_item_path(@channel, @item),
+        'Destroy', subscription_article_path(@subscription, @article),
         method: :delete, data: { 'turbo-confirm': 'Are you sure?' }, class: 'button-danger',
       )
     %>
   <% else %>
-    <%= link_to 'Back to items', channel_items_path(@channel) %>
+    <%= link_to 'Back to articles', subscription_articles_path(@subscription) %>
 
     <%= read_unread %>
 
     <%=
-      button_to('Disable', disable_channel_item_path(@channel, @item),
+      button_to('Disable', disable_subscription_article_path(@subscription, @article),
         method: :patch, data: { 'turbo-confirm': 'Are you sure?' }, class: 'button-notice',
       )
     %>
     <%=
-      button_to('Destroy', channel_item_path(@channel, @item),
+      button_to('Destroy', subscription_article_path(@subscription, @article),
         method: :delete, data: { 'turbo-confirm': 'Are you sure?' }, class: 'button-danger',
       )
     %>

@@ -26,7 +26,7 @@ export default class extends Controller {
     console.info(`refresh_controller#new: this.concurrencyValue=[${this.concurrencyValue}]`);
   }
 
-  // refresh all channels
+  // refresh all subscriptions
   all() {
     const generateFetchFunction = (urlRefresh, method, frame_id) => {
       return async () => new RefreshChanelsDelegator(urlRefresh, method, frame_id).perform();
@@ -34,7 +34,7 @@ export default class extends Controller {
 
     const que = new Queue(this.concurrencyValue);
 
-    document.getElementById('channels').querySelectorAll('li').forEach(li => {
+    document.getElementById('subscriptions').querySelectorAll('li').forEach(li => {
       const turboFrame = li.querySelector('turbo-frame');
       if (turboFrame) { // "trash" has no turbo-frame
         que.add(
@@ -61,7 +61,7 @@ export default class extends Controller {
 
     const que = new Queue(this.concurrencyValue);
 
-    document.getElementById('channels').querySelectorAll('li').forEach(li => {
+    document.getElementById('subscriptions').querySelectorAll('li').forEach(li => {
       const turboFrame = li.querySelector('turbo-frame');
       if (turboFrame) { // "trash" has no turbo-frame
         que.add(

@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus";
 import TurboFrameDelegator from "lib/turbo_frame_delegator"
 import { getCsrfToken } from 'lib/schema'
 
-class RefreshChannelDelegator extends TurboFrameDelegator {
+class RefreshSubscriptionDelegator extends TurboFrameDelegator {
   // override
   prepareRequest(request) {
     super.prepareRequest(request)
@@ -18,28 +18,28 @@ class RefreshChannelDelegator extends TurboFrameDelegator {
 }
 
 export default class extends Controller {
-  static targets = ['navigationPane', 'channelsPane', 'itemsPane', 'contentsPane', 'linkEditChannel'];
+  static targets = ['navigationPane', 'subscriptionsPane', 'articlesPane', 'contentsPane', 'linkEditSubscription'];
 
   connect() {
     this.allPaneTargets().forEach((pane) => {
       pane.addEventListener('click', () => this.focusPane(pane));
     });
 
-    // initialize state for Edit channel button
-    this.#resetEditChannelLinkByChannelListItem(this.getSelectedChannelListItem())
+    // initialize state for Edit subscription button
+    this.#resetEditSubscriptionLinkBySubscriptionListItem(this.getSelectedSubscriptionListItem())
   }
 
-  getSelectedChannelListItem() {
-    return this.channelsPaneTarget.querySelector('li[data-selected="true"]');
+  getSelectedSubscriptionListItem() {
+    return this.subscriptionsPaneTarget.querySelector('li[data-selected="true"]');
   }
 
-  getChannelListItemById(channelId) {
-    return this.channelsPaneTarget.querySelector('li[data-channel="'+ channelId +'"]');
+  getSubscriptionListItemById(subscriptionId) {
+    return this.subscriptionsPaneTarget.querySelector('li[data-subscription="'+ subscriptionId +'"]');
   }
 
   // 何らかのアクションが発生する要素が存在する pane の全てのリスト
   allPaneTargets() {
-    return [this.navigationPaneTarget, this.channelsPaneTarget, this.itemsPaneTarget, this.contentsPaneTarget]
+    return [this.navigationPaneTarget, this.subscriptionsPaneTarget, this.articlesPaneTarget, this.contentsPaneTarget]
   }
 
   focusPane(pane) {
@@ -47,46 +47,46 @@ export default class extends Controller {
     pane.classList.add('focused');
   }
 
-  // keyup LEFT on items pane
-  backToChannelPane(evt) {
-    this.focusPane(this.channelsPaneTarget)
-    this.getSelectedChannelListItem().focus()
+  // keyup LEFT on articles pane
+  backToSubscriptionPane(evt) {
+    this.focusPane(this.subscriptionsPaneTarget)
+    this.getSelectedSubscriptionListItem().focus()
   }
 
-  // keyup RIGHT on channels pane
+  // keyup RIGHT on subscriptions pane
   forwardToItemPane(evt) {
-    this.focusPane(this.itemsPaneTarget);
+    this.focusPane(this.articlesPaneTarget);
 
-    const selectedItems = this.itemsPaneTarget.querySelectorAll('li[data-selected="true"]');
+    const selectedItems = this.articlesPaneTarget.querySelectorAll('li[data-selected="true"]');
     if (0 < selectedItems.length) {
       selectedItems.item(selectedItems.length - 1).focus();
     }
     else {
-      const li = this.itemsPaneTarget.querySelectorAll('li').item(0);
+      const li = this.articlesPaneTarget.querySelectorAll('li').item(0);
       if (li) {
-        li.closest('ul').items.enterItem(li);
+        li.closest('ul').articles.enterItem(li);
       }
     }
   }
 
-  // keyup SPACE on channels pane
+  // keyup SPACE on subscriptions pane
   forwardToUnreadItemPane(evt) {
-    this.focusPane(this.itemsPaneTarget);
+    this.focusPane(this.articlesPaneTarget);
 
-    const items = this.itemsPaneTarget.querySelectorAll('li');
+    const articles = this.articlesPaneTarget.querySelectorAll('li');
     let pos = -1;
-    for (let i = 0; i < items.length; ++i) {
-      if (items[i] == evt.currentTarget) {
+    for (let i = 0; i < articles.length; ++i) {
+      if (articles[i] == evt.currentTarget) {
         pos = i;
         break;
       }
     }
 
-    for (let i = pos + 1; i < items.length; ++i) {
-      let li = items[i];
+    for (let i = pos + 1; i < articles.length; ++i) {
+      let li = articles[i];
       if (li.dataset['unread'] == 'true') {
-        // call a method of items controller (based selected-li controller)
-        li.closest('ul').items.enterItem(li);
+        // call a method of articles controller (based selected-li controller)
+        li.closest('ul').articles.enterItem(li);
         break;
       }
     }
@@ -123,22 +123,22 @@ export default class extends Controller {
   }
 
   onChangeReadStatus(evt) {
-    const li = this.getChannelListItemById(evt.target.dataset['channel']);
+    const li = this.getSubscriptionListItemById(evt.target.dataset['subscription']);
     const turboFrame = li.querySelector('turbo-frame');
     if (turboFrame) {
-      new RefreshChannelDelegator(
+      new RefreshSubscriptionDelegator(
         li.dataset['urlRefresh'], 'PATCH', turboFrame.id, new URLSearchParams({short: true, dry_run: true})
       )
       .perform();
     }
   }
 
-  onChangeSelectedChannelListItem(evt) {
+  onChangeSelectedSubscriptionListItem(evt) {
     const li = evt.detail.selected
-    this.#resetEditChannelLinkByChannelListItem(li);
+    this.#resetEditSubscriptionLinkBySubscriptionListItem(li);
   }
 
-  #resetEditChannelLinkByChannelListItem(li) {
+  #resetEditSubscriptionLinkBySubscriptionListItem(li) {
     let settingHref = null;
     if (li) {
       const urlEdit = li.dataset['urlEdit']
@@ -146,17 +146,17 @@ export default class extends Controller {
          settingHref = urlEdit;
       }
     }
-    this.#resetEditChannelLinkHref(settingHref)
+    this.#resetEditSubscriptionLinkHref(settingHref)
   }
 
-  #resetEditChannelLinkHref(settingHref) {
+  #resetEditSubscriptionLinkHref(settingHref) {
     if (settingHref == null) {
-      this.linkEditChannelTarget.href = '#'
-      this.linkEditChannelTarget.dataset['disabled'] = true
+      this.linkEditSubscriptionTarget.href = '#'
+      this.linkEditSubscriptionTarget.dataset['disabled'] = true
     }
     else {
-      this.linkEditChannelTarget.href = settingHref
-      this.linkEditChannelTarget.dataset['disabled'] = false
+      this.linkEditSubscriptionTarget.href = settingHref
+      this.linkEditSubscriptionTarget.dataset['disabled'] = false
     }
   }
 
@@ -165,15 +165,15 @@ export default class extends Controller {
   }
 
   onEmptyTrash(evt) {
-    const selectedChannel = this.getSelectedChannelListItem();
-    if (selectedChannel && selectedChannel.id == 'trash') {
+    const selectedSubscription = this.getSelectedSubscriptionListItem();
+    if (selectedSubscription && selectedSubscription.id == 'trash') {
       this.clearContentsPane();
       this.clearItemsPane();
     }
   }
 
   clearItemsPane() {
-    this.itemsPaneTarget.querySelector('turbo-frame#items').innerHTML = '';
+    this.articlesPaneTarget.querySelector('turbo-frame#articles').innerHTML = '';
   }
 
   clearContentsPane() {

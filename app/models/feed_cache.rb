@@ -1,3 +1,3 @@
 class FeedCache < ApplicationRecord
-  belongs_to :channel
+  belongs_to :subscription
 end

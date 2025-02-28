@@ -1,5 +1,5 @@
-class Item < ApplicationRecord
-  belongs_to :channel
+class Article < ApplicationRecord
+  belongs_to :subscription
 
   validates :title, presence: true
   validates :url, presence: true

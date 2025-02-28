@@ -1,13 +1,13 @@
 <header class="contaner mb-4">
-  <h3><%= item.title %></h3>
+  <h3><%= article.title %></h3>
   <div class="contaner text-xs">
-    <%= link_to(item.url, item.url, target: '_blank', rel: 'noopener noreferrer') %>
+    <%= link_to(article.url, article.url, target: '_blank', rel: 'noopener noreferrer') %>
   </div>
 </header>
 <hr>
 <div class="contaner">
   <%=
-    sanitize(item.description,
+    sanitize(article.description,
       tags: ['img', 'p', 'br', 'div', 'pre', 'code', 'h1', 'h2', 'h3'],
       attributes: ['src'],
     )
