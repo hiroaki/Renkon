@@ -17,22 +17,10 @@ export default class extends Controller {
     elem.dispatchEvent(event);
   }
 
-  changeSelected(evt) {
-    this.fireChangeSelectedLiEvent(this.element, this.#updateListSelectionStatus(evt.currentTarget));
-  }
-
-  #updateListSelectionStatus(aTag) {
-    let newSelectedLi = null;
-
-    this.listItemTargets.forEach(li => {
-      delete li.dataset.selected;
-      if (li.contains(aTag)) {
-        li.dataset.selected = 'true';
-        newSelectedLi = li;
-      }
-    });
-
-    return newSelectedLi;
+  // リストアイテムをクリックした時。そのアイテムを「選択状態」にします。
+  handlerEnterItem(evt) {
+    const li = this.detectLiFrom(evt.target);
+    this.enterItem(li);
   }
 
   selectPrevItem(evt) {
@@ -89,17 +77,41 @@ export default class extends Controller {
     }
   }
 
+  // 与えられた <li> を「選択状態」にします。
+  // <li> は次の条件を満たす <span> をひとつ含みます：
+  // - data-link-to-url 属性にリンク先の URL
+  // - data-link-to-frame 属性にリンク先の URL の内容を表示するための turbo-frame 名
+  // この <span> は <a> の代替です。ブラウザの <a> の挙動をカスタムするために手動で行うための工夫です。
   enterItem(li) {
     li.focus(); // Important for being the base point for next and previous
-    const aTag = li.getElementsByTagName('A').item(0);
-    aTag.click(); // This is going to invoke changeSelected()
+
+    const span = li.querySelector('span[data-link-to-url]');
+    const url = span.dataset['linkToUrl'];
+    const frame = document.querySelector(`turbo-frame[id=${span.dataset['linkToFrame']}]`);
+    frame.src = url;
+
+    this.fireChangeSelectedLiEvent(this.element, this.#updateListSelectionStatus(span));
+  }
+
+  #updateListSelectionStatus(currentTag) {
+    let newSelectedLi = null;
+
+    this.listItemTargets.forEach(li => {
+      delete li.dataset.selected;
+      if (li.contains(currentTag)) {
+        li.dataset.selected = 'true';
+        newSelectedLi = li;
+      }
+    });
+
+    return newSelectedLi;
   }
 
   // li 以外をクリックしてフォーカスが移動すると、 li に選択状態にありながらも
   // キーイベントがそこでは発生しなくなってしまうため、
   // このメソッドにより "selected" の最後のものにフォーカスを移動させます。
   // NOTE: 複数選択状態は現在のところ未実装ですが、今後実装が予定されています。
-  focusLastSelectedLi() {
+  focusLastSelectedLi(_evt) {
     let lastSelected = null;
 
     this.listItemTargets.forEach(li => {

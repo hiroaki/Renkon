@@ -35,21 +35,21 @@
               </button>
 
               <div class="container flex-grow">
-                <%=
-                  link_to(subscription_article_path(article.subscription, article),
-                    'tabindex' => '-1',
-                    'data-turbo-frame' => turbo_frame_if_turbo_frame_request('contents'),
-                    'class' => 'pl-2 pr-1 py-0.5 block no-underline text-inherit hover:no-underline hover:text-inherit focus:outline-none',
-                    'data-action' => 'click->articles#changeSelected'
-                  ) do
-                %>
+                <span
+                  tabindex="-1"
+                  class="pl-2 pr-1 py-0.5 block no-underline text-inherit hover:no-underline hover:text-inherit focus:outline-none"
+                  data-turbo-frame="<%= turbo_frame_if_turbo_frame_request('contents') %>"
+                  data-action="click->articles#handlerEnterItem"
+                  data-link-to-url="<%= subscription_article_path(article.subscription, article) %>"
+                  data-link-to-frame="contents"
+                >
                   <p class="overflow-hidden text-nowrap">
                     <span><%= article.title %></span>
                   </p>
                   <p class="text-xs text-gray-400 overflow-hidden text-nowrap">
                     <%= article.pub_date %>
                   </p>
-                <% end %>
+                </span>
               </div>
 
             </div>

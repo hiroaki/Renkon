@@ -122,6 +122,12 @@ export default class extends Controller {
     }
   }
 
+  handlerEnterItem(evt) {
+    const pane = evt.currentTarget;
+    const li = pane.getElementsByTagName('ul').item(0).selectedLi.detectLiFrom(evt.target);
+    pane.getElementsByTagName('ul').item(0).selectedLi.enterItem(li);
+  }
+
   onChangeReadStatus(evt) {
     const li = this.getSubscriptionListItemById(evt.target.dataset['subscription']);
     const turboFrame = li.querySelector('turbo-frame');
