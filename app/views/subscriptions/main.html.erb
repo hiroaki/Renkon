@@ -68,8 +68,8 @@
       data-frame-storage-key-value="subscriptions-width"
       data-pane-focus-target="subscriptionsPane"
       data-action="
-        keydown.right->pane-focus#forwardToItemPane
-        keydown.space->pane-focus#forwardToUnreadItemPane:prevent
+        keydown.right->pane-focus#forwardToArticlesPane
+        keydown.space->pane-focus#forwardToUnreadArticlePane:prevent
         changeSelectedLi->pane-focus#onChangeSelectedSubscriptionListItem
       "
     >
@@ -93,7 +93,7 @@
       data-frame-storage-key-value="articles-width"
       data-pane-focus-target="articlesPane"
       data-action="
-        keydown.left->pane-focus#backToSubscriptionPane
+        keydown.left->pane-focus#backToSubscriptionsPane
       "
     >
       <div class="flex-1 bg-white-100 overflow-y-auto overflow-x-hidden pt-2">

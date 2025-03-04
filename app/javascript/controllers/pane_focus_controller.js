@@ -48,13 +48,13 @@ export default class extends Controller {
   }
 
   // keyup LEFT on articles pane
-  backToSubscriptionPane(evt) {
+  backToSubscriptionsPane(evt) {
     this.focusPane(this.subscriptionsPaneTarget)
     this.getSelectedSubscriptionListItem().focus()
   }
 
   // keyup RIGHT on subscriptions pane
-  forwardToItemPane(evt) {
+  forwardToArticlesPane(evt) {
     this.focusPane(this.articlesPaneTarget);
 
     const selectedItems = this.articlesPaneTarget.querySelectorAll('li[data-selected="true"]');
@@ -64,15 +64,18 @@ export default class extends Controller {
     else {
       const li = this.articlesPaneTarget.querySelectorAll('li').item(0);
       if (li) {
-        li.closest('ul').articles.enterItem(li);
+        li.closest('ul').selectedLi.enterItem(li);
       }
     }
   }
 
   // keyup SPACE on subscriptions pane
-  forwardToUnreadItemPane(evt) {
+  forwardToUnreadArticlePane(evt) {
     this.focusPane(this.articlesPaneTarget);
 
+    // Articles リストの、
+    // 現在選択されている li がなければ先頭から最初の未読、
+    // または選択されている li があればその位置から最初の未読のものを選択状態にします。
     const articles = this.articlesPaneTarget.querySelectorAll('li');
     let pos = -1;
     for (let i = 0; i < articles.length; ++i) {
@@ -86,7 +89,7 @@ export default class extends Controller {
       let li = articles[i];
       if (li.dataset['unread'] == 'true') {
         // call a method of articles controller (based selected-li controller)
-        li.closest('ul').articles.enterItem(li);
+        li.closest('ul').selectedLi.enterItem(li);
         break;
       }
     }
