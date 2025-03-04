@@ -70,8 +70,6 @@
       data-action="
         keydown.right->pane-focus#forwardToItemPane
         keydown.space->pane-focus#forwardToUnreadItemPane:prevent
-        keydown.up->pane-focus#selectPrevItem:prevent
-        keydown.down->pane-focus#selectNextItem:prevent
         changeSelectedLi->pane-focus#onChangeSelectedSubscriptionListItem
       "
     >
@@ -96,8 +94,6 @@
       data-pane-focus-target="articlesPane"
       data-action="
         keydown.left->pane-focus#backToSubscriptionPane
-        keydown.up->pane-focus#selectPrevItem:prevent
-        keydown.down->pane-focus#selectNextItem:prevent
       "
     >
       <div class="flex-1 bg-white-100 overflow-y-auto overflow-x-hidden pt-2">

@@ -4,6 +4,7 @@ export default class extends Controller {
   static targets = ['listItem'];
 
   connect() {
+    console.log("this.identifier: "+ this.identifier); // 'subscriptions' or 'articles'
     this.element[this.identifier] = this;
     this.element['selectedLi'] = this;
   }
@@ -23,8 +24,11 @@ export default class extends Controller {
     this.enterItem(li);
   }
 
+  // イベントを発生させた要素を含むリストの、イベント要素のひとつ前の li を「選択状態」にします。
+  // ここで想定しているのは、ある li がフォーカスされている状態から、カーソルキーの上を押下したとき。
   selectPrevItem(evt) {
-    this.selectPrevLi(evt.currentTarget);
+    const li = this.detectLiFrom(evt.target);
+    this.selectPrevLi(li);
   }
 
   selectPrevLi(li) {
@@ -41,6 +45,8 @@ export default class extends Controller {
     }
   }
 
+  // イベントを発生させた要素を含むリストの、イベント要素のひとつ次の li を「選択状態」にします。
+  // ここで想定しているのは、ある li がフォーカスされている状態から、カーソルキーの下を押下したとき。
   selectNextItem(evt) {
     const li = this.detectLiFrom(evt.target)
     this.selectNextLi(li);

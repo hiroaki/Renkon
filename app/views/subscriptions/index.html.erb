@@ -16,6 +16,9 @@
       dblclick->subscriptions#openUrl
       keydown.backspace->subscriptions#confirmDestroy
       keydown.backspace->subscriptions#destroyChannel
+
+      keydown.up->subscriptions#selectPrevItem:prevent
+      keydown.down->subscriptions#selectNextItem:prevent
     "
   >
     <li id="trash" tabindex="0" class="container focus:outline-none"

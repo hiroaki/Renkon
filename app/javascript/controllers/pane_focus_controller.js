@@ -92,36 +92,6 @@ export default class extends Controller {
     }
   }
 
-  selectPrevItem(evt) {
-    const pane = evt.currentTarget;
-
-    const selection = pane.querySelectorAll('li[data-selected="true"]');
-    if (0 < selection.length) {
-      pane.getElementsByTagName('ul').item(0).selectedLi.selectPrevLi(selection.item(0));
-    }
-    else {
-      const li = pane.querySelectorAll('li')
-      if (0 < li.length) {
-        pane.getElementsByTagName('ul').item(0).selectedLi.enterItem(li.item(li.length - 1));
-      }
-    }
-  }
-
-  selectNextItem(evt) {
-    const pane = evt.currentTarget;
-
-    const selection = pane.querySelectorAll('li[data-selected="true"]');
-    if (0 < selection.length) {
-      pane.getElementsByTagName('ul').item(0).selectedLi.selectNextLi(selection.item(selection.length - 1));
-    }
-    else {
-      const li = pane.querySelectorAll('li')
-      if (0 < li.length) {
-        pane.getElementsByTagName('ul').item(0).selectedLi.enterItem(li.item(0));
-      }
-    }
-  }
-
   onChangeReadStatus(evt) {
     const li = this.getSubscriptionListItemById(evt.target.dataset['subscription']);
     const turboFrame = li.querySelector('turbo-frame');

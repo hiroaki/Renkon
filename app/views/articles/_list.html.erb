@@ -10,6 +10,9 @@
       keydown.backspace->articles#selectNextItem
       dblclick->articles#openUrl
       dblclick->articles#handlerMakeItemRead
+
+      keydown.up->articles#selectPrevItem:prevent
+      keydown.down->articles#selectNextItem:prevent
     "
   >
     <% @articles.each do |article| %>
