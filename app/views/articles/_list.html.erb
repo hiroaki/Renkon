@@ -37,7 +37,7 @@
               <div class="container flex-grow">
                 <span
                   tabindex="-1"
-                  class="pl-2 pr-1 py-0.5 block no-underline text-inherit hover:no-underline hover:text-inherit focus:outline-none"
+                  class="pl-2 pr-1 py-0.5 block no-underline text-inherit hover:no-underline hover:text-inherit focus:outline-none cursor-pointer"
                   data-turbo-frame="<%= turbo_frame_if_turbo_frame_request('contents') %>"
                   data-action="click->articles#handlerEnterItem"
                   data-link-to-url="<%= subscription_article_path(article.subscription, article) %>"
