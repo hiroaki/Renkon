@@ -4,6 +4,7 @@ export default class extends Controller {
   static targets = ['listItem'];
 
   connect() {
+    // INTERFACE - adapted by other controllers via this element
     console.log("this.identifier: "+ this.identifier); // 'subscriptions' or 'articles'
     this.element[this.identifier] = this;
     this.element['selectedLi'] = this;
@@ -115,5 +116,13 @@ export default class extends Controller {
 
   detectLiFrom(elem) {
     return elem.closest('li')
+  }
+
+  getSelectedItem() {
+    return this.element.querySelector('li[data-selected="true"]');
+  }
+
+  getSelectedItems() {
+    return this.element.querySelectorAll('li[data-selected="true"]');
   }
 }

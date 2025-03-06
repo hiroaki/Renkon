@@ -19,18 +19,55 @@ class RefreshSubscriptionDelegator extends TurboFrameDelegator {
 
 export default class extends Controller {
   static targets = ['navigationPane', 'subscriptionsPane', 'articlesPane', 'contentsPane', 'linkEditSubscription'];
+  static values = {
+    adaptSubscriptionsController: String, // 接続する Subscriotions コントローラの識別子
+    adaptArticlesController: String, // 接続する Articles コントローラの識別子
+  }
 
   connect() {
+    // それぞれの Pane は、クリックされることで "forcus" のマークがつくようにします。
+    // これは GUI の focus とは異なり、単に focus された要素がどの Pane の中ににあるか、の判定のみに使えます。
+    // このマークは CSS の装飾のために用いています。どの具体的な要素に focus があるかは別にコントロールしておく必要があります。
     this.allPaneTargets().forEach((pane) => {
       pane.addEventListener('click', () => this.focusPane(pane));
     });
 
     // initialize state for Edit subscription button
-    this.#resetEditSubscriptionLinkBySubscriptionListItem(this.getSelectedSubscriptionListItem())
+    this.#resetEditSubscriptionLinkBySubscriptionListItem(this.getSelectedSubscriptionListItem());
+  }
+
+  // INTERFACE of subscriptionsController inherited SelectedLiBaseController
+  subscriptionsController() {
+    const controllerElement = this.subscriptionsPaneTarget.querySelector(`[data-controller="${this.adaptSubscriptionsControllerValue}"]`);
+
+    if (controllerElement) {
+      return controllerElement.selectedLi;
+    } else {
+      // not connected (loaded) yet
+      return null;
+    }
+  }
+
+  // INTERFACE of articlesController inherited SelectedLiBaseController
+  articlesController() {
+    const controllerElement = this.articlesPaneTarget.querySelector(`[data-controller="${this.adaptArticlesControllerValue}"]`);
+
+    if (controllerElement) {
+      return controllerElement.selectedLi;
+    } else {
+      // not connected (loaded) yet
+      return null;
+    }
   }
 
   getSelectedSubscriptionListItem() {
-    return this.subscriptionsPaneTarget.querySelector('li[data-selected="true"]');
+    // return this.subscriptionsPaneTarget.querySelector('li[data-selected="true"]');
+    const controller = this.subscriptionsController();
+    if (controller) {
+      return controller.getSelectedItem();
+    } else {
+      return null;
+    }
   }
 
   getSubscriptionListItemById(subscriptionId) {
@@ -49,8 +86,14 @@ export default class extends Controller {
 
   // keyup LEFT on articles pane
   backToSubscriptionsPane(evt) {
-    this.focusPane(this.subscriptionsPaneTarget)
-    this.getSelectedSubscriptionListItem().focus()
+    this.focusPane(this.subscriptionsPaneTarget);
+
+    const selectedSubscription = this.getSelectedSubscriptionListItem();
+    if (selectedSubscription) {
+      selectedSubscription.focus();
+    } else {
+      debugger; // something wrong
+    }
   }
 
   // keyup RIGHT on subscriptions pane
