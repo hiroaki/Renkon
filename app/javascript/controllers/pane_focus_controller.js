@@ -9,7 +9,7 @@ export default class extends Controller {
   }
 
   connect() {
-    // それぞれの Pane は、クリックされることで "forcus" のマークがつくようにします。
+    // それぞれの Pane は、クリックされることで "focus" のマークがつくようにします。
     // これは GUI の focus とは異なり、単に focus された要素がどの Pane の中ににあるか、の判定のみに使えます。
     // このマークは CSS の装飾のために用いています。どの具体的な要素に focus があるかは別にコントロールしておく必要があります。
     this.allPaneTargets().forEach((pane) => {
@@ -59,6 +59,8 @@ export default class extends Controller {
     return [this.navigationPaneTarget, this.subscriptionsPaneTarget, this.articlesPaneTarget, this.contentsPaneTarget]
   }
 
+  // 指定した pane をフォーカス状態にします（ "focus" をマークします）。
+  // その他の pane(s) のフォーカス状態は外されます。
   focusPane(pane) {
     this.allPaneTargets().forEach((pane) => pane.classList.remove('focused'));
     pane.classList.add('focused');
@@ -67,13 +69,7 @@ export default class extends Controller {
   // keyup LEFT on articles pane
   backToSubscriptionsPane(evt) {
     this.focusPane(this.subscriptionsPaneTarget);
-
-    const selectedSubscription = this.getSelectedSubscriptionListItem();
-    if (selectedSubscription) {
-      selectedSubscription.focus();
-    } else {
-      debugger; // something wrong
-    }
+    this.subscriptionsController().setFocusToCurrentItem();
   }
 
   // keyup RIGHT on subscriptions pane
@@ -87,7 +83,7 @@ export default class extends Controller {
     else {
       const li = this.articlesPaneTarget.querySelectorAll('li').item(0);
       if (li) {
-        li.closest('ul').selectedLi.enterItem(li);
+        li.closest('ul').selectedLi.activateItem(li);
       }
     }
   }
@@ -112,7 +108,7 @@ export default class extends Controller {
       let li = articles[i];
       if (li.dataset['unread'] == 'true') {
         // call a method of articles controller (based selected-li controller)
-        li.closest('ul').selectedLi.enterItem(li);
+        li.closest('ul').selectedLi.activateItem(li);
         break;
       }
     }

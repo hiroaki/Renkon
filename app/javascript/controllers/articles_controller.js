@@ -39,7 +39,7 @@ export default class extends SelectedLiBaseController {
 
     for (let i = pos + 1; i < articles.length; ++i) {
       if (articles[i].dataset['unread'] == 'true') {
-        this.enterItem(articles[i]);
+        this.activateItem(articles[i]);
         break;
       }
     }
