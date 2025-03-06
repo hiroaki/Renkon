@@ -1,21 +1,5 @@
 import { Controller } from "@hotwired/stimulus";
-import TurboFrameDelegator from "lib/turbo_frame_delegator"
 import { getCsrfToken } from 'lib/schema'
-
-class RefreshSubscriptionDelegator extends TurboFrameDelegator {
-  // override
-  prepareRequest(request) {
-    super.prepareRequest(request)
-    console.log('request', request)
-
-    if (!request.isSafe) {
-      const token = getCsrfToken()
-      if (token) {
-        request.headers['X-CSRF-Token'] = token
-      }
-    }
-  }
-}
 
 export default class extends Controller {
   static targets = ['navigationPane', 'subscriptionsPane', 'articlesPane', 'contentsPane', 'linkEditSubscription'];
@@ -60,18 +44,14 @@ export default class extends Controller {
     }
   }
 
+  // 選択されている Subscription 項目があればそれを返します。なければ null です。
   getSelectedSubscriptionListItem() {
-    // return this.subscriptionsPaneTarget.querySelector('li[data-selected="true"]');
     const controller = this.subscriptionsController();
     if (controller) {
       return controller.getSelectedItem();
     } else {
       return null;
     }
-  }
-
-  getSubscriptionListItemById(subscriptionId) {
-    return this.subscriptionsPaneTarget.querySelector('li[data-subscription="'+ subscriptionId +'"]');
   }
 
   // 何らかのアクションが発生する要素が存在する pane の全てのリスト
@@ -139,13 +119,9 @@ export default class extends Controller {
   }
 
   onChangeReadStatus(evt) {
-    const li = this.getSubscriptionListItemById(evt.target.dataset['subscription']);
-    const turboFrame = li.querySelector('turbo-frame');
-    if (turboFrame) {
-      new RefreshSubscriptionDelegator(
-        li.dataset['urlRefresh'], 'PATCH', turboFrame.id, new URLSearchParams({short: true, dry_run: true})
-      )
-      .perform();
+    const controller = this.subscriptionsController();
+    if (controller) {
+      controller.refreshItem(evt.target.dataset['subscription']);
     }
   }
 
