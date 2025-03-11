@@ -4,6 +4,7 @@ export default class extends Controller {
   static targets = ['listItem'];
 
   connect() {
+    // INTERFACE - adapted by other controllers via this element
     console.log("this.identifier: "+ this.identifier); // 'subscriptions' or 'articles'
     this.element[this.identifier] = this;
     this.element['selectedLi'] = this;
@@ -21,7 +22,7 @@ export default class extends Controller {
   // リストアイテムをクリックした時。そのアイテムを「選択状態」にします。
   handlerEnterItem(evt) {
     const li = this.detectLiFrom(evt.target);
-    this.enterItem(li);
+    this.activateItem(li);
   }
 
   // イベントを発生させた要素を含むリストの、イベント要素のひとつ前の li を「選択状態」にします。
@@ -38,7 +39,7 @@ export default class extends Controller {
       if (this.listItemTargets[i] == li) {
         prev_item = i - 1;
         if (prev_item != null && 0 <= prev_item) {
-          this.enterItem(this.listItemTargets[prev_item]);
+          this.activateItem(this.listItemTargets[prev_item]);
         }
         break;
       }
@@ -59,7 +60,7 @@ export default class extends Controller {
       if (this.listItemTargets[i] == li) {
         next_item = i + 1;
         if (next_item != null && next_item < len) {
-          this.enterItem(this.listItemTargets[next_item]);
+          this.activateItem(this.listItemTargets[next_item]);
         }
         break;
       }
@@ -83,13 +84,13 @@ export default class extends Controller {
     }
   }
 
-  // 与えられた <li> を「選択状態」にします。
+  // 与えられた <li> を「選択状態」にし、 <li> が内包する要素からリンクを取得し、指定される <turbo-frame> に表示します。
   // <li> は次の条件を満たす <span> をひとつ含みます：
   // - data-link-to-url 属性にリンク先の URL
   // - data-link-to-frame 属性にリンク先の URL の内容を表示するための turbo-frame 名
   // この <span> は <a> の代替です。ブラウザの <a> の挙動をカスタムするために手動で行うための工夫です。
-  enterItem(li) {
-    li.focus(); // Important for being the base point for next and previous
+  activateItem(li) {
+    this.moveFocusToItem(li); // Important for being the base point for next and previous
 
     const span = li.querySelector('span[data-link-to-url]');
     const url = span.dataset['linkToUrl'];
@@ -115,5 +116,35 @@ export default class extends Controller {
 
   detectLiFrom(elem) {
     return elem.closest('li')
+  }
+
+  activateFirstItem() {
+    const li = this.element.querySelector('li');
+    if (li) {
+      this.activateItem(li);
+    }
+  }
+
+  getSelectedItem() {
+    return this.element.querySelector('li[data-selected="true"]');
+  }
+
+  getSelectedItems() {
+    return this.element.querySelectorAll('li[data-selected="true"]');
+  }
+
+  moveFocusToItem(li) {
+    li.focus();
+    return li;
+  }
+
+  setFocusToCurrentItem() {
+    const li = this.getSelectedItem();
+    if (li) {
+      li.focus();
+      return true;
+    } else {
+      return false;
+    }
   }
 }

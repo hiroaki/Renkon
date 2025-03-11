@@ -1,6 +1,6 @@
 import SelectedLiBaseController from "lib/selected_li_base_controller"
 import { getCsrfToken } from 'lib/schema'
-import { fireConnectItemsEvent, fireChangeReadStatusEvent } from 'lib/pane_focus_events'
+import { fireConnectArticlesEvent, fireChangeReadStatusEvent } from 'lib/pane_focus_events'
 
 export default class extends SelectedLiBaseController {
   connect() {
@@ -10,7 +10,7 @@ export default class extends SelectedLiBaseController {
     // pane-controller に取り除かれたことを検知してもらいたいところですが、
     // disconnect 時この要素は既に無くなっているためここでイベントを作っても、それが伝播しません。
     // 要素が取り除かれたことを祖先要素で検知するには祖先要素の方で MutationObserver の実装を検討してください。
-    fireConnectItemsEvent(this.element)
+    fireConnectArticlesEvent(this.element)
   }
 
   selectUnreadItem(evt) {
@@ -39,7 +39,7 @@ export default class extends SelectedLiBaseController {
 
     for (let i = pos + 1; i < articles.length; ++i) {
       if (articles[i].dataset['unread'] == 'true') {
-        this.enterItem(articles[i]);
+        this.activateItem(articles[i]);
         break;
       }
     }
@@ -121,5 +121,28 @@ export default class extends SelectedLiBaseController {
       }
     })
     .catch(error => console.error('Error:', error));
+  }
+
+  //
+  activateFirstUnreadItem() {
+    // 選択されている <li> があればその位置から最初の未読のものを、または
+    // 選択されている <li> がなければ先頭から最初の未読のものを、選択状態にします。
+    const articles = this.listItemTargets;
+    let pos = -1;
+    for (let i = 0; i < articles.length; ++i) {
+      if (articles[i].dataset['selected'] == 'true') {
+        pos = i;
+        break;
+      }
+    }
+
+    for (let i = pos + 1; i < articles.length; ++i) {
+      let li = articles[i];
+      if (li.dataset['unread'] == 'true') {
+        // call a method of articles controller (based selected-li controller)
+        this.activateItem(li);
+        break;
+      }
+    }
   }
 }
