@@ -76,15 +76,13 @@ export default class extends Controller {
   forwardToArticlesPane(evt) {
     this.focusPane(this.articlesPaneTarget);
 
-    const selectedItems = this.articlesPaneTarget.querySelectorAll('li[data-selected="true"]');
+    const controller = this.articlesController();
+    const selectedItems = controller.getSelectedItems();
     if (0 < selectedItems.length) {
-      selectedItems.item(selectedItems.length - 1).focus();
+      controller.moveFocusToItem(selectedItems.item(selectedItems.length - 1));
     }
     else {
-      const li = this.articlesPaneTarget.querySelectorAll('li').item(0);
-      if (li) {
-        li.closest('ul').selectedLi.activateItem(li);
-      }
+      controller.activateFirstItem();
     }
   }
 

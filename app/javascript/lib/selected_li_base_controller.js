@@ -90,7 +90,7 @@ export default class extends Controller {
   // - data-link-to-frame 属性にリンク先の URL の内容を表示するための turbo-frame 名
   // この <span> は <a> の代替です。ブラウザの <a> の挙動をカスタムするために手動で行うための工夫です。
   activateItem(li) {
-    this.setFocusToItem(li); // Important for being the base point for next and previous
+    this.moveFocusToItem(li); // Important for being the base point for next and previous
 
     const span = li.querySelector('span[data-link-to-url]');
     const url = span.dataset['linkToUrl'];
@@ -118,6 +118,13 @@ export default class extends Controller {
     return elem.closest('li')
   }
 
+  activateFirstItem() {
+    const li = this.element.querySelector('li');
+    if (li) {
+      this.activateItem(li);
+    }
+  }
+
   getSelectedItem() {
     return this.element.querySelector('li[data-selected="true"]');
   }
@@ -126,7 +133,7 @@ export default class extends Controller {
     return this.element.querySelectorAll('li[data-selected="true"]');
   }
 
-  setFocusToItem(li) {
+  moveFocusToItem(li) {
     li.focus();
     return li;
   }
