@@ -9,11 +9,12 @@ export default class extends Controller {
   }
 
   connect() {
-    // それぞれの Pane は、クリックされることで "focus" のマークがつくようにします。
-    // これは GUI の focus とは異なり、単に focus された要素がどの Pane の中ににあるか、の判定のみに使えます。
-    // このマークは CSS の装飾のために用いています。どの具体的な要素に focus があるかは別にコントロールしておく必要があります。
+    // それぞれの Pane は、その範囲の要素がクリックされることで "focused" のマークがつくようにします。
+    // これはブラウザの focus とは別の概念で、 focus された要素がどの Pane の中にあるかの判定のみに使えるもので、
+    // このマークは CSS の装飾の制御に用いています。
+    // ブラウザの focus の操作は別にコントロールする必要があります。
     this.allPaneTargets().forEach((pane) => {
-      pane.addEventListener('click', () => this.focusPane(pane));
+      pane.addEventListener('click', () => this.setCurrentPane(pane));
     });
 
     // initialize state for Edit subscription button
@@ -54,27 +55,27 @@ export default class extends Controller {
     }
   }
 
-  // 何らかのアクションが発生する要素が存在する pane の全てのリスト
+  // このコントローラが操作する pane の全てのリスト
   allPaneTargets() {
     return [this.navigationPaneTarget, this.subscriptionsPaneTarget, this.articlesPaneTarget, this.contentsPaneTarget]
   }
 
-  // 指定した pane をフォーカス状態にします（ "focus" をマークします）。
-  // その他の pane(s) のフォーカス状態は外されます。
-  focusPane(pane) {
+  // 指定した pane に "focused" をマークします。
+  // その他の pane(s) の "focused" は外されます。
+  setCurrentPane(pane) {
     this.allPaneTargets().forEach((pane) => pane.classList.remove('focused'));
     pane.classList.add('focused');
   }
 
   // keyup LEFT on articles pane
   backToSubscriptionsPane(evt) {
-    this.focusPane(this.subscriptionsPaneTarget);
+    this.setCurrentPane(this.subscriptionsPaneTarget);
     this.subscriptionsController().setFocusToCurrentItem();
   }
 
   // keyup RIGHT on subscriptions pane
   forwardToArticlesPane(evt) {
-    this.focusPane(this.articlesPaneTarget);
+    this.setCurrentPane(this.articlesPaneTarget);
 
     const controller = this.articlesController();
     const selectedItems = controller.getSelectedItems();
@@ -88,7 +89,7 @@ export default class extends Controller {
 
   // keyup SPACE on subscriptions pane
   forwardToUnreadArticlePane(evt) {
-    this.focusPane(this.articlesPaneTarget);
+    this.setCurrentPane(this.articlesPaneTarget);
     this.articlesController().activateFirstUnreadItem();
   }
 
