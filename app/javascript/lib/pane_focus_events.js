@@ -26,12 +26,12 @@ export function fireEmptyTrashEvent(elem) {
   elem.dispatchEvent(event)
 }
 
-/* イベント - connectItems
-  items-controller が connect されたときに発生させるイベント
+/* イベント - connectArticles
+  articles-controller が connect されたときに発生させるイベント
   引数 elem はコントローラがセットされた要素を渡してください。
   */
-export function fireConnectItemsEvent(elem) {
-  const event = new CustomEvent('connectItems', {
+export function fireConnectArticlesEvent(elem) {
+  const event = new CustomEvent('connectArticles', {
     detail: {},
     bubbles: true
   })

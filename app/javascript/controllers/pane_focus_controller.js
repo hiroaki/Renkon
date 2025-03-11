@@ -92,6 +92,7 @@ export default class extends Controller {
     this.articlesController().activateFirstUnreadItem();
   }
 
+  // "既読状況" に変化があった時、購読リストの当該項目を更新します（未読数バッジの更新）
   onChangeReadStatus(evt) {
     const controller = this.subscriptionsController();
     if (controller) {
@@ -99,6 +100,7 @@ export default class extends Controller {
     }
   }
 
+  // 選択されている "購読" が変わった時、操作バー上の「編集」ボタンの操作対象を当該購読の内容に変更します。
   onChangeSelectedSubscriptionListItem(evt) {
     const li = evt.detail.selected
     this.#resetEditSubscriptionLinkBySubscriptionListItem(li);
@@ -126,19 +128,22 @@ export default class extends Controller {
     }
   }
 
-  onConnectItems(evt) {
+  // "記事" リストが変更されたとき、 "コンテンツ" ペインをクリアします。
+  onConnectArticles(evt) {
     this.clearContentsPane();
   }
 
+  // "ゴミ箱" が空にされたとき、 "購読リスト" で選択されている項目が "ゴミ箱" である場合に限り、
+  // "コンテンツ" ペインと "記事リスト" ペインをクリアします。
   onEmptyTrash(evt) {
     const selectedSubscription = this.getSelectedSubscriptionListItem();
     if (selectedSubscription && selectedSubscription.id == 'trash') {
       this.clearContentsPane();
-      this.clearItemsPane();
+      this.clearArticlesPane();
     }
   }
 
-  clearItemsPane() {
+  clearArticlesPane() {
     this.articlesPaneTarget.querySelector('turbo-frame#articles').innerHTML = '';
   }
 
