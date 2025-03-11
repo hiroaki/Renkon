@@ -122,4 +122,27 @@ export default class extends SelectedLiBaseController {
     })
     .catch(error => console.error('Error:', error));
   }
+
+  //
+  activateFirstUnreadItem() {
+    // 選択されている <li> があればその位置から最初の未読のものを、または
+    // 選択されている <li> がなければ先頭から最初の未読のものを、選択状態にします。
+    const articles = this.listItemTargets;
+    let pos = -1;
+    for (let i = 0; i < articles.length; ++i) {
+      if (articles[i].dataset['selected'] == 'true') {
+        pos = i;
+        break;
+      }
+    }
+
+    for (let i = pos + 1; i < articles.length; ++i) {
+      let li = articles[i];
+      if (li.dataset['unread'] == 'true') {
+        // call a method of articles controller (based selected-li controller)
+        this.activateItem(li);
+        break;
+      }
+    }
+  }
 }
