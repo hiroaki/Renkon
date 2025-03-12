@@ -23,10 +23,11 @@ export default class extends Controller {
 
   // INTERFACE of subscriptionsController inherited SelectedLiBaseController
   subscriptionsController() {
-    const controllerElement = this.subscriptionsPaneTarget.querySelector(`[data-controller="${this.adaptSubscriptionsControllerValue}"]`);
+    const identifier = this.adaptSubscriptionsControllerValue;
+    const controllerElement = this.subscriptionsPaneTarget.querySelector(`[data-controller="${identifier}"]`);
 
     if (controllerElement) {
-      return controllerElement.selectedLi;
+      return controllerElement[identifier];
     } else {
       // not connected (loaded) yet
       return null;
@@ -35,10 +36,11 @@ export default class extends Controller {
 
   // INTERFACE of articlesController inherited SelectedLiBaseController
   articlesController() {
-    const controllerElement = this.articlesPaneTarget.querySelector(`[data-controller="${this.adaptArticlesControllerValue}"]`);
+    const identifier = this.adaptArticlesControllerValue;
+    const controllerElement = this.articlesPaneTarget.querySelector(`[data-controller="${identifier}"]`);
 
     if (controllerElement) {
-      return controllerElement.selectedLi;
+      return controllerElement[identifier];
     } else {
       // not connected (loaded) yet
       return null;

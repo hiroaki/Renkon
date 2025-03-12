@@ -15,7 +15,7 @@ export default class extends SelectedLiBaseController {
 
   selectUnreadItem(evt) {
     const li = this.detectLiFrom(evt.target)
-    const articles = document.getElementById('articles').querySelectorAll('li');
+    const articles = this.listItemTargets;
 
     // articles ペイン上からこのイベントが発生している場合は、
     // 現在の選択位置以降から未読を探すようにします（ subscriptions ペインでは先頭から）

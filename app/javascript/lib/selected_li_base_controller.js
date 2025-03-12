@@ -5,9 +5,7 @@ export default class extends Controller {
 
   connect() {
     // INTERFACE - adapted by other controllers via this element
-    console.log("this.identifier: "+ this.identifier); // 'subscriptions' or 'articles'
-    this.element[this.identifier] = this;
-    this.element['selectedLi'] = this;
+    this.element[this.identifier] = this; // 'subscriptions' or 'articles' which are subclasses
   }
 
   fireChangeSelectedLiEvent(elem, newSelectedLi) {
