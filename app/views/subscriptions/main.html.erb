@@ -2,9 +2,11 @@
   data-controller="pane-focus"
   data-action="
     changeReadStatus->pane-focus#onChangeReadStatus
-    connectItems->pane-focus#onConnectItems
+    connectArticles->pane-focus#onConnectArticles
     emptyTrash->pane-focus#onEmptyTrash
   "
+  data-pane-focus-adapt-subscriptions-controller-value="subscriptions"
+  data-pane-focus-adapt-articles-controller-value="articles"
 >
   <nav class="flex-shrink-0 h-12 bg-gray-200 px-1 flex flex-row place-items-center"
     data-pane-focus-target="navigationPane",
@@ -68,10 +70,8 @@
       data-frame-storage-key-value="subscriptions-width"
       data-pane-focus-target="subscriptionsPane"
       data-action="
-        keydown.right->pane-focus#forwardToItemPane
-        keydown.space->pane-focus#forwardToUnreadItemPane:prevent
-        keydown.up->pane-focus#selectPrevItem:prevent
-        keydown.down->pane-focus#selectNextItem:prevent
+        keydown.right->pane-focus#forwardToArticlesPane
+        keydown.space->pane-focus#forwardToUnreadArticlePane:prevent
         changeSelectedLi->pane-focus#onChangeSelectedSubscriptionListItem
       "
     >
@@ -95,9 +95,8 @@
       data-frame-storage-key-value="articles-width"
       data-pane-focus-target="articlesPane"
       data-action="
-        keydown.left->pane-focus#backToSubscriptionPane
-        keydown.up->pane-focus#selectPrevItem:prevent
-        keydown.down->pane-focus#selectNextItem:prevent
+        keydown.left->pane-focus#backToSubscriptionsPane
+        keydown.space->pane-focus#forwardContentsOrNextArticle:prevent
       "
     >
       <div class="flex-1 bg-white-100 overflow-y-auto overflow-x-hidden pt-2">

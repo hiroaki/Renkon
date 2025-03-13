@@ -1,5 +1,21 @@
 import SelectedLiBaseController from 'lib/selected_li_base_controller'
+import TurboFrameDelegator from 'lib/turbo_frame_delegator'
 import { getCsrfToken } from 'lib/schema'
+
+class RefreshSubscriptionDelegator extends TurboFrameDelegator {
+  // override
+  prepareRequest(request) {
+    super.prepareRequest(request)
+    console.log('request', request)
+
+    if (!request.isSafe) {
+      const token = getCsrfToken()
+      if (token) {
+        request.headers['X-CSRF-Token'] = token
+      }
+    }
+  }
+}
 
 export default class extends SelectedLiBaseController {
   // Subscription の削除処理の前提として、この確認の動作を発動させるイベントに続いて、
@@ -42,5 +58,16 @@ export default class extends SelectedLiBaseController {
       }
     })
     .catch(error => console.error('Error:', error));
+  }
+
+  refreshItem(id) {
+    const li = this.element.querySelector(`li[data-subscription="${id}"]`);
+    const turboFrame = li.querySelector('turbo-frame');
+    if (turboFrame) {
+      new RefreshSubscriptionDelegator(
+        li.dataset['urlRefresh'], 'PATCH', turboFrame.id, new URLSearchParams({short: true, dry_run: true})
+      )
+      .perform();
+    }
   }
 }
