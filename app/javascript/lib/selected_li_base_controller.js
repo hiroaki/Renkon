@@ -83,17 +83,24 @@ export default class extends Controller {
   }
 
   // 与えられた <li> を「選択状態」にし、 <li> が内包する要素からリンクを取得し、指定される <turbo-frame> に表示します。
+  // ただし指定される <turbo-frame> が存在しない場合は Turbo.visit によるリンクの遷移を行います。
+  // また、いずれの場合もリンク遷移ののち、イベント changeSelectedLi を着火します。
   // <li> は次の条件を満たす <span> をひとつ含みます：
   // - data-link-to-url 属性にリンク先の URL
   // - data-link-to-frame 属性にリンク先の URL の内容を表示するための turbo-frame 名
-  // この <span> は <a> の代替です。ブラウザの <a> の挙動をカスタムするために手動で行うための工夫です。
+  // ちなみにこの <span> は <a> の代替です。ブラウザの <a> の挙動をカスタムするために手動で行うための工夫として <span> を用いています。
   activateItem(li) {
     this.moveFocusToItem(li); // Important for being the base point for next and previous
 
     const span = li.querySelector('span[data-link-to-url]');
     const url = span.dataset['linkToUrl'];
     const frame = document.querySelector(`turbo-frame[id=${span.dataset['linkToFrame']}]`);
-    frame.src = url;
+
+    if (frame) {
+      frame.src = url;
+    } else {
+      Turbo.visit(url);
+    }
 
     this.fireChangeSelectedLiEvent(this.element, this.#updateListSelectionStatus(span));
   }
