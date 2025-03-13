@@ -13,42 +13,13 @@ export default class extends SelectedLiBaseController {
     fireConnectArticlesEvent(this.element)
   }
 
-  selectUnreadItem(evt) {
-    const li = this.detectLiFrom(evt.target)
-    const articles = this.listItemTargets;
-
-    // articles ペイン上からこのイベントが発生している場合は、
-    // 現在の選択位置以降から未読を探すようにします（ subscriptions ペインでは先頭から）
-    let pos = -1;
-    for (let i = 0; i < articles.length; ++i) {
-      if (articles[i] == li) {
-        pos = i;
-        break;
-      }
-    }
-    const isFiredOnItem = pos != -1;
-
-    if (isFiredOnItem) {
-      const contentsPane = document.getElementById('contents-pane');
-      const maxScroll = contentsPane.scrollHeight - contentsPane.clientHeight;
-      if (contentsPane.scrollTop + 1 < maxScroll) {
-        contentsPane.scrollBy({top: contentsPane.clientHeight, behavior: 'auto'});
-        return false;
-      }
-    }
-
-    for (let i = pos + 1; i < articles.length; ++i) {
-      if (articles[i].dataset['unread'] == 'true') {
-        this.activateItem(articles[i]);
-        break;
-      }
-    }
-  }
-
   //
   handlerMakeItemRead(evt) {
-    const li = this.detectLiFrom(evt.target)
+    const li = this.detectLiFrom(evt.target);
+    this.makeItemRead(li);
+  }
 
+  makeItemRead(li) {
     if (li.dataset['unread'] == 'true') {
       const targetElement = li.querySelector('button');
       const me = this;

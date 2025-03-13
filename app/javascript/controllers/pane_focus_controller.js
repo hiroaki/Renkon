@@ -69,6 +69,10 @@ export default class extends Controller {
     pane.classList.add('focused');
   }
 
+  isCurrentPane(pane) {
+    return pane.classList.contains('focused');
+  }
+
   // keyup LEFT on articles pane
   backToSubscriptionsPane(evt) {
     this.setCurrentPane(this.subscriptionsPaneTarget);
@@ -93,6 +97,50 @@ export default class extends Controller {
   forwardToUnreadArticlePane(evt) {
     this.setCurrentPane(this.articlesPaneTarget);
     this.articlesController().activateFirstUnreadItem();
+  }
+
+  // keyup SPACE on articles pane
+  forwardContentsOrNextArticle(evt) {
+    if (!this.isCurrentPane(this.articlesPaneTarget)) {
+      console.error('articlesPane is not the current');
+      return;
+    }
+
+    const controller = this.articlesController();
+    const articles = controller.listItemTargets;
+
+    // 記事が選択されている場合、その位置以降から "未読" 項目を探すようにします。
+    const li = controller.getSelectedItem();
+    let pos = -1;
+    if (li) {
+      for (let i = 0; i < articles.length; ++i) {
+        if (articles[i] == li) {
+          pos = i;
+          break;
+        }
+      }
+    }
+    const isSomeArticleActivated = pos != -1;
+
+    // contents ペインに、現在選択している Article のコンテンツが表示されている場合、
+    // それがまだスクロール可能ならばスクロールだけを行います。
+    // スクロールが最後まで到達しているならば、次の Article を "選択状態" にするための処理へ続きます。
+    if (isSomeArticleActivated) {
+      const contentsPane = this.contentsPaneTarget;
+      const maxScroll = contentsPane.scrollHeight - contentsPane.clientHeight;
+      if (contentsPane.scrollTop + 1 < maxScroll) {
+        contentsPane.scrollBy({top: contentsPane.clientHeight, behavior: 'auto'});
+        return false;
+      }
+    }
+
+    // 次の "未読" 項目をアクティブにします。
+    for (let i = pos + 1; i < articles.length; ++i) {
+      if (articles[i].dataset['unread'] == 'true') {
+        controller.activateItem(articles[i]);
+        break;
+      }
+    }
   }
 
   // "既読状況" に変化があった時、購読リストの当該項目を更新します（未読数バッジの更新）

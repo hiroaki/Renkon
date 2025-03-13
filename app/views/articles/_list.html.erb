@@ -5,9 +5,10 @@
       keydown.enter->articles#openUrl
       keydown.enter->articles#handlerMakeItemRead
       keydown.space->articles#handlerMakeItemRead:prevent
-      keydown.space->articles#selectUnreadItem:prevent
+
       keydown.backspace->articles#deleteItem
       keydown.backspace->articles#selectNextItem
+
       dblclick->articles#openUrl
       dblclick->articles#handlerMakeItemRead
 
