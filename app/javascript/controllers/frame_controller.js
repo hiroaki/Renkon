@@ -15,6 +15,8 @@ export default class extends Controller {
     localStorage.removeItem('items-pane');
     localStorage.removeItem('channelsPane');
     localStorage.removeItem('itemsPane');
+    localStorage.removeItem('channels-width');
+    localStorage.removeItem('items-width');
 
     this.reset();
   }
@@ -103,7 +105,6 @@ export default class extends Controller {
 
   updateWidthOfTarget(delta_x) {
     const new_width = this.start_width + delta_x;
-    // console.log("new_width="+ new_width, this)
     this.adjustableTarget.style.width = parseInt(new_width) +'px'
   }
 }
