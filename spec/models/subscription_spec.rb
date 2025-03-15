@@ -6,6 +6,10 @@ RSpec.describe Subscription, type: :model do
     it '既定の Factory が valid であり、レコードが保存できる' do
       expect { subscription.save! }.not_to raise_error
     end
+
+    it 'has many articles with dependent delete all' do
+      expect(subject).to have_many(:articles).dependent(:delete_all)
+    end
   end
 
   describe 'バリデーション' do
