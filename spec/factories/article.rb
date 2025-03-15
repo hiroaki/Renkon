@@ -1,6 +1,6 @@
 FactoryBot.define do
-  factory :item do
-    association :channel
+  factory :article do
+    association :subscription
     sequence :title do |n|
       "Title ##{n}"
     end

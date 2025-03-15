@@ -1,43 +1,43 @@
 require 'rails_helper'
 
-RSpec.describe Item, type: :model do
+RSpec.describe Article, type: :model do
   describe '基本' do
-    let!(:item) { FactoryBot.build(:item) }
+    let!(:article) { FactoryBot.build(:article) }
     it '既定の Factory が valid であり、レコードが保存できる' do
-      expect { item.save! }.not_to raise_error
+      expect { article.save! }.not_to raise_error
     end
   end
 
   describe 'バリデーション' do
-    let!(:channel) { FactoryBot.create(:channel) }
+    let!(:subscription) { FactoryBot.create(:subscription) }
 
     subject { described_class.new(params).valid? }
 
     context do
-      let!(:params) { { channel: channel, title: "aaa", url: "http://example.com/" } }
+      let!(:params) { { subscription: subscription, title: "aaa", url: "http://example.com/" } }
       it { is_expected.to be true }
     end
 
     context do
-      let!(:params) { { channel: nil, title: "aaa", url: "http://example.com/" } }
+      let!(:params) { { subscription: nil, title: "aaa", url: "http://example.com/" } }
       it { is_expected.to be false }
     end
 
     context do
-      let!(:params) { { channel: channel, title: nil, url: "http://example.com/" } }
+      let!(:params) { { subscription: subscription, title: nil, url: "http://example.com/" } }
       it { is_expected.to be false }
     end
 
     context do
-      let!(:params) { { channel: channel, title: "aaa", url: "" } }
+      let!(:params) { { subscription: subscription, title: "aaa", url: "" } }
       it { is_expected.to be false }
     end
   end
 
   describe '#unread?' do
-    let!(:item) { FactoryBot.build(:item, unread: unread) }
+    let!(:article) { FactoryBot.build(:article, unread: unread) }
 
-    subject { item.unread? }
+    subject { article.unread? }
 
     context do
       let!(:unread) { true }
