@@ -18,14 +18,10 @@ class Subscription < ApplicationRecord
   end
 
   def count_articles(options = {})
-    count_articles(options)
-  end
-
-  def count_articles(options = {})
     unread = options.fetch(:unread, false)
-    as_name = options[:as_name].presence || 'count_articles'
 
     rel = articles.where(disabled: false)
+
     if unread
       rel = rel.where(unread: true)
     end
