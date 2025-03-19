@@ -48,13 +48,19 @@ group :development, :test do
 
   gem 'pry-rails'
 
-  gem 'rspec-rails', '~> 7.0.0'
+  gem 'rspec-rails', '~> 7.1', '>= 7.1.1'
   gem 'factory_bot_rails'
 end
 
 group :development do
   # Speed up commands on slow machines / big apps [https://github.com/rails/spring]
   # gem "spring"
+end
+
+group :test do
+  gem 'simplecov', require: false
+  gem 'capybara'
+  gem 'shoulda-matchers', '~> 6.0'
 end
 
 #-----

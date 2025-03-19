@@ -40,3 +40,7 @@
 
 # Since customized for each environment. Procfile.dev.skel is committed instead
 Procfile.dev
+
+# simplecov outputs
+coverage
+
