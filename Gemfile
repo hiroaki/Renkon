@@ -62,6 +62,7 @@ group :test do
   gem 'capybara'
   gem 'shoulda-matchers', '~> 6.0'
   gem 'simplecov', require: false
+  gem 'webmock'
 end
 
 #-----
