@@ -97,3 +97,6 @@ end
 
 # if you use Docker don't forget to pass no-sandbox option:
 #Capybara::Cuprite::Driver.new(app, browser_options: { 'no-sandbox': nil })
+
+# Capybara/Cuprite が //127.0.0.1:xxxxx/__identify__ という内部リクエストを発するためそれを通します。
+WebMock.disable_net_connect!(allow_localhost: true)
