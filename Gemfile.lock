@@ -361,6 +361,7 @@ DEPENDENCIES
   simplecov
   sqlite3 (>= 2.1)
   stimulus-rails
+  stringio (>= 3.1.5)
   tailwindcss-rails (~> 2.7)
   turbo-rails
   tzinfo-data
