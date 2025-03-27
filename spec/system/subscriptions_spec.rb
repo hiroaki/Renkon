@@ -213,4 +213,65 @@ RSpec.describe "Subscriptions", type: :system do
       expect(page).to have_selector("li[data-subscription='#{subscription_b.id}'] span[data-unread-count]", text: "4")
     end
   end
+
+  describe 'Subscription destroy flow' do
+    let!(:subscription) { FactoryBot.create(:subscription) }
+
+    before do
+      visit root_path
+    end
+
+    context "when destroying from the modal" do
+      it "shows a success message and closes the modal" do
+        find("li[data-subscription='#{subscription.id}']").click
+        find('[data-pane-focus-target="linkEditSubscription"]').click
+        expect(page).to have_selector("turbo-frame#modal", wait: 5)
+
+        accept_confirm "Are you sure?" do
+          click_button "Destroy this subscription"
+        end
+
+        expect(page).to have_content("Subscription was successfully destroyed.")
+        click_button "Close"
+        expect(page).to have_selector("turbo-frame#modal", text: "")
+      end
+
+      it "shows an error message when destruction fails" do
+        allow_any_instance_of(Subscription).to receive(:destroy).and_return(false)
+        find("li[data-subscription='#{subscription.id}']").click
+        find('[data-pane-focus-target="linkEditSubscription"]').click
+        expect(page).to have_selector("turbo-frame#modal", wait: 5)
+
+        accept_confirm "Are you sure?" do
+          click_button "Destroy this subscription"
+        end
+
+        expect(page).to have_selector("turbo-frame#modal")
+        expect(page).to have_content("Subscription destruction failed.")
+      end
+    end
+
+    context "when destroying from the edit page" do
+      before do
+        visit edit_subscription_path(subscription)
+      end
+
+      it "redirects to the subscriptions index and shows a success message" do
+        accept_confirm "Are you sure?" do
+          click_button "Destroy this subscription"
+        end
+        expect(page).to have_current_path(subscriptions_path)
+        expect(page).to have_content("Subscription was successfully destroyed.")
+      end
+
+      it "stays on the edit page and shows an error message when destruction fails" do
+        allow_any_instance_of(Subscription).to receive(:destroy).and_return(false)
+        accept_confirm "Are you sure?" do
+          click_button "Destroy this subscription"
+        end
+        expect(page).to have_current_path(edit_subscription_path(subscription))
+        expect(page).to have_content("Subscription destruction failed.")
+      end
+    end
+  end
 end

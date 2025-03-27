@@ -66,8 +66,18 @@ class SubscriptionsController < ApplicationController
 
   # DELETE /subscriptions/1
   def destroy
-    @subscription.destroy!
-    redirect_to subscriptions_url, notice: "Subscription was successfully destroyed.", status: :see_other
+    if @subscription.destroy
+      if turbo_frame_request?
+        # in turbo-frame "modal"
+        flash.now[:notice] = 'Subscription was successfully destroyed.'
+        render
+      else
+        redirect_to subscriptions_url, notice: 'Subscription was successfully destroyed.', status: :see_other
+      end
+    else
+      flash.now[:notice] = 'Subscription destruction failed.'
+      render :edit, status: :unprocessable_entity
+    end
   end
 
   # fetch_subscription PATCH /subscriptions/:id/fetch(.:format)
