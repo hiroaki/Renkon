@@ -25,7 +25,7 @@ class ArticlesController < ApplicationController
     @article = @subscription.articles.build(article_params)
 
     if @article.save
-      redirect_to [@subscription, @article], notice: "Item was successfully created."
+      redirect_to [@subscription, @article], notice: "Article was successfully created."
     else
       render :new, status: :unprocessable_entity
     end
@@ -39,7 +39,7 @@ class ArticlesController < ApplicationController
   # article_article DELETE /articles/:article_id/articles/:id(.:format)
   def destroy
     @article.destroy!
-    redirect_to article_articles_url(@subscription), notice: "Item was successfully destroyed.", status: :see_other
+    redirect_to subscription_articles_url(@subscription), notice: "Article was successfully destroyed.", status: :see_other
   end
 
   # disable_article_article PATCH /articles/:article_id/articles/:id/disable(.:format)
@@ -71,8 +71,8 @@ class ArticlesController < ApplicationController
   def empty_trash
     number_of_deleted = Article.empty_trash
 
-    redirect_to(root_path,
-      notice: "#{number_of_deleted} articles were successfully deleted.",
+    redirect_to(subscriptions_path,
+      notice: "#{number_of_deleted} disabled articles were successfully deleted.",
       status: :see_other,
     )
   end
@@ -96,7 +96,7 @@ class ArticlesController < ApplicationController
 
     def common_action_for_update(params)
       if @article.update(params)
-        redirect_to [@subscription, @article], notice: "Item was successfully updated.", status: :see_other
+        redirect_to [@subscription, @article], notice: "Article was successfully updated.", status: :see_other
       else
         render :edit, status: :unprocessable_entity
       end

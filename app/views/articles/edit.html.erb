@@ -1,8 +1,22 @@
+<%
+  button_to_destroy = capture do
+    button_to('Destroy this article', [@subscription, @article],
+      method: :delete,
+      class: 'button-danger',
+      data: { 'turbo-confirm': 'Are you sure?' },
+    )
+  end
+%>
+
 <header class="contaner">
   <h2>Editing article</h2>
 </header>
 
-<%= render "form", article: @article %>
+<%= render 'form', article: @article %>
+
+<div class="container">
+  <%= button_to_destroy %>
+</div>
 
 <hr>
 

@@ -22,7 +22,7 @@
       %>
     <% else %>
       <%=
-        button_to('Mark Unead', unread_subscription_article_path(@subscription, @article),
+        button_to('Mark Unread', unread_subscription_article_path(@subscription, @article),
           method: :patch, data: { 'turbo-confirm': 'Are you sure?' }, class: 'button-notice',
         )
       %>

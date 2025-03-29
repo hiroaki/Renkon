@@ -6,6 +6,14 @@
   <%= link_to "Back to subscriptions", subscriptions_path %>
 </nav>
 
+<%=
+    button_to('Empty trash', trash_path,
+      method: :delete,
+      class: 'button-danger',
+      data: { 'turbo-confirm': 'Are you sure?' },
+    )
+%>
+
 <hr>
 
 <%= turbo_frame_tag 'articles' do %>
