@@ -1,143 +1,163 @@
 import { Controller } from "@hotwired/stimulus";
-import TurboFrameDelegator from "lib/turbo_frame_delegator"
 import { getCsrfToken } from 'lib/schema'
 
-class RefreshChannelDelegator extends TurboFrameDelegator {
-  // override
-  prepareRequest(request) {
-    super.prepareRequest(request)
-    console.log('request', request)
-
-    if (!request.isSafe) {
-      const token = getCsrfToken()
-      if (token) {
-        request.headers['X-CSRF-Token'] = token
-      }
-    }
-  }
-}
-
 export default class extends Controller {
-  static targets = ['channelsPane', 'itemsPane', 'contentsPane', 'linkEditChannel'];
+  static targets = ['navigationPane', 'subscriptionsPane', 'articlesPane', 'contentsPane', 'linkEditSubscription'];
+  static values = {
+    adaptSubscriptionsController: String, // 接続する Subscriotions コントローラの識別子
+    adaptArticlesController: String, // 接続する Articles コントローラの識別子
+  }
 
   connect() {
+    // それぞれの Pane は、その範囲の要素がクリックされることで "focused" のマークがつくようにします。
+    // これはブラウザの focus とは別の概念で、 focus された要素がどの Pane の中にあるかの判定のみに使えるもので、
+    // このマークは CSS の装飾の制御に用いています。
+    // ブラウザの focus の操作は別にコントロールする必要があります。
     this.allPaneTargets().forEach((pane) => {
-      pane.addEventListener('click', () => this.focusPane(pane));
+      pane.addEventListener('click', () => this.setCurrentPane(pane));
     });
 
-    // initialize state for Edit channel button
-    this.#resetEditChannelLinkByChannelListItem(this.getSelectedChannelListItem())
+    // initialize state for Edit subscription button
+    this.#resetEditSubscriptionLinkBySubscriptionListItem(this.getSelectedSubscriptionListItem());
   }
 
-  getSelectedChannelListItem() {
-    return this.channelsPaneTarget.querySelector('li[data-selected="true"]');
+  // INTERFACE of subscriptionsController inherited SelectedLiBaseController
+  subscriptionsController() {
+    const identifier = this.adaptSubscriptionsControllerValue;
+    const controllerElement = this.subscriptionsPaneTarget.querySelector(`[data-controller="${identifier}"]`);
+
+    if (controllerElement) {
+      return controllerElement[identifier];
+    } else {
+      // not connected (loaded) yet
+      return null;
+    }
   }
 
-  getChannelListItemById(channelId) {
-    return this.channelsPaneTarget.querySelector('li[data-channel="'+ channelId +'"]');
+  // INTERFACE of articlesController inherited SelectedLiBaseController
+  articlesController() {
+    const identifier = this.adaptArticlesControllerValue;
+    const controllerElement = this.articlesPaneTarget.querySelector(`[data-controller="${identifier}"]`);
+
+    if (controllerElement) {
+      return controllerElement[identifier];
+    } else {
+      // not connected (loaded) yet
+      return null;
+    }
   }
 
+  // 選択されている Subscription 項目があればそれを返します。なければ null です。
+  getSelectedSubscriptionListItem() {
+    const controller = this.subscriptionsController();
+    if (controller) {
+      return controller.getSelectedItem();
+    } else {
+      return null;
+    }
+  }
+
+  // このコントローラが操作する pane の全てのリスト
   allPaneTargets() {
-    return [this.channelsPaneTarget, this.itemsPaneTarget, this.contentsPaneTarget]
+    return [this.navigationPaneTarget, this.subscriptionsPaneTarget, this.articlesPaneTarget, this.contentsPaneTarget]
   }
 
-  focusPane(pane) {
+  // 指定した pane に "focused" をマークします。
+  // その他の pane(s) の "focused" は外されます。
+  setCurrentPane(pane) {
     this.allPaneTargets().forEach((pane) => pane.classList.remove('focused'));
     pane.classList.add('focused');
   }
 
-  // keyup LEFT on items pane
-  backToChannelPane(evt) {
-    this.focusPane(this.channelsPaneTarget)
-    this.getSelectedChannelListItem().focus()
+  isCurrentPane(pane) {
+    return pane.classList.contains('focused');
   }
 
-  // keyup RIGHT on channels pane
-  forwardToItemPane(evt) {
-    this.focusPane(this.itemsPaneTarget);
+  // keyup LEFT on articles pane
+  backToSubscriptionsPane(evt) {
+    this.setCurrentPane(this.subscriptionsPaneTarget);
+    this.subscriptionsController().setFocusToCurrentItem();
+  }
 
-    const selectedItems = this.itemsPaneTarget.querySelectorAll('li[data-selected="true"]');
+  // keyup RIGHT on subscriptions pane
+  forwardToArticlesPane(evt) {
+    this.setCurrentPane(this.articlesPaneTarget);
+
+    const controller = this.articlesController();
+    const selectedItems = controller.getSelectedItems();
     if (0 < selectedItems.length) {
-      selectedItems.item(selectedItems.length - 1).focus();
+      controller.moveFocusToItem(selectedItems.item(selectedItems.length - 1));
     }
     else {
-      const li = this.itemsPaneTarget.querySelectorAll('li').item(0);
-      if (li) {
-        li.closest('ul').items.enterItem(li);
-      }
+      controller.activateFirstItem();
     }
   }
 
-  // keyup SPACE on channels pane
-  forwardToUnreadItemPane(evt) {
-    this.focusPane(this.itemsPaneTarget);
+  // keyup SPACE on subscriptions pane
+  forwardToUnreadArticlePane(evt) {
+    this.setCurrentPane(this.articlesPaneTarget);
+    this.articlesController().activateFirstUnreadItem();
+  }
 
-    const items = this.itemsPaneTarget.querySelectorAll('li');
+  // keyup SPACE on articles pane
+  forwardContentsOrNextArticle(evt) {
+    if (!this.isCurrentPane(this.articlesPaneTarget)) {
+      console.error('articlesPane is not the current');
+      return;
+    }
+
+    const controller = this.articlesController();
+    const articles = controller.listItemTargets;
+
+    // 記事が選択されている場合、その位置以降から "未読" 項目を探すようにします。
+    const li = controller.getSelectedItem();
     let pos = -1;
-    for (let i = 0; i < items.length; ++i) {
-      if (items[i] == evt.currentTarget) {
-        pos = i;
+    if (li) {
+      for (let i = 0; i < articles.length; ++i) {
+        if (articles[i] == li) {
+          pos = i;
+          break;
+        }
+      }
+    }
+    const isSomeArticleActivated = pos != -1;
+
+    // contents ペインに、現在選択している Article のコンテンツが表示されている場合、
+    // それがまだスクロール可能ならばスクロールだけを行います。
+    // スクロールが最後まで到達しているならば、次の Article を "選択状態" にするための処理へ続きます。
+    if (isSomeArticleActivated) {
+      const contentsPane = this.contentsPaneTarget;
+      const maxScroll = contentsPane.scrollHeight - contentsPane.clientHeight;
+      if (contentsPane.scrollTop + 1 < maxScroll) {
+        contentsPane.scrollBy({top: contentsPane.clientHeight, behavior: 'auto'});
+        return false;
+      }
+    }
+
+    // 次の "未読" 項目をアクティブにします。
+    for (let i = pos + 1; i < articles.length; ++i) {
+      if (articles[i].dataset['unread'] == 'true') {
+        controller.activateItem(articles[i]);
         break;
       }
     }
-
-    for (let i = pos + 1; i < items.length; ++i) {
-      let li = items[i];
-      if (li.dataset['unread'] == 'true') {
-        // call a method of items controller (based selected-li controller)
-        li.closest('ul').items.enterItem(li);
-        break;
-      }
-    }
   }
 
-  selectPrevItem(evt) {
-    const pane = evt.currentTarget;
-
-    const selection = pane.querySelectorAll('li[data-selected="true"]');
-    if (0 < selection.length) {
-      pane.getElementsByTagName('ul').item(0).selectedLi.selectPrevLi(selection.item(0));
-    }
-    else {
-      const li = pane.querySelectorAll('li')
-      if (0 < li.length) {
-        pane.getElementsByTagName('ul').item(0).selectedLi.enterItem(li.item(li.length - 1));
-      }
-    }
-  }
-
-  selectNextItem(evt) {
-    const pane = evt.currentTarget;
-
-    const selection = pane.querySelectorAll('li[data-selected="true"]');
-    if (0 < selection.length) {
-      pane.getElementsByTagName('ul').item(0).selectedLi.selectNextLi(selection.item(selection.length - 1));
-    }
-    else {
-      const li = pane.querySelectorAll('li')
-      if (0 < li.length) {
-        pane.getElementsByTagName('ul').item(0).selectedLi.enterItem(li.item(0));
-      }
-    }
-  }
-
+  // "既読状況" に変化があった時、購読リストの当該項目を更新します（未読数バッジの更新）
   onChangeReadStatus(evt) {
-    const li = this.getChannelListItemById(evt.target.dataset['channel']);
-    const turboFrame = li.querySelector('turbo-frame');
-    if (turboFrame) {
-      new RefreshChannelDelegator(
-        li.dataset['urlRefresh'], 'PATCH', turboFrame.id, new URLSearchParams({short: true, dry_run: true})
-      )
-      .perform();
+    const controller = this.subscriptionsController();
+    if (controller) {
+      controller.refreshItem(evt.target.dataset['subscription']);
     }
   }
 
-  onChangeSelectedChannelListItem(evt) {
+  // 選択されている "購読" が変わった時、操作バー上の「編集」ボタンの操作対象を当該購読の内容に変更します。
+  onChangeSelectedSubscriptionListItem(evt) {
     const li = evt.detail.selected
-    this.#resetEditChannelLinkByChannelListItem(li);
+    this.#resetEditSubscriptionLinkBySubscriptionListItem(li);
   }
 
-  #resetEditChannelLinkByChannelListItem(li) {
+  #resetEditSubscriptionLinkBySubscriptionListItem(li) {
     let settingHref = null;
     if (li) {
       const urlEdit = li.dataset['urlEdit']
@@ -145,34 +165,37 @@ export default class extends Controller {
          settingHref = urlEdit;
       }
     }
-    this.#resetEditChannelLinkHref(settingHref)
+    this.#resetEditSubscriptionLinkHref(settingHref)
   }
 
-  #resetEditChannelLinkHref(settingHref) {
+  #resetEditSubscriptionLinkHref(settingHref) {
     if (settingHref == null) {
-      this.linkEditChannelTarget.href = '#'
-      this.linkEditChannelTarget.dataset['disabled'] = true
+      this.linkEditSubscriptionTarget.href = '#'
+      this.linkEditSubscriptionTarget.dataset['disabled'] = true
     }
     else {
-      this.linkEditChannelTarget.href = settingHref
-      this.linkEditChannelTarget.dataset['disabled'] = false
+      this.linkEditSubscriptionTarget.href = settingHref
+      this.linkEditSubscriptionTarget.dataset['disabled'] = false
     }
   }
 
-  onConnectItems(evt) {
+  // "記事" リストが変更されたとき、 "コンテンツ" ペインをクリアします。
+  onConnectArticles(evt) {
     this.clearContentsPane();
   }
 
+  // "ゴミ箱" が空にされたとき、 "購読リスト" で選択されている項目が "ゴミ箱" である場合に限り、
+  // "コンテンツ" ペインと "記事リスト" ペインをクリアします。
   onEmptyTrash(evt) {
-    const selectedChannel = this.getSelectedChannelListItem();
-    if (selectedChannel && selectedChannel.id == 'trash') {
+    const selectedSubscription = this.getSelectedSubscriptionListItem();
+    if (selectedSubscription && selectedSubscription.id == 'trash') {
       this.clearContentsPane();
-      this.clearItemsPane();
+      this.clearArticlesPane();
     }
   }
 
-  clearItemsPane() {
-    this.itemsPaneTarget.querySelector('turbo-frame#items').innerHTML = '';
+  clearArticlesPane() {
+    this.articlesPaneTarget.querySelector('turbo-frame#articles').innerHTML = '';
   }
 
   clearContentsPane() {

@@ -1,0 +1,21 @@
+<header class="contaner">
+  <h2>Disabled article</h2>
+</header>
+
+<nav class="container">
+  <%= link_to "Back to subscriptions", subscriptions_path %>
+</nav>
+
+<%=
+    button_to('Empty trash', trash_path,
+      method: :delete,
+      class: 'button-danger',
+      data: { 'turbo-confirm': 'Are you sure?' },
+    )
+%>
+
+<hr>
+
+<%= turbo_frame_tag 'articles' do %>
+  <%= render 'list' %>
+<% end %>

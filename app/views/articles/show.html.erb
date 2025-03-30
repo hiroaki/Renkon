@@ -1,0 +1,66 @@
+<header class="contaner">
+  <h2>Show article</h2>
+</header>
+
+<turbo-frame id="contents">
+  <div id="actual-contents" class="contaner">
+    <%= render @article %>
+  </div>
+</turbo-frame>
+
+<hr>
+
+<div class="container">
+  <%= link_to 'Edit', edit_subscription_article_path(@subscription, @article) %> |
+
+  <% read_unread = capture do %>
+    <% if @article.unread? %>
+      <%=
+        button_to('Mark Read', read_subscription_article_path(@subscription, @article),
+          method: :patch, data: { 'turbo-confirm': 'Are you sure?' }, class: 'button-notice',
+        )
+      %>
+    <% else %>
+      <%=
+        button_to('Mark Unread', unread_subscription_article_path(@subscription, @article),
+          method: :patch, data: { 'turbo-confirm': 'Are you sure?' }, class: 'button-notice',
+        )
+      %>
+    <% end %>
+  <% end %>
+
+  <% if @article.disabled? %>
+    <%= link_to 'Back to articles', subscription_articles_path(@subscription) %> |
+    <%= link_to 'Back to Trash', trash_path %>
+
+    <%= read_unread %>
+
+    <%=
+      button_to(
+        'Enable', enable_subscription_article_path(@subscription, @article),
+        method: :patch, data: { 'turbo-confirm': 'Are you sure?' }, class: 'button-notice',
+      )
+    %>
+    <%=
+      button_to(
+        'Destroy', subscription_article_path(@subscription, @article),
+        method: :delete, data: { 'turbo-confirm': 'Are you sure?' }, class: 'button-danger',
+      )
+    %>
+  <% else %>
+    <%= link_to 'Back to articles', subscription_articles_path(@subscription) %>
+
+    <%= read_unread %>
+
+    <%=
+      button_to('Disable', disable_subscription_article_path(@subscription, @article),
+        method: :patch, data: { 'turbo-confirm': 'Are you sure?' }, class: 'button-notice',
+      )
+    %>
+    <%=
+      button_to('Destroy', subscription_article_path(@subscription, @article),
+        method: :delete, data: { 'turbo-confirm': 'Are you sure?' }, class: 'button-danger',
+      )
+    %>
+  <% end %>
+</div>

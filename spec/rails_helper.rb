@@ -1,3 +1,8 @@
+require 'simplecov'
+SimpleCov.start 'rails' do
+  SimpleCov.coverage_dir('coverage/rspec')
+end
+
 # This file is copied to spec/ when you run 'rails generate rspec:install'
 require 'spec_helper'
 ENV['RAILS_ENV'] ||= 'test'
@@ -66,3 +71,32 @@ RSpec.configure do |config|
   # arbitrary gems may also be filtered via:
   # config.filter_gems_from_backtrace("gem name")
 end
+
+# https://github.com/thoughtbot/shoulda-matchers/tree/v6.4.0?tab=readme-ov-file#rails-apps
+Shoulda::Matchers.configure do |config|
+  config.integrate do |with|
+    with.test_framework :rspec
+    with.library :rails
+  end
+end
+
+# require 'capybara/rspec'
+require 'capybara/cuprite'
+Capybara.javascript_driver = :cuprite_custom
+Capybara.register_driver(:cuprite_custom) do |app|
+  # see also https://github.com/rubycdp/ferrum?tab=readme-ov-file#customization
+  Capybara::Cuprite::Driver.new(app,
+    js_errors: true,
+    window_size: [1200, 800],
+    headless: %w[0 false].exclude?(ENV['HEADLESS']),
+    slowmo: ENV['SLOWMO']&.to_f,
+    inspector: true,
+    browser_options: ENV['DOCKER'] ? { 'no-sandbox' => nil } : {},
+  )
+end
+
+# if you use Docker don't forget to pass no-sandbox option:
+#Capybara::Cuprite::Driver.new(app, browser_options: { 'no-sandbox': nil })
+
+# Capybara/Cuprite が //127.0.0.1:xxxxx/__identify__ という内部リクエストを発するためそれを通します。
+WebMock.disable_net_connect!(allow_localhost: true)

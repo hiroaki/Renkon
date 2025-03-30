@@ -1,0 +1,130 @@
+<div class="flex flex-col h-screen text-gray-700"
+  data-controller="pane-focus"
+  data-action="
+    changeReadStatus->pane-focus#onChangeReadStatus
+    connectArticles->pane-focus#onConnectArticles
+    emptyTrash->pane-focus#onEmptyTrash
+  "
+  data-pane-focus-adapt-subscriptions-controller-value="subscriptions"
+  data-pane-focus-adapt-articles-controller-value="articles"
+>
+  <nav class="flex-shrink-0 h-12 bg-gray-200 px-1 flex flex-row place-items-center"
+    data-pane-focus-target="navigationPane",
+  >
+    <%= image_tag('renkon.png', size: '46x46') %>
+
+    <div class="ml-1 mr-2 max-w-20">
+      <h2 class="m-0 p-0 my-0 text-gray-400">
+        <span>Renkon</span>
+      </h2>
+    </div>
+
+    <div class="mx-2">
+      <button class="px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-blue-600 border border-transparent rounded-md active:bg-blue-600 hover:bg-blue-700 focus:outline-none focus:shadow-outline-blue"
+        data-controller="refresh"
+        data-action="click->refresh#all"
+        data-refresh-concurrency-value="2"
+      >
+        Refresh
+      </button>
+    </div>
+
+    <div class="mx-2">
+      <%=
+        link_to('New subscription', new_subscription_path,
+          'data-turbo-frame' => 'modal',
+          'class' => 'px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-green-600 border border-transparent rounded-md active:bg-green-600 hover:bg-green-700 focus:outline-none focus:shadow-outline-green inline-block hover:text-white'
+        )
+      %>
+    </div>
+    <div class="mx-2">
+      <%=
+        link_to('Edit subscription', '#',
+          'data-turbo-frame' => 'modal',
+          'data-pane-focus-target' => 'linkEditSubscription',
+          'class' => 'px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-green-600 border border-transparent rounded-md active:bg-green-600 hover:bg-green-700 focus:outline-none focus:shadow-outline-green inline-block hover:text-white data-[disabled=true]:bg-gray-400',
+        )
+      %>
+    </div>
+
+    <div class="mx-2">
+      <button class="px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-orange-300 border border-transparent rounded-md active:bg-orange-300 hover:bg-orange-400 focus:outline-none focus:shadow-outline-orange"
+        data-controller="trash"
+        data-action="
+          click->trash#confirmEmptyTrash
+          click->trash#emptyTrash
+        "
+        data-url-empty-trash="<%= trash_path %>"
+        data-text-for-confirm-empty-trash="Are you sure you want to empty the trash?"
+      >
+        Empty Trash
+      </button>
+    </div>
+  </nav>
+
+  <main class="flex flex-row flex-1 overflow-hidden">
+    <!-- -->
+    <div id="subscriptions-pane" tabindex="-1" class="flex flex-row flex-shrink-0 min-w-8 focus:outline-none" style="width: 8rem;"
+      data-controller="frame"
+      data-frame-target="adjustable"
+      data-frame-storage-key-value="subscriptions-width"
+      data-pane-focus-target="subscriptionsPane"
+      data-action="
+        keydown.right->pane-focus#forwardToArticlesPane
+        keydown.space->pane-focus#forwardToUnreadArticlePane:prevent
+        changeSelectedLi->pane-focus#onChangeSelectedSubscriptionListItem
+      "
+    >
+      <div class="flex-1 bg-blue-100 overflow-y-auto overflow-x-hidden pt-2">
+        <%= turbo_frame_tag('subscriptions', src: subscriptions_path(short: true)) %>
+      </div>
+      <div class="w-0.5 bg-gray-200 cursor-col-resize" draggable="true"
+        data-action="
+          dragstart->frame#handlerDragStart
+          drag->frame#handlerDrag
+          dragend->frame#handlerDragEnd
+        "
+      >
+      </div>
+    </div>
+
+    <!-- -->
+    <div id="articles-pane" tabindex="-1" class="flex flex-row flex-shrink-0 min-w-8 focus:outline-none" style="width: 8rem;"
+      data-controller="frame"
+      data-frame-target="adjustable"
+      data-frame-storage-key-value="articles-width"
+      data-pane-focus-target="articlesPane"
+      data-action="
+        keydown.left->pane-focus#backToSubscriptionsPane
+        keydown.space->pane-focus#forwardContentsOrNextArticle:prevent
+      "
+    >
+      <div class="flex-1 bg-white-100 overflow-y-auto overflow-x-hidden pt-2">
+        <%= turbo_frame_tag('articles') %>
+      </div>
+      <div class="w-0.5 bg-gray-200 cursor-col-resize" draggable="true"
+      data-action="
+        dragstart->frame#handlerDragStart
+        drag->frame#handlerDrag
+        dragend->frame#handlerDragEnd
+      "
+      >
+      </div>
+    </div>
+
+    <!-- -->
+    <div id="contents-pane" tabindex="-1" class="flex-1 overflow-y-auto min-w-8 focus:outline-none"
+      data-pane-focus-target="contentsPane"
+    >
+      <div class="bg-white p-2">
+        <%= turbo_frame_tag('contents', autoscroll: true, data: { autoscroll_block: 'start' } ) %>
+      </div>
+      <div class="w-0.5 bg-gray-200 cursor-col-resize">
+      </div>
+    </div>
+  </main>
+
+  <footer class="flex-shrink-0 h-4 bg-gray-200 text-xs px-1">
+    <p>Status</p>
+  </footer>
+</div>

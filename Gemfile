@@ -48,7 +48,7 @@ group :development, :test do
 
   gem 'pry-rails'
 
-  gem 'rspec-rails', '~> 7.0.0'
+  gem 'rspec-rails', '~> 7.1', '>= 7.1.1'
   gem 'factory_bot_rails'
 end
 
@@ -57,9 +57,21 @@ group :development do
   # gem "spring"
 end
 
+group :test do
+  gem 'cuprite'
+  gem 'capybara'
+  gem 'shoulda-matchers', '~> 6.0'
+  gem 'simplecov', require: false
+  gem 'webmock'
+end
+
 #-----
 
 gem 'feedjira'
 gem 'http'
 gem 'tailwindcss-rails', '~> 2.7'
 gem 'image_processing', '>= 1.2'
+
+# The version is specified to avoid "Unresolved or ambiguous specs" warnings.
+gem "stringio", ">= 3.1.5"
+

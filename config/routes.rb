@@ -8,13 +8,13 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   # root "posts#index"
 
-  root to: 'channels#main'
+  root to: 'subscriptions#main'
 
-  get 'trash', to: 'items#trash'
-  delete 'trash', to: 'items#empty_trash'
+  get 'trash', to: 'articles#trash'
+  delete 'trash', to: 'articles#empty_trash'
 
-  resources :channels do
-    resources :items do
+  resources :subscriptions do
+    resources :articles do
       member do
         patch :disable
         patch :enable
