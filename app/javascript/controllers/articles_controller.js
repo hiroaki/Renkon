@@ -10,7 +10,7 @@ export default class extends SelectedLiBaseController {
     // pane-controller に取り除かれたことを検知してもらいたいところですが、
     // disconnect 時この要素は既に無くなっているためここでイベントを作っても、それが伝播しません。
     // 要素が取り除かれたことを祖先要素で検知するには祖先要素の方で MutationObserver の実装を検討してください。
-    fireConnectArticlesEvent(this.element)
+    fireConnectArticlesEvent(this.element);
   }
 
   //
@@ -22,10 +22,8 @@ export default class extends SelectedLiBaseController {
   makeItemRead(li) {
     if (li.dataset['unread'] == 'true') {
       const targetElement = li.querySelector('button');
-      const me = this;
-      this.toggleReadStatus(li)
-      .then(() => {
-        me.resetReadStatus(targetElement);
+      this.toggleReadStatus(li).then(() => {
+        this.resetReadStatus(targetElement);
       });
     }
   }
@@ -33,65 +31,59 @@ export default class extends SelectedLiBaseController {
   //
   resetReadStatus(targetElement) {
     const li = targetElement.closest('li');
-    if (li.dataset.unread == 'true') {
-       targetElement.textContent = '●'
-    } else {
-      targetElement.textContent = '　'
-    }
+    targetElement.textContent = li.dataset.unread == 'true' ? '●' : '　';
   }
 
   //
   handlerToggleReadStatus(evt) {
     const targetElement = evt.currentTarget;
     const li = targetElement.closest('li');
-    const me = this;
-    this.toggleReadStatus(li)
-    .then(() => {
-      me.resetReadStatus(targetElement);
+    this.toggleReadStatus(li).then(() => {
+      this.resetReadStatus(targetElement);
     });
   }
 
-  toggleReadStatus(li) {
-    const me = this;
+  async toggleReadStatus(li) {
     const isUnread = li.dataset.unread == 'true';
-    const url = li.dataset[ isUnread ? 'urlRead' : 'urlUnread' ];
+    const url = li.dataset[isUnread ? 'urlRead' : 'urlUnread'];
 
-    return fetch(url, {
-      method: 'PATCH',
-      headers: { 'X-CSRF-Token': getCsrfToken() }
-    })
-    .then(response => {
+    try {
+      const response = await fetch(url, {
+        method: 'PATCH',
+        headers: { 'X-CSRF-Token': getCsrfToken() }
+      });
+
       if (response.ok) {
         li.dataset.unread = isUnread ? 'false' : 'true';
         fireChangeReadStatusEvent(li);
-      }
-      else {
+      } else {
         console.error('Failed to update read status', response);
       }
-    })
-    .catch(error => console.error('Error:', error));
+    } catch (error) {
+      console.error('Error:', error);
+    }
   }
 
   //
-  deleteItem(evt) {
-    const me = this;
+  async deleteItem(evt) {
     const li = this.detectLiFrom(evt.target);
     const url = li.dataset['urlDisable'];
 
-    return fetch(url, {
-      method: 'PATCH',
-      headers: { 'X-CSRF-Token': getCsrfToken() }
-    })
-    .then(response => {
+    try {
+      const response = await fetch(url, {
+        method: 'PATCH',
+        headers: { 'X-CSRF-Token': getCsrfToken() }
+      });
+
       if (response.ok) {
         fireChangeReadStatusEvent(li);
         li.remove();
-      }
-      else {
+      } else {
         console.error('Failed to delete the item', response);
       }
-    })
-    .catch(error => console.error('Error:', error));
+    } catch (error) {
+      console.error('Error:', error);
+    }
   }
 
   //

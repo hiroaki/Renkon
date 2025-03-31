@@ -9,15 +9,7 @@ export default class extends Controller {
   static EMPTY_IMAGE_ID = '__workaroundDisappearingDragImage__';
 
   connect() {
-    // ストレージのキーを変更したため、古い名前があれば消します。
-    // TODO: あとで消す
-    localStorage.removeItem('channels-pane');
-    localStorage.removeItem('items-pane');
-    localStorage.removeItem('channelsPane');
-    localStorage.removeItem('itemsPane');
-    localStorage.removeItem('channels-width');
-    localStorage.removeItem('items-width');
-
+    this.cleanupOldStorageKeys();
     this.reset();
   }
 
@@ -26,6 +18,13 @@ export default class extends Controller {
     // この最初の時点で定数のコピーを保持しておきます
     this.emptyImageId = this.constructor.EMPTY_IMAGE_ID;
     this.workaroundDisappearingDragImage();
+  }
+
+  // ストレージのキーを変更したため、古い名前が存在していた場合は消します。
+  // TODO: あとで消す
+  cleanupOldStorageKeys() {
+    const oldKeys = ['channels-pane', 'items-pane', 'channelsPane', 'itemsPane', 'channels-width', 'items-width'];
+    oldKeys.forEach(key => localStorage.removeItem(key));
   }
 
   // 特定のペインのサイズ幅をコントロールできるように、ドラッグ可能な DIV を設けていますが、これをドラッグする際、
@@ -40,9 +39,7 @@ export default class extends Controller {
   // ただし、レイアウトに影響が出ないようにするにはサイズを 0px にしたいところですが、そうするとドラッグイメージが表示されず？
   // "妙な挙動" が再現してしまうため、それを避けるために style の値を工夫しています。
   workaroundDisappearingDragImage() {
-    if (!!this.getEmptyImage()) {
-      return;
-    }
+    if (this.getEmptyImage()) return;
 
     const emptyImage = new Image();
     emptyImage.id = this.emptyImageId;
@@ -55,7 +52,7 @@ export default class extends Controller {
   }
 
   getEmptyImage() {
-    return document.getElementById(this.emptyImageId)
+    return document.getElementById(this.emptyImageId);
   }
 
   storeWidth(storageKey, value) {
@@ -88,7 +85,7 @@ export default class extends Controller {
     // WORKAROUND: Chrome: drag を終了して dragend になる最後の drag イベントの evt.x が 0 になります（なぜ？バグ？）
     // このことから、 evt.x == 0 は無視します。
     // ちなみに dragend 時の evt.x は 0 ではなく、ちゃんとした位置になっています。
-    if (evt.x != 0) {
+    if (evt.x !== 0) {
       this.updateWidthOfTarget(evt.x - this.start_x);
     }
   }
@@ -98,13 +95,13 @@ export default class extends Controller {
     evt.preventDefault();
   }
 
-  handlerDragEnd(evt) {
+  handlerDragEnd(_evt) {
     this.storeWidth(this.storageKeyValue, this.adjustableTarget.offsetWidth);
     this.reset();
   }
 
   updateWidthOfTarget(delta_x) {
     const new_width = this.start_width + delta_x;
-    this.adjustableTarget.style.width = parseInt(new_width) +'px'
+    this.adjustableTarget.style.width = `${parseInt(new_width)}px`;
   }
 }

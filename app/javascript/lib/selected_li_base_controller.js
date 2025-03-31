@@ -27,38 +27,23 @@ export default class extends Controller {
   // ここで想定しているのは、ある li がフォーカスされている状態から、カーソルキーの上を押下したとき。
   selectPrevItem(evt) {
     const li = this.detectLiFrom(evt.target);
-    this.selectPrevLi(li);
-  }
-
-  selectPrevLi(li) {
-    let prev_item = null;
-    const len = this.listItemTargets.length;
-    for (let i = 0; i < len; ++i) {
-      if (this.listItemTargets[i] == li) {
-        prev_item = i - 1;
-        if (prev_item != null && 0 <= prev_item) {
-          this.activateItem(this.listItemTargets[prev_item]);
-        }
-        break;
-      }
-    }
+    this.selectAdjacentLi(li, -1);
   }
 
   // イベントを発生させた要素を含むリストの、イベント要素のひとつ次の li を「選択状態」にします。
   // ここで想定しているのは、ある li がフォーカスされている状態から、カーソルキーの下を押下したとき。
   selectNextItem(evt) {
-    const li = this.detectLiFrom(evt.target)
-    this.selectNextLi(li);
+    const li = this.detectLiFrom(evt.target);
+    this.selectAdjacentLi(li, 1);
   }
 
-  selectNextLi(li) {
-    let next_item = null;
+  selectAdjacentLi(li, direction) {
     const len = this.listItemTargets.length;
     for (let i = 0; i < len; ++i) {
-      if (this.listItemTargets[i] == li) {
-        next_item = i + 1;
-        if (next_item != null && next_item < len) {
-          this.activateItem(this.listItemTargets[next_item]);
+      if (this.listItemTargets[i] === li) {
+        const adjacentIndex = i + direction;
+        if (adjacentIndex >= 0 && adjacentIndex < len) {
+          this.activateItem(this.listItemTargets[adjacentIndex]);
         }
         break;
       }
@@ -66,9 +51,9 @@ export default class extends Controller {
   }
 
   openUrl(evt) {
-    const li = this.detectLiFrom(evt.target)
+    const li = this.detectLiFrom(evt.target);
     if (li) {
-      window.open(li.dataset.urlSource, '_blank', 'noopener noreferrer')
+      window.open(li.dataset.urlSource, '_blank', 'noopener noreferrer');
     } else {
       // このブロックへ来るのは、たとえばイベントをリッスンしている <ul> の中で発生したイベントであるも、
       // <li> の上ではない部分（いわゆる余白部分）で発生したとき。
@@ -78,7 +63,7 @@ export default class extends Controller {
       // 見た目の選択状態との兼ね合いに注意してください。
       // 現状は、余白をクリックしたあと、ある <li> が選択状態であれば、
       // キー Enter イベントは #open を実行し、またダブルクリックは実行せずにこのブロックへ来るようにしています。
-      console.warn('<li> was undetected from the event target')
+      console.warn('<li> was undetected from the event target');
     }
   }
 
@@ -120,7 +105,7 @@ export default class extends Controller {
   }
 
   detectLiFrom(elem) {
-    return elem.closest('li')
+    return elem.closest('li');
   }
 
   activateFirstItem() {

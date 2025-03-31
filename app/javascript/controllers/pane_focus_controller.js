@@ -13,7 +13,7 @@ export default class extends Controller {
     // これはブラウザの focus とは別の概念で、 focus された要素がどの Pane の中にあるかの判定のみに使えるもので、
     // このマークは CSS の装飾の制御に用いています。
     // ブラウザの focus の操作は別にコントロールする必要があります。
-    this.allPaneTargets().forEach((pane) => {
+    this.allPaneTargets().forEach(pane => {
       pane.addEventListener('click', () => this.setCurrentPane(pane));
     });
 
@@ -59,13 +59,13 @@ export default class extends Controller {
 
   // このコントローラが操作する pane の全てのリスト
   allPaneTargets() {
-    return [this.navigationPaneTarget, this.subscriptionsPaneTarget, this.articlesPaneTarget, this.contentsPaneTarget]
+    return [this.navigationPaneTarget, this.subscriptionsPaneTarget, this.articlesPaneTarget, this.contentsPaneTarget];
   }
 
   // 指定した pane に "focused" をマークします。
   // その他の pane(s) の "focused" は外されます。
   setCurrentPane(pane) {
-    this.allPaneTargets().forEach((pane) => pane.classList.remove('focused'));
+    this.allPaneTargets().forEach(pane => pane.classList.remove('focused'));
     pane.classList.add('focused');
   }
 
@@ -114,13 +114,13 @@ export default class extends Controller {
     let pos = -1;
     if (li) {
       for (let i = 0; i < articles.length; ++i) {
-        if (articles[i] == li) {
+        if (articles[i] === li) {
           pos = i;
           break;
         }
       }
     }
-    const isSomeArticleActivated = pos != -1;
+    const isSomeArticleActivated = pos !== -1;
 
     // contents ペインに、現在選択している Article のコンテンツが表示されている場合、
     // それがまだスクロール可能ならばスクロールだけを行います。
@@ -129,14 +129,14 @@ export default class extends Controller {
       const contentsPane = this.contentsPaneTarget;
       const maxScroll = contentsPane.scrollHeight - contentsPane.clientHeight;
       if (contentsPane.scrollTop + 1 < maxScroll) {
-        contentsPane.scrollBy({top: contentsPane.clientHeight, behavior: 'auto'});
+        contentsPane.scrollBy({ top: contentsPane.clientHeight, behavior: 'auto' });
         return false;
       }
     }
 
     // 次の "未読" 項目をアクティブにします。
     for (let i = pos + 1; i < articles.length; ++i) {
-      if (articles[i].dataset['unread'] == 'true') {
+      if (articles[i].dataset['unread'] === 'true') {
         controller.activateItem(articles[i]);
         break;
       }
@@ -153,29 +153,23 @@ export default class extends Controller {
 
   // 選択されている "購読" が変わった時、操作バー上の「編集」ボタンの操作対象を当該購読の内容に変更します。
   onChangeSelectedSubscriptionListItem(evt) {
-    const li = evt.detail.selected
+    const li = evt.detail.selected;
     this.#resetEditSubscriptionLinkBySubscriptionListItem(li);
   }
 
   #resetEditSubscriptionLinkBySubscriptionListItem(li) {
-    let settingHref = null;
-    if (li) {
-      const urlEdit = li.dataset['urlEdit']
-      if (urlEdit) {
-         settingHref = urlEdit;
-      }
-    }
-    this.#resetEditSubscriptionLinkHref(settingHref)
+    const urlEdit = li ? li.dataset['urlEdit'] : null;
+    this.#resetEditSubscriptionLinkHref(urlEdit);
   }
 
   #resetEditSubscriptionLinkHref(settingHref) {
     if (settingHref == null) {
-      this.linkEditSubscriptionTarget.href = '#'
-      this.linkEditSubscriptionTarget.dataset['disabled'] = true
+      this.linkEditSubscriptionTarget.href = '#';
+      this.linkEditSubscriptionTarget.dataset['disabled'] = true;
     }
     else {
-      this.linkEditSubscriptionTarget.href = settingHref
-      this.linkEditSubscriptionTarget.dataset['disabled'] = false
+      this.linkEditSubscriptionTarget.href = settingHref;
+      this.linkEditSubscriptionTarget.dataset['disabled'] = false;
     }
   }
 
@@ -188,7 +182,7 @@ export default class extends Controller {
   // "コンテンツ" ペインと "記事リスト" ペインをクリアします。
   onEmptyTrash(evt) {
     const selectedSubscription = this.getSelectedSubscriptionListItem();
-    if (selectedSubscription && selectedSubscription.id == 'trash') {
+    if (selectedSubscription && selectedSubscription.id === 'trash') {
       this.clearContentsPane();
       this.clearArticlesPane();
     }
