@@ -1,16 +1,14 @@
 import SelectedLiBaseController from "lib/selected_li_base_controller"
 import { getCsrfToken } from 'lib/schema'
-import { fireConnectArticlesEvent, fireChangeReadStatusEvent } from 'lib/pane_focus_events'
+import { fireDisconnectArticlesEvent, fireChangeReadStatusEvent } from 'lib/pane_focus_events'
 
 export default class extends SelectedLiBaseController {
   connect() {
     super.connect();
+  }
 
-    // NOTE: アイテムリストが取り除かれた時、どちらかといえば disconnect 時に（イベントを bubble-up して）、
-    // pane-controller に取り除かれたことを検知してもらいたいところですが、
-    // disconnect 時この要素は既に無くなっているためここでイベントを作っても、それが伝播しません。
-    // 要素が取り除かれたことを祖先要素で検知するには祖先要素の方で MutationObserver の実装を検討してください。
-    fireConnectArticlesEvent(this.element);
+  disconnect() {
+    fireDisconnectArticlesEvent(document.querySelector('#articles-pane'));
   }
 
   //

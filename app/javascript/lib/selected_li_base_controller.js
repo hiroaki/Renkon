@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { fireConnectedSelectedLiBaseController, fireChangeSelectedLiEvent } from 'lib/pane_focus_events'
 
 export default class extends Controller {
   static targets = ['listItem'];
@@ -6,19 +7,15 @@ export default class extends Controller {
   connect() {
     // INTERFACE - adapted by other controllers via this element
     this.element[this.identifier] = this; // 'subscriptions' or 'articles' which are subclasses
-  }
-
-  fireChangeSelectedLiEvent(elem, newSelectedLi) {
-    const event = new CustomEvent('changeSelectedLi', {
-      detail: { selected: newSelectedLi },
-      bubbles: true,
-    });
-
-    elem.dispatchEvent(event);
+    fireConnectedSelectedLiBaseController(this);
+    console.log(this.listItemTargets.length);
   }
 
   // リストアイテムをクリックした時。そのアイテムを「選択状態」にします。
   handlerEnterItem(evt) {
+    const withShiftKey = evt.shiftKey; // boolean
+    const withMetaKey = evt.metaKey; // "command" key on macOS, boolean
+
     const li = this.detectLiFrom(evt.target);
     this.activateItem(li);
   }
@@ -27,14 +24,20 @@ export default class extends Controller {
   // ここで想定しているのは、ある li がフォーカスされている状態から、カーソルキーの上を押下したとき。
   selectPrevItem(evt) {
     const li = this.detectLiFrom(evt.target);
-    this.selectAdjacentLi(li, -1);
+    const newLi = this.selectAdjacentLi(li, -1);
+    if (newLi) {
+      this.activateItem(newLi);
+    }
   }
 
   // イベントを発生させた要素を含むリストの、イベント要素のひとつ次の li を「選択状態」にします。
   // ここで想定しているのは、ある li がフォーカスされている状態から、カーソルキーの下を押下したとき。
   selectNextItem(evt) {
     const li = this.detectLiFrom(evt.target);
-    this.selectAdjacentLi(li, 1);
+    const newLi = this.selectAdjacentLi(li, 1);
+    if (newLi) {
+      this.activateItem(newLi);
+    }
   }
 
   selectAdjacentLi(li, direction) {
@@ -43,7 +46,7 @@ export default class extends Controller {
       if (this.listItemTargets[i] === li) {
         const adjacentIndex = i + direction;
         if (adjacentIndex >= 0 && adjacentIndex < len) {
-          this.activateItem(this.listItemTargets[adjacentIndex]);
+          return this.listItemTargets[adjacentIndex];
         }
         break;
       }
@@ -87,7 +90,7 @@ export default class extends Controller {
       Turbo.visit(url);
     }
 
-    this.fireChangeSelectedLiEvent(this.element, this.#updateListSelectionStatus(span));
+    fireChangeSelectedLiEvent(this.element, this.#updateListSelectionStatus(span));
   }
 
   #updateListSelectionStatus(currentTag) {

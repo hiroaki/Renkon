@@ -23,22 +23,16 @@ export default class extends Controller {
 
   // INTERFACE of subscriptionsController inherited SelectedLiBaseController
   subscriptionsController() {
-    const identifier = this.adaptSubscriptionsControllerValue;
-    const controllerElement = this.subscriptionsPaneTarget.querySelector(`[data-controller="${identifier}"]`);
-
-    if (controllerElement) {
-      return controllerElement[identifier];
-    } else {
-      // not connected (loaded) yet
-      return null;
-    }
+    return this.getController(this.adaptSubscriptionsControllerValue);
   }
 
   // INTERFACE of articlesController inherited SelectedLiBaseController
   articlesController() {
-    const identifier = this.adaptArticlesControllerValue;
-    const controllerElement = this.articlesPaneTarget.querySelector(`[data-controller="${identifier}"]`);
+    return this.getController(this.adaptArticlesControllerValue);
+  }
 
+  getController(identifier) {
+    const controllerElement = this.element.querySelector(`[data-controller="${identifier}"]`);
     if (controllerElement) {
       return controllerElement[identifier];
     } else {
@@ -173,8 +167,15 @@ export default class extends Controller {
     }
   }
 
-  // "記事" リストが変更されたとき、 "コンテンツ" ペインをクリアします。
-  onConnectArticles(evt) {
+  // "購読" または "記事" コントローラが接続されたとき。
+  onConnectedSelectedLiBaseController(evt) {
+    let controller_id = evt.detail.identifier;
+    let controller = this.getController(controller_id);
+    console.log("connectedSelectedLiBaseController", controller_id, controller);
+  }
+
+  // "記事" リストのコントローラが取り除かれたとき "コンテンツ" ペインをクリアします。
+  onDisconnectArticles(evt) {
     this.clearContentsPane();
   }
 

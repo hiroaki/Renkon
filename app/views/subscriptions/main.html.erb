@@ -2,8 +2,9 @@
   data-controller="pane-focus"
   data-action="
     changeReadStatus->pane-focus#onChangeReadStatus
-    connectArticles->pane-focus#onConnectArticles
+    disconnectArticles->pane-focus#onDisconnectArticles
     emptyTrash->pane-focus#onEmptyTrash
+    connectedSelectedLiBaseController->pane-focus#onConnectedSelectedLiBaseController
   "
   data-pane-focus-adapt-subscriptions-controller-value="subscriptions"
   data-pane-focus-adapt-articles-controller-value="articles"
