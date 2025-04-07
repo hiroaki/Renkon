@@ -19,6 +19,36 @@ export default class extends Controller {
 
     // initialize state for Edit subscription button
     this.#resetEditSubscriptionLinkBySubscriptionListItem(this.getSelectedSubscriptionListItem());
+
+    //
+    this.observeArticlePaneChanges();
+  }
+
+  disconnet() {
+    // TODO: この処理は不要かもしれません。 #disconnect というものがあることのメモとして残しておきます。
+    console.log('PaneFocusController.observerForArticlePane.disconnect()');
+    this.observerForArticlePane.disconnect();
+  }
+
+  // "記事" ペインの内容の変更を検出し、処理します。現在は "コンテンツ" ペインをクリアするだけです。
+  observeArticlePaneChanges() {
+    this.observerForArticlePane = new MutationObserver((mutationsList, observer) => {
+      for (let mutation of mutationsList) {
+        if (mutation.type === 'childList' && mutation.removedNodes.length > 0) {
+          for (const removedNode of mutation.removedNodes) {
+            if (removedNode.nodeType === Node.ELEMENT_NODE) {
+              this.clearContentsPane();
+              break;
+            }
+          }
+        }
+      }
+    });
+
+    // DOM の削除があるのは turbo-frame の中なため、監視対象の直接の子要素だけで済むように turob-frame にセットしています。
+    this.observerForArticlePane.observe(this.articlesPaneTarget.querySelector('turbo-frame'), {
+      childList: true
+    });
   }
 
   // INTERFACE of subscriptionsController inherited SelectedLiBaseController
@@ -172,11 +202,6 @@ export default class extends Controller {
     let controller_id = evt.detail.identifier;
     let controller = this.getController(controller_id);
     console.log("connectedSelectedLiBaseController", controller_id, controller);
-  }
-
-  // "記事" リストのコントローラが取り除かれたとき "コンテンツ" ペインをクリアします。
-  onDisconnectArticles(evt) {
-    this.clearContentsPane();
   }
 
   // "ゴミ箱" が空にされたとき、 "購読リスト" で選択されている項目が "ゴミ箱" である場合に限り、

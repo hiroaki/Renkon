@@ -1,14 +1,10 @@
 import SelectedLiBaseController from "lib/selected_li_base_controller"
 import { getCsrfToken } from 'lib/schema'
-import { fireDisconnectArticlesEvent, fireChangeReadStatusEvent } from 'lib/pane_focus_events'
+import { fireChangeReadStatusEvent } from 'lib/pane_focus_events'
 
 export default class extends SelectedLiBaseController {
   connect() {
     super.connect();
-  }
-
-  disconnect() {
-    fireDisconnectArticlesEvent(document.querySelector('#articles-pane'));
   }
 
   //

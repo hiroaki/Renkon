@@ -26,19 +26,6 @@ export function fireEmptyTrashEvent(elem) {
   elem.dispatchEvent(event);
 }
 
-/* イベント - disconnectArticles
-  articles-controller が connect されたときに発生させるイベント
-  引数 elem はコントローラがセットされた要素を渡してください。
-  */
-export function fireDisconnectArticlesEvent(elem) {
-  const event = new CustomEvent('disconnectArticles', {
-    detail: {},
-    bubbles: true
-  });
-
-  elem.dispatchEvent(event);
-}
-
 /* イベント - changeSelectedLiEvent
   */
 export function fireChangeSelectedLiEvent(elem, newSelectedLi) {
