@@ -81,19 +81,21 @@ export default class extends Controller {
     this.moveFocusToItem(li); // Important for being the base point for next and previous
 
     const span = li.querySelector('span[data-link-to-url]');
+
+    const newSelectedLi = this.#updateListSelectionStatusExclusively(span);
+
     const url = span.dataset['linkToUrl'];
     const frame = document.querySelector(`turbo-frame[id=${span.dataset['linkToFrame']}]`);
-
     if (frame) {
       frame.src = url;
     } else {
       Turbo.visit(url);
     }
 
-    fireChangeSelectedLiEvent(this.element, this.#updateListSelectionStatus(span));
+    fireChangeSelectedLiEvent(this.element, newSelectedLi);
   }
 
-  #updateListSelectionStatus(currentTag) {
+  #updateListSelectionStatusExclusively(currentTag) {
     let newSelectedLi = null;
 
     this.listItemTargets.forEach(li => {
@@ -106,6 +108,15 @@ export default class extends Controller {
 
     return newSelectedLi;
   }
+
+  #updateListSelectionStatusConsecutive(currentTag) {
+
+  }
+
+  #updateListSelectionStatusAppend(currentTag) {
+
+  }
+
 
   detectLiFrom(elem) {
     return elem.closest('li');
