@@ -73,5 +73,5 @@ gem 'tailwindcss-rails', '~> 2.7'
 gem 'image_processing', '>= 1.2'
 
 # The version is specified to avoid "Unresolved or ambiguous specs" warnings.
-gem "stringio", ">= 3.1.5"
+gem "stringio", "~> 3.1.5"
 
