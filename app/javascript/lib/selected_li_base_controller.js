@@ -3,6 +3,9 @@ import { fireConnectedSelectedLiBaseController, fireChangeSelectedLiEvent } from
 
 export default class extends Controller {
   static targets = ['listItem'];
+  static values = {
+    multiSelect: { type: Boolean, default: false },
+  }
 
   connect() {
     // INTERFACE - adapted by other controllers via this element
@@ -17,7 +20,33 @@ export default class extends Controller {
     const withMetaKey = evt.metaKey; // "command" key on macOS, boolean
 
     const li = this.detectLiFrom(evt.target);
+    if (!li) {
+      return;
+    }
+
+    if (!this.multiSelectValue) {
+      this.activateItem(li);
+      this.anchorItem = li;
+      return;
+    }
+
+    if (withShiftKey) {
+      this.selectItemRange(li);
+      this.moveFocusToItem(li);
+      this.fireSelectionChanged(li);
+      return;
+    }
+
+    if (withMetaKey) {
+      this.toggleItemSelection(li);
+      this.moveFocusToItem(li);
+      this.anchorItem = li;
+      this.fireSelectionChanged(li);
+      return;
+    }
+
     this.activateItem(li);
+    this.anchorItem = li;
   }
 
   // イベントを発生させた要素を含むリストの、イベント要素のひとつ前の li を「選択状態」にします。
@@ -80,19 +109,22 @@ export default class extends Controller {
   activateItem(li) {
     this.moveFocusToItem(li); // Important for being the base point for next and previous
 
-    const span = li.querySelector('span[data-link-to-url]');
+    const newSelectedLi = this.selectSingleItem(li);
 
-    const newSelectedLi = this.#updateListSelectionStatusExclusively(span);
-
-    const url = span.dataset['linkToUrl'];
-    const frame = document.querySelector(`turbo-frame[id=${span.dataset['linkToFrame']}]`);
-    if (frame) {
-      frame.src = url;
-    } else {
-      Turbo.visit(url);
+    if (!this.multiSelectValue) {
+      const span = li.querySelector('span[data-link-to-url]');
+      if (span) {
+        const url = span.dataset['linkToUrl'];
+        const frame = document.querySelector(`turbo-frame[id=${span.dataset['linkToFrame']}]`);
+        if (frame) {
+          frame.src = url;
+        } else {
+          Turbo.visit(url);
+        }
+      }
     }
 
-    fireChangeSelectedLiEvent(this.element, newSelectedLi);
+    this.fireSelectionChanged(newSelectedLi);
   }
 
   #updateListSelectionStatusExclusively(currentTag) {
@@ -115,6 +147,62 @@ export default class extends Controller {
 
   #updateListSelectionStatusAppend(currentTag) {
 
+  }
+
+  selectSingleItem(li) {
+    this.listItemTargets.forEach(currentLi => {
+      delete currentLi.dataset.selected;
+    });
+
+    li.dataset.selected = 'true';
+    return li;
+  }
+
+  toggleItemSelection(li) {
+    if (li.dataset.selected === 'true') {
+      delete li.dataset.selected;
+    }
+    else {
+      li.dataset.selected = 'true';
+    }
+  }
+
+  selectItemRange(li) {
+    const items = this.listItemTargets;
+    if (!items || items.length === 0) {
+      return;
+    }
+
+    const anchor = this.anchorItem || this.getSelectedItem() || li;
+    const anchorIndex = items.indexOf(anchor);
+    const currentIndex = items.indexOf(li);
+    if (anchorIndex === -1 || currentIndex === -1) {
+      this.selectSingleItem(li);
+      return;
+    }
+
+    const from = Math.min(anchorIndex, currentIndex);
+    const to = Math.max(anchorIndex, currentIndex);
+
+    items.forEach((currentLi, index) => {
+      if (from <= index && index <= to) {
+        currentLi.dataset.selected = 'true';
+      }
+      else {
+        delete currentLi.dataset.selected;
+      }
+    });
+  }
+
+  fireSelectionChanged(focusedItem = null) {
+    const selectedItems = Array.from(this.getSelectedItems());
+    const selected = selectedItems.length > 0 ? selectedItems[0] : null;
+
+    fireChangeSelectedLiEvent(this.element, {
+      selected,
+      selectedItems,
+      focusedItem,
+    });
   }
 
 

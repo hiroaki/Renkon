@@ -28,9 +28,9 @@ export function fireEmptyTrashEvent(elem) {
 
 /* イベント - changeSelectedLiEvent
   */
-export function fireChangeSelectedLiEvent(elem, newSelectedLi) {
+export function fireChangeSelectedLiEvent(elem, detail = {}) {
   const event = new CustomEvent('changeSelectedLi', {
-    detail: { selected: newSelectedLi },
+    detail,
     bubbles: true,
   });
 
