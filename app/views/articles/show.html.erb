@@ -2,7 +2,7 @@
   <h2>Show article</h2>
 </header>
 
-<turbo-frame id="contents">
+<turbo-frame id="<%= request.headers['Turbo-Frame'] || 'contents' %>">
   <div id="actual-contents" class="contaner">
     <%= render @article %>
   </div>

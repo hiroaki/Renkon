@@ -1,6 +1,7 @@
 <div class="flex flex-col h-full">
-  <ul class="container"
+  <ul class="container select-none"
     data-controller="articles"
+    data-articles-multi-select-value="true"
     data-action="
       keydown.enter->articles#openUrl
       keydown.enter->articles#handlerMakeItemRead
@@ -18,6 +19,8 @@
   >
     <% @articles.each do |article| %>
       <li id="<%= dom_id article %>" tabindex="0" class="container even:bg-gray-100 focus:outline-none"
+        data-article-id="<%= article.id %>"
+        data-url-content="<%= subscription_article_path(article.subscription, article) %>"
         data-subscription="<%= article.subscription_id %>"
         data-articles-target="listItem"
         data-url-source="<%= article.url %>"

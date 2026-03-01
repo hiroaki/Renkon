@@ -181,6 +181,79 @@ export default class extends Controller {
     this.#resetEditSubscriptionLinkBySubscriptionListItem(li);
   }
 
+  onChangeSelectedArticleListItems(evt) {
+    const selectedItems = evt.detail.selectedItems || [];
+    this.syncContentsPaneBySelectedArticles(selectedItems);
+  }
+
+  syncContentsPaneBySelectedArticles(selectedItems) {
+    const contentsFrame = this.getContentsFrame();
+    if (!contentsFrame) {
+      return;
+    }
+
+    const selectedEntries = selectedItems
+      .map(li => {
+        return {
+          articleId: li.dataset.articleId,
+          contentUrl: li.dataset.urlContent,
+        };
+      })
+      .filter(entry => entry.articleId && entry.contentUrl);
+
+    const selectedIdSet = new Set(selectedEntries.map(entry => entry.articleId));
+
+    const existingById = this.getArticleContentsFrameMap(contentsFrame);
+
+    existingById.forEach((frame, articleId) => {
+      if (!selectedIdSet.has(articleId)) {
+        this.hideArticleContentsFrame(frame);
+      }
+    });
+
+    selectedEntries.forEach(entry => {
+      let frame = existingById.get(entry.articleId);
+      if (!frame) {
+        frame = this.createArticleContentsFrame(entry.articleId, entry.contentUrl);
+      }
+      else {
+        console.debug('[contents-cache] reused', {
+          articleId: entry.articleId,
+          frameId: frame.id,
+        });
+      }
+
+      this.showArticleContentsFrame(frame);
+      contentsFrame.appendChild(frame);
+    });
+  }
+
+  getContentsFrame() {
+    return this.contentsPaneTarget.querySelector('turbo-frame#contents');
+  }
+
+  getArticleContentsFrameMap(contentsFrame) {
+    const frames = Array.from(contentsFrame.querySelectorAll('turbo-frame[data-article-id]'));
+    return new Map(frames.map(frame => [frame.dataset.articleId, frame]));
+  }
+
+  createArticleContentsFrame(articleId, contentUrl) {
+    const frame = document.createElement('turbo-frame');
+    frame.id = `contents-article-${articleId}`;
+    frame.dataset.articleId = articleId;
+    frame.dataset.cached = 'true';
+    frame.src = contentUrl;
+    return frame;
+  }
+
+  hideArticleContentsFrame(frame) {
+    frame.hidden = true;
+  }
+
+  showArticleContentsFrame(frame) {
+    frame.hidden = false;
+  }
+
   #resetEditSubscriptionLinkBySubscriptionListItem(li) {
     const urlEdit = li ? li.dataset['urlEdit'] : null;
     this.#resetEditSubscriptionLinkHref(urlEdit);
@@ -219,6 +292,9 @@ export default class extends Controller {
   }
 
   clearContentsPane() {
-    this.contentsPaneTarget.querySelector('turbo-frame#contents').innerHTML = '';
+    const frame = this.getContentsFrame();
+    if (frame) {
+      frame.innerHTML = '';
+    }
   }
 }
