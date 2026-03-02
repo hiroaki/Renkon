@@ -7,8 +7,7 @@
       keydown.enter->articles#handlerMakeItemRead
       keydown.space->articles#handlerMakeItemRead:prevent
 
-      keydown.backspace->articles#deleteItem
-      keydown.backspace->articles#selectNextItem
+      keydown.backspace->articles#deleteSelectedItems:prevent
 
       dblclick->articles#openUrl
       dblclick->articles#handlerMakeItemRead
