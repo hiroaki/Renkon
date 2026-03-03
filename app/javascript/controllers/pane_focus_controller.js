@@ -39,6 +39,7 @@ export default class extends Controller {
           for (const removedNode of mutation.removedNodes) {
             if (removedNode.nodeType === Node.ELEMENT_NODE) {
               this.clearContentsPane();
+              this.updateBulkReadButtons([]);
               break;
             }
           }
@@ -311,6 +312,7 @@ export default class extends Controller {
 
   clearArticlesPane() {
     this.articlesPaneTarget.querySelector('turbo-frame#articles').innerHTML = '';
+    this.updateBulkReadButtons([]);
   }
 
   clearContentsPane() {

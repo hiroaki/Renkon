@@ -27,5 +27,10 @@ RSpec.describe "Content pane behavior", type: :system do
     within("#contents-pane") do
       expect(page).not_to have_text("Content 1")
     end
+
+    mark_read_button = find('button', text: 'Mark Read')
+    mark_unread_button = find('button', text: 'Mark Unread')
+    expect(mark_read_button.disabled?).to be(true)
+    expect(mark_unread_button.disabled?).to be(true)
   end
 end
