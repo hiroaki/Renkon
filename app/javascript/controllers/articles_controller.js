@@ -58,6 +58,63 @@ export default class extends SelectedLiBaseController {
     }
   }
 
+  async markSelectedItemsRead() {
+    await this.updateSelectedItemsUnreadStatus(false);
+  }
+
+  async markSelectedItemsUnread() {
+    await this.updateSelectedItemsUnreadStatus(true);
+  }
+
+  async updateSelectedItemsUnreadStatus(targetUnread) {
+    const selectedItems = Array.from(this.getSelectedItems());
+    if (selectedItems.length === 0) {
+      return;
+    }
+
+    for (const li of selectedItems) {
+      await this.updateUnreadStatus(li, targetUnread);
+    }
+  }
+
+  async updateUnreadStatus(li, targetUnread) {
+    const currentUnread = li.dataset.unread == 'true';
+    if (currentUnread === targetUnread) {
+      return true;
+    }
+
+    const url = li.dataset[targetUnread ? 'urlUnread' : 'urlRead'];
+    if (!url) {
+      console.warn('Read status URL is missing', { targetUnread, li });
+      return false;
+    }
+
+    try {
+      const response = await fetch(url, {
+        method: 'PATCH',
+        headers: { 'X-CSRF-Token': getCsrfToken() }
+      });
+
+      if (response.ok) {
+        li.dataset.unread = targetUnread ? 'true' : 'false';
+        const button = li.querySelector('button');
+        if (button) {
+          this.resetReadStatus(button);
+        }
+        fireChangeReadStatusEvent(li);
+        return true;
+      }
+
+      console.error('Failed to update read status', response);
+      console.warn('Read status request returned non-ok response', { url, targetUnread, status: response.status });
+      return false;
+    } catch (error) {
+      console.error('Error:', error);
+      console.warn('Read status request threw an exception', { url, targetUnread, error });
+      return false;
+    }
+  }
+
   //
   async deleteItem(evt) {
     await this.deleteSelectedItems(evt);
