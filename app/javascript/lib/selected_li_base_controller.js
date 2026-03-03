@@ -52,21 +52,35 @@ export default class extends Controller {
   // イベントを発生させた要素を含むリストの、イベント要素のひとつ前の li を「選択状態」にします。
   // ここで想定しているのは、ある li がフォーカスされている状態から、カーソルキーの上を押下したとき。
   selectPrevItem(evt) {
-    const li = this.detectLiFrom(evt.target);
-    const newLi = this.selectAdjacentLi(li, -1);
-    if (newLi) {
-      this.activateItem(newLi);
-    }
+    this.handleArrowKeySelection(evt, -1);
   }
 
   // イベントを発生させた要素を含むリストの、イベント要素のひとつ次の li を「選択状態」にします。
   // ここで想定しているのは、ある li がフォーカスされている状態から、カーソルキーの下を押下したとき。
   selectNextItem(evt) {
+    this.handleArrowKeySelection(evt, 1);
+  }
+
+  handleArrowKeySelection(evt, direction) {
     const li = this.detectLiFrom(evt.target);
-    const newLi = this.selectAdjacentLi(li, 1);
-    if (newLi) {
-      this.activateItem(newLi);
+    const newLi = this.selectAdjacentLi(li, direction);
+    if (!newLi) {
+      return;
     }
+
+    if (this.multiSelectValue && evt.shiftKey) {
+      if (!this.anchorItem) {
+        this.anchorItem = li || this.getSelectedItem() || newLi;
+      }
+
+      this.selectItemRange(newLi);
+      this.moveFocusToItem(newLi);
+      this.fireSelectionChanged(newLi);
+      return;
+    }
+
+    this.activateItem(newLi);
+    this.anchorItem = newLi;
   }
 
   selectAdjacentLi(li, direction) {
