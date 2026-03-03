@@ -20,7 +20,7 @@ class RefreshSubscriptionDelegator extends TurboFrameDelegator {
 export default class extends SelectedLiBaseController {
   connect() {
     super.connect();
-    this.fireChangeSelectedLiEvent(this.element, this.getSelectedItem());
+    this.fireSelectionChanged(this.getSelectedItem());
   }
 
   // Subscription の削除処理の前提として、この確認の動作を発動させるイベントに続いて、
