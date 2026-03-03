@@ -16,6 +16,16 @@ RSpec.describe "Main Page", type: :system do
       expect(page).to have_selector('button', text: 'Refresh')
     end
 
+    it "has a 'Mark Read' button" do
+      visit root_path
+      expect(page).to have_selector('button', text: 'Mark Read')
+    end
+
+    it "has a 'Mark Unread' button" do
+      visit root_path
+      expect(page).to have_selector('button', text: 'Mark Unread')
+    end
+
     it "has a 'New subscription' link" do
       visit root_path
       expect(page).to have_link('New subscription', href: new_subscription_path)

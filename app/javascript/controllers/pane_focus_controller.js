@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus";
 import { getCsrfToken } from 'lib/schema'
 
 export default class extends Controller {
-  static targets = ['navigationPane', 'subscriptionsPane', 'articlesPane', 'contentsPane', 'linkEditSubscription'];
+  static targets = ['navigationPane', 'subscriptionsPane', 'articlesPane', 'contentsPane', 'linkEditSubscription', 'buttonMarkSelectedRead', 'buttonMarkSelectedUnread'];
   static values = {
     adaptSubscriptionsController: String, // 接続する Subscriotions コントローラの識別子
     adaptArticlesController: String, // 接続する Articles コントローラの識別子
@@ -19,6 +19,7 @@ export default class extends Controller {
 
     // initialize state for Edit subscription button
     this.#resetEditSubscriptionLinkBySubscriptionListItem(this.getSelectedSubscriptionListItem());
+    this.updateBulkReadButtons([]);
 
     //
     this.observeArticlePaneChanges();
@@ -183,7 +184,28 @@ export default class extends Controller {
 
   onChangeSelectedArticleListItems(evt) {
     const selectedItems = evt.detail.selectedItems || [];
+    this.updateBulkReadButtons(selectedItems);
     this.syncContentsPaneBySelectedArticles(selectedItems);
+  }
+
+  updateBulkReadButtons(selectedItems) {
+    const hasSelectedArticles = selectedItems.length > 0;
+    this.buttonMarkSelectedReadTarget.disabled = !hasSelectedArticles;
+    this.buttonMarkSelectedUnreadTarget.disabled = !hasSelectedArticles;
+  }
+
+  markSelectedArticlesRead() {
+    const controller = this.articlesController();
+    if (controller) {
+      controller.markSelectedItemsRead();
+    }
+  }
+
+  markSelectedArticlesUnread() {
+    const controller = this.articlesController();
+    if (controller) {
+      controller.markSelectedItemsUnread();
+    }
   }
 
   syncContentsPaneBySelectedArticles(selectedItems) {

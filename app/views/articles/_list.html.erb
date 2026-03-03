@@ -8,6 +8,8 @@
       keydown.space->articles#handlerMakeItemRead:prevent
 
       keydown.backspace->articles#deleteSelectedItems:prevent
+      keydown.r->articles#toggleSelectedItemsReadStatus:prevent
+      keydown.u->articles#markSelectedItemsUnread:prevent
 
       dblclick->articles#openUrl
       dblclick->articles#handlerMakeItemRead
