@@ -18,6 +18,11 @@ class RefreshSubscriptionDelegator extends TurboFrameDelegator {
 }
 
 export default class extends SelectedLiBaseController {
+  connect() {
+    super.connect();
+    this.fireChangeSelectedLiEvent(this.element, this.getSelectedItem());
+  }
+
   // Subscription の削除処理の前提として、この確認の動作を発動させるイベントに続いて、
   // 実際の destroy の処理へ進むイベントが、連続して仕込まれていることが期待されています。
   // その前提のもと、 confirm が No を返したときは、 destroy へ進むことをキャンセルするために
