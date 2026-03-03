@@ -232,6 +232,7 @@ RSpec.describe "Subscriptions", type: :system do
         end
 
         expect(page).to have_content("Subscription was successfully destroyed.")
+        expect(page).to have_no_selector("li[data-subscription='#{subscription.id}']", wait: 5)
         click_button "Close"
         expect(page).to have_selector("turbo-frame#modal", text: "")
       end

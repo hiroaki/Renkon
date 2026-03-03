@@ -70,7 +70,11 @@ class SubscriptionsController < ApplicationController
       if turbo_frame_request?
         # in turbo-frame "modal"
         flash.now[:notice] = 'Subscription was successfully destroyed.'
-        render
+        @subscriptions = Subscription.all_with_count_articles(unread: true)
+        respond_to do |format|
+          format.turbo_stream
+          format.html { render :destroy }
+        end
       else
         redirect_to subscriptions_url, notice: 'Subscription was successfully destroyed.', status: :see_other
       end
