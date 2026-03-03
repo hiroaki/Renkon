@@ -11,11 +11,16 @@ RSpec.describe Subscription, type: :model do
     it 'has many articles with dependent delete all' do
       expect(subject).to have_many(:articles).dependent(:delete_all)
     end
+
+    it 'has many feed_caches with dependent delete all' do
+      expect(subject).to have_many(:feed_caches).dependent(:delete_all)
+    end
   end
 
   # Copilot
   describe 'associations' do
     it { should have_many(:articles).dependent(:delete_all) }
+    it { should have_many(:feed_caches).dependent(:delete_all) }
     it { should have_one_attached(:favicon) }
   end
 
