@@ -49,14 +49,14 @@ export default class extends Controller {
     this.anchorItem = li;
   }
 
-  // イベントを発生させた要素を含むリストの、イベント要素のひとつ前の li を「選択状態」にします。
-  // ここで想定しているのは、ある li がフォーカスされている状態から、カーソルキーの上を押下したとき。
+  // イベントを発生させた要素を含むリストの、イベント要素のひとつ前の li を選択します。
+  // Shift 押下時は範囲選択を拡張・縮小します。
   selectPrevItem(evt) {
     this.handleArrowKeySelection(evt, -1);
   }
 
-  // イベントを発生させた要素を含むリストの、イベント要素のひとつ次の li を「選択状態」にします。
-  // ここで想定しているのは、ある li がフォーカスされている状態から、カーソルキーの下を押下したとき。
+  // イベントを発生させた要素を含むリストの、イベント要素のひとつ次の li を選択します。
+  // Shift 押下時は範囲選択を拡張・縮小します。
   selectNextItem(evt) {
     this.handleArrowKeySelection(evt, 1);
   }
@@ -139,28 +139,6 @@ export default class extends Controller {
     }
 
     this.fireSelectionChanged(newSelectedLi);
-  }
-
-  #updateListSelectionStatusExclusively(currentTag) {
-    let newSelectedLi = null;
-
-    this.listItemTargets.forEach(li => {
-      delete li.dataset.selected;
-      if (li.contains(currentTag)) {
-        li.dataset.selected = 'true';
-        newSelectedLi = li;
-      }
-    });
-
-    return newSelectedLi;
-  }
-
-  #updateListSelectionStatusConsecutive(currentTag) {
-
-  }
-
-  #updateListSelectionStatusAppend(currentTag) {
-
   }
 
   selectSingleItem(li) {

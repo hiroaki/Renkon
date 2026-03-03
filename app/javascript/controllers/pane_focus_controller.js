@@ -1,10 +1,9 @@
 import { Controller } from "@hotwired/stimulus";
-import { getCsrfToken } from 'lib/schema'
 
 export default class extends Controller {
   static targets = ['navigationPane', 'subscriptionsPane', 'articlesPane', 'contentsPane', 'linkEditSubscription', 'buttonMarkSelectedRead', 'buttonMarkSelectedUnread'];
   static values = {
-    adaptSubscriptionsController: String, // 接続する Subscriotions コントローラの識別子
+    adaptSubscriptionsController: String, // 接続する Subscriptions コントローラの識別子
     adaptArticlesController: String, // 接続する Articles コントローラの識別子
   }
 
@@ -25,21 +24,20 @@ export default class extends Controller {
     this.observeArticlePaneChanges();
   }
 
-  disconnet() {
-    // TODO: この処理は不要かもしれません。 #disconnect というものがあることのメモとして残しておきます。
+  disconnect() {
+    // 記事ペイン監視の後始末
     console.log('PaneFocusController.observerForArticlePane.disconnect()');
     this.observerForArticlePane.disconnect();
   }
 
-  // "記事" ペインの内容の変更を検出し、処理します。現在は "コンテンツ" ペインをクリアするだけです。
+  // "記事" ペインの内容変更を検出し、記事選択に依存する UI（contents / 一括既読ボタン）をリセットします。
   observeArticlePaneChanges() {
     this.observerForArticlePane = new MutationObserver((mutationsList, observer) => {
       for (let mutation of mutationsList) {
         if (mutation.type === 'childList' && mutation.removedNodes.length > 0) {
           for (const removedNode of mutation.removedNodes) {
             if (removedNode.nodeType === Node.ELEMENT_NODE) {
-              this.clearContentsPane();
-              this.updateBulkReadButtons([]);
+              this.resetArticleDependentUi();
               break;
             }
           }
@@ -195,6 +193,11 @@ export default class extends Controller {
     this.buttonMarkSelectedUnreadTarget.disabled = !hasSelectedArticles;
   }
 
+  resetArticleDependentUi() {
+    this.clearContentsPane();
+    this.updateBulkReadButtons([]);
+  }
+
   markSelectedArticlesRead() {
     const controller = this.articlesController();
     if (controller) {
@@ -312,7 +315,7 @@ export default class extends Controller {
 
   clearArticlesPane() {
     this.articlesPaneTarget.querySelector('turbo-frame#articles').innerHTML = '';
-    this.updateBulkReadButtons([]);
+    this.resetArticleDependentUi();
   }
 
   clearContentsPane() {
