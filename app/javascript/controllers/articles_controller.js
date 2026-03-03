@@ -60,24 +60,123 @@ export default class extends SelectedLiBaseController {
 
   //
   async deleteItem(evt) {
+    await this.deleteSelectedItems(evt);
+  }
+
+  async deleteSelectedItems(evt) {
+    const deleteTargets = this.collectDeleteTargets(evt);
+    if (deleteTargets.length === 0) {
+      return;
+    }
+
+    const nextFocusTarget = this.detectPostDeleteFocusTarget(deleteTargets);
+    const deletedItems = await this.disableSelectedItems(deleteTargets);
+    deletedItems.forEach(li => li.remove());
+
+    if (nextFocusTarget && this.element.contains(nextFocusTarget)) {
+      this.activateItem(nextFocusTarget);
+    }
+    else {
+      this.fireSelectionChanged(null);
+    }
+  }
+
+  collectDeleteTargets(evt) {
+    const selectedItems = Array.from(this.getSelectedItems());
+    if (selectedItems.length > 0) {
+      return selectedItems;
+    }
+
     const li = this.detectLiFrom(evt.target);
-    const url = li.dataset['urlDisable'];
+    return li ? [li] : [];
+  }
+
+  detectPostDeleteFocusTarget(deleteTargets) {
+    const allItems = this.listItemTargets;
+    const deletingSet = new Set(deleteTargets);
+    const deletingIndexes = deleteTargets
+      .map(li => allItems.indexOf(li))
+      .filter(index => index !== -1);
+
+    if (deletingIndexes.length === 0) {
+      return null;
+    }
+
+    const firstDeletingIndex = Math.min(...deletingIndexes);
+    for (let i = firstDeletingIndex; i < allItems.length; ++i) {
+      if (!deletingSet.has(allItems[i])) {
+        return allItems[i];
+      }
+    }
+
+    for (let i = firstDeletingIndex - 1; 0 <= i; --i) {
+      if (!deletingSet.has(allItems[i])) {
+        return allItems[i];
+      }
+    }
+
+    return null;
+  }
+
+  async disableSelectedItems(deleteTargets) {
+    const deletedItems = [];
+    for (const li of deleteTargets) {
+      const disabled = await this.disableItem(li);
+      if (disabled) {
+        deletedItems.push(li);
+      }
+    }
+
+    return deletedItems;
+  }
+
+  async disableItem(li) {
+    const request = this.buildDeleteRequest(li);
+    if (!request) {
+      console.warn('Failed to build delete request', { li });
+      return false;
+    }
+
+    const { method, url } = request;
+    if (!url) {
+      console.warn('Delete URL is missing', { method, li });
+      return false;
+    }
 
     try {
       const response = await fetch(url, {
-        method: 'PATCH',
+        method,
         headers: { 'X-CSRF-Token': getCsrfToken() }
       });
 
       if (response.ok) {
         fireChangeReadStatusEvent(li);
-        li.remove();
+        return true;
       } else {
         console.error('Failed to delete the item', response);
+        console.warn('Delete request returned non-ok response', { method, url, status: response.status });
+        return false;
       }
     } catch (error) {
       console.error('Error:', error);
+      console.warn('Delete request threw an exception', { method, url, error });
+      return false;
     }
+  }
+
+  buildDeleteRequest(li) {
+    const isDisabledItem = li.dataset['disabled'] === 'true';
+    if (isDisabledItem) {
+      return {
+        method: 'DELETE',
+        url: li.dataset['urlDestroy'],
+      };
+    }
+
+    return {
+      method: 'PATCH',
+      url: li.dataset['urlDisable'],
+    };
   }
 
   //
