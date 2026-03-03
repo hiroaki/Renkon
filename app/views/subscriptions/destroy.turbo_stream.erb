@@ -1,0 +1,15 @@
+<%= turbo_stream.replace 'subscriptions' do %>
+  <%= turbo_frame_tag('subscriptions', src: subscriptions_path(short: true)) %>
+<% end %>
+
+<%= turbo_stream.replace 'articles' do %>
+  <%= turbo_frame_tag('articles') %>
+<% end %>
+
+<%= turbo_stream.replace 'contents' do %>
+  <%= turbo_frame_tag('contents', autoscroll: true, data: { autoscroll_block: 'start' }) %>
+<% end %>
+
+<%= turbo_stream.replace 'modal' do %>
+  <%= render 'destroy_modal' %>
+<% end %>
