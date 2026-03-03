@@ -16,6 +16,8 @@
 
       keydown.up->articles#selectPrevItem:prevent
       keydown.down->articles#selectNextItem:prevent
+      keydown.shift+up->articles#selectPrevItem:prevent
+      keydown.shift+down->articles#selectNextItem:prevent
     "
   >
     <% @articles.each do |article| %>
