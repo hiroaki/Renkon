@@ -66,6 +66,21 @@ export default class extends SelectedLiBaseController {
     await this.updateSelectedItemsUnreadStatus(true);
   }
 
+  async toggleSelectedItemsReadStatus() {
+    const selectedItems = Array.from(this.getSelectedItems());
+    if (selectedItems.length === 0) {
+      return;
+    }
+
+    const areAllSelectedItemsUnread = selectedItems.every(li => li.dataset.unread == 'true');
+    if (areAllSelectedItemsUnread) {
+      await this.markSelectedItemsRead();
+      return;
+    }
+
+    await this.markSelectedItemsUnread();
+  }
+
   async updateSelectedItemsUnreadStatus(targetUnread) {
     const selectedItems = Array.from(this.getSelectedItems());
     if (selectedItems.length === 0) {
