@@ -2,6 +2,7 @@ FactoryBot.define do
   factory :subscription do
     title { "String" }
     src { "http://example.com/rss" }
+    sequence(:position) { |n| n }
 
     trait :with_articles do
       transient do

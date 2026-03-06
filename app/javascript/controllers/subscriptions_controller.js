@@ -23,12 +23,25 @@ export default class extends SelectedLiBaseController {
     this.fireSelectionChanged(this.getSelectedItem());
   }
 
+  openUrl(evt) {
+    const li = this.detectLiFrom(evt.target);
+    if (!this.isSubscriptionItem(li)) {
+      return;
+    }
+
+    super.openUrl(evt);
+  }
+
   // Subscription の削除処理の前提として、この確認の動作を発動させるイベントに続いて、
   // 実際の destroy の処理へ進むイベントが、連続して仕込まれていることが期待されています。
   // その前提のもと、 confirm が No を返したときは、 destroy へ進むことをキャンセルするために
   // stopImmediatePropagation を呼び出すことにしています。
   confirmDestroy(evt) {
     const li = this.detectLiFrom(evt.target);
+    if (!this.isSubscriptionItem(li)) {
+      return;
+    }
+
     const message = li.dataset.textForConfirmDestroy || 'Sure?';
     if (!confirm(message)) {
       evt.stopImmediatePropagation();
@@ -38,6 +51,10 @@ export default class extends SelectedLiBaseController {
   // Subscription の削除処理をリクエストします。
   async destroySubscription(evt) {
     const li = this.detectLiFrom(evt.target);
+    if (!this.isSubscriptionItem(li)) {
+      return;
+    }
+
     const url = li.dataset['urlDestroy'];
 
     try {
@@ -68,6 +85,10 @@ export default class extends SelectedLiBaseController {
 
   _destroySubscription(evt) {
     const li = this.detectLiFrom(evt.target);
+    if (!this.isSubscriptionItem(li)) {
+      return;
+    }
+
     const url = li.dataset['urlDestroy'];
 
     return fetch(url, {
@@ -97,6 +118,10 @@ export default class extends SelectedLiBaseController {
 
   async refreshItem(id) {
     const li = this.element.querySelector(`li[data-subscription="${id}"]`);
+    if (!this.isSubscriptionItem(li)) {
+      return;
+    }
+
     const turboFrame = li.querySelector('turbo-frame');
     if (turboFrame) {
       const delegator = new RefreshSubscriptionDelegator(
@@ -104,5 +129,9 @@ export default class extends SelectedLiBaseController {
       );
       await delegator.perform();
     }
+  }
+
+  isSubscriptionItem(li) {
+    return !!li && li.dataset.itemType === 'subscription';
   }
 }

@@ -3,7 +3,7 @@
 </header>
 
 <nav class="container">
-  <%= link_to link_to 'New subscription', new_subscription_path, 'data-turbo-frame' => turbo_frame_if_turbo_frame_request('modal') %>
+  <%= link_to 'New subscription', new_subscription_path, 'data-turbo-frame' => turbo_frame_if_turbo_frame_request('modal') %>
 </nav>
 
 <hr>
@@ -22,6 +22,7 @@
     "
   >
     <li id="trash" tabindex="0" class="container focus:outline-none"
+      data-item-type="trash"
       data-subscriptions-target="listItem"
     >
       <div class="container overflow-hidden text-nowrap text-xs">
@@ -50,6 +51,7 @@
 
     <% @subscriptions.each do |subscription| %>
       <li tabindex="0" class="container focus:outline-none"
+        data-item-type="subscription"
         data-subscription="<%= subscription.id %>"
         data-subscriptions-target="listItem"
         data-url-source="<%= subscription.url %>"
@@ -70,7 +72,7 @@
             <%=
               turbo_frame_tag(dom_id(subscription)) do
             %>
-              <%= render subscription %>
+              <%= render partial: 'subscriptions/subscription_row', locals: { subscription: subscription } %>
             <% end %>
           </span>
 
