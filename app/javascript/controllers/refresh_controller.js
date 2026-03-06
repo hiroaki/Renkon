@@ -3,7 +3,7 @@ import Queue from "promise-queue"
 import TurboFrameDelegator from "lib/turbo_frame_delegator"
 import { getCsrfToken } from 'lib/schema'
 
-class RefreshChanelsDelegator extends TurboFrameDelegator {
+class RefreshChannelsDelegator extends TurboFrameDelegator {
   // override
   prepareRequest(request) {
     super.prepareRequest(request)
@@ -29,7 +29,13 @@ export default class extends Controller {
   // refresh all subscriptions
   all() {
     const generateFetchFunction = (urlRefresh, method, frame_id) => {
-      return async () => new RefreshChanelsDelegator(urlRefresh, method, frame_id).perform();
+      return async () => {
+        try {
+          await new RefreshChannelsDelegator(urlRefresh, method, frame_id).perform();
+        } catch (error) {
+          console.error(`Failed to refresh frame ${frame_id}:`, error);
+        }
+      }
     }
 
     const que = new Queue(this.concurrencyValue);

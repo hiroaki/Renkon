@@ -7,31 +7,32 @@ export default class extends Controller {
   confirmEmptyTrash(evt) {
     const message = evt.currentTarget.dataset['textForConfirmEmptyTrash'] || 'Sure?';
     if (!confirm(message)) {
-      evt.stopImmediatePropagation()
+      evt.stopImmediatePropagation();
     }
   }
 
   //
-  emptyTrash(evt) {
+  async emptyTrash(evt) {
     const url = evt.currentTarget.dataset['urlEmptyTrash'];
 
-    return fetch(url, {
-      method: 'DELETE',
-      headers: { 'X-CSRF-Token': getCsrfToken() }
-    })
-    .then(response => {
+    try {
+      const response = await fetch(url, {
+        method: 'DELETE',
+        headers: { 'X-CSRF-Token': getCsrfToken() }
+      });
+
       if (response.ok) {
         console.log('response ok, nothing to do', response);
         this.fireEmptyTrash();
-      }
-      else {
+      } else {
         console.error('Failed to delete the item', response);
       }
-    })
-    .catch(error => console.error('Error:', error));
+    } catch (error) {
+      console.error('Error:', error);
+    }
   }
 
   fireEmptyTrash() {
-    fireEmptyTrashEvent(this.element)
+    fireEmptyTrashEvent(this.element);
   }
 }

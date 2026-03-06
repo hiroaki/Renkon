@@ -8,9 +8,9 @@ export function fireChangeReadStatusEvent(li) {
   const event = new CustomEvent('changeReadStatus', {
     detail: {},
     bubbles: true
-  })
+  });
 
-  li.dispatchEvent(event)
+  li.dispatchEvent(event);
 }
 
 /* イベント - emptyTrash
@@ -21,20 +21,29 @@ export function fireEmptyTrashEvent(elem) {
   const event = new CustomEvent('emptyTrash', {
     detail: {},
     bubbles: true
-  })
+  });
 
-  elem.dispatchEvent(event)
+  elem.dispatchEvent(event);
 }
 
-/* イベント - connectArticles
-  articles-controller が connect されたときに発生させるイベント
-  引数 elem はコントローラがセットされた要素を渡してください。
+/* イベント - changeSelectedLiEvent
   */
-export function fireConnectArticlesEvent(elem) {
-  const event = new CustomEvent('connectArticles', {
-    detail: {},
-    bubbles: true
-  })
+export function fireChangeSelectedLiEvent(elem, detail = {}) {
+  const event = new CustomEvent('changeSelectedLi', {
+    detail,
+    bubbles: true,
+  });
 
-  elem.dispatchEvent(event)
+  elem.dispatchEvent(event);
+}
+
+/*
+  */
+export function fireConnectedSelectedLiBaseController(controller) {
+  // NOTE: メモリリークを懸念してインスタンスを渡していません、識別子（文字列）のみです
+  const event = new CustomEvent('connectedSelectedLiBaseController', {
+    detail: { identifier: controller.identifier },
+    bubbles: true
+  });
+  controller.element.dispatchEvent(event);
 }

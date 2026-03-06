@@ -1,16 +1,10 @@
 import SelectedLiBaseController from "lib/selected_li_base_controller"
 import { getCsrfToken } from 'lib/schema'
-import { fireConnectArticlesEvent, fireChangeReadStatusEvent } from 'lib/pane_focus_events'
+import { fireChangeReadStatusEvent } from 'lib/pane_focus_events'
 
 export default class extends SelectedLiBaseController {
   connect() {
     super.connect();
-
-    // NOTE: アイテムリストが取り除かれた時、どちらかといえば disconnect 時に（イベントを bubble-up して）、
-    // pane-controller に取り除かれたことを検知してもらいたいところですが、
-    // disconnect 時この要素は既に無くなっているためここでイベントを作っても、それが伝播しません。
-    // 要素が取り除かれたことを祖先要素で検知するには祖先要素の方で MutationObserver の実装を検討してください。
-    fireConnectArticlesEvent(this.element)
   }
 
   //
@@ -22,10 +16,8 @@ export default class extends SelectedLiBaseController {
   makeItemRead(li) {
     if (li.dataset['unread'] == 'true') {
       const targetElement = li.querySelector('button');
-      const me = this;
-      this.toggleReadStatus(li)
-      .then(() => {
-        me.resetReadStatus(targetElement);
+      this.toggleReadStatus(li).then(() => {
+        this.resetReadStatus(targetElement);
       });
     }
   }
@@ -33,65 +25,230 @@ export default class extends SelectedLiBaseController {
   //
   resetReadStatus(targetElement) {
     const li = targetElement.closest('li');
-    if (li.dataset.unread == 'true') {
-       targetElement.textContent = '●'
-    } else {
-      targetElement.textContent = '　'
-    }
+    targetElement.textContent = li.dataset.unread == 'true' ? '●' : '　';
   }
 
   //
   handlerToggleReadStatus(evt) {
     const targetElement = evt.currentTarget;
     const li = targetElement.closest('li');
-    const me = this;
-    this.toggleReadStatus(li)
-    .then(() => {
-      me.resetReadStatus(targetElement);
+    this.toggleReadStatus(li).then(() => {
+      this.resetReadStatus(targetElement);
     });
   }
 
-  toggleReadStatus(li) {
-    const me = this;
+  async toggleReadStatus(li) {
     const isUnread = li.dataset.unread == 'true';
-    const url = li.dataset[ isUnread ? 'urlRead' : 'urlUnread' ];
+    const url = li.dataset[isUnread ? 'urlRead' : 'urlUnread'];
 
-    return fetch(url, {
-      method: 'PATCH',
-      headers: { 'X-CSRF-Token': getCsrfToken() }
-    })
-    .then(response => {
+    try {
+      const response = await fetch(url, {
+        method: 'PATCH',
+        headers: { 'X-CSRF-Token': getCsrfToken() }
+      });
+
       if (response.ok) {
         li.dataset.unread = isUnread ? 'false' : 'true';
         fireChangeReadStatusEvent(li);
-      }
-      else {
+      } else {
         console.error('Failed to update read status', response);
       }
-    })
-    .catch(error => console.error('Error:', error));
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  }
+
+  async markSelectedItemsRead() {
+    await this.updateSelectedItemsUnreadStatus(false);
+  }
+
+  async markSelectedItemsUnread() {
+    await this.updateSelectedItemsUnreadStatus(true);
+  }
+
+  async toggleSelectedItemsReadStatus() {
+    const selectedItems = Array.from(this.getSelectedItems());
+    if (selectedItems.length === 0) {
+      return;
+    }
+
+    const areAllSelectedItemsUnread = selectedItems.every(li => li.dataset.unread == 'true');
+    if (areAllSelectedItemsUnread) {
+      await this.markSelectedItemsRead();
+      return;
+    }
+
+    await this.markSelectedItemsUnread();
+  }
+
+  async updateSelectedItemsUnreadStatus(targetUnread) {
+    const selectedItems = Array.from(this.getSelectedItems());
+    if (selectedItems.length === 0) {
+      return;
+    }
+
+    for (const li of selectedItems) {
+      await this.updateUnreadStatus(li, targetUnread);
+    }
+  }
+
+  async updateUnreadStatus(li, targetUnread) {
+    const currentUnread = li.dataset.unread == 'true';
+    if (currentUnread === targetUnread) {
+      return true;
+    }
+
+    const url = li.dataset[targetUnread ? 'urlUnread' : 'urlRead'];
+    if (!url) {
+      console.warn('Read status URL is missing', { targetUnread, li });
+      return false;
+    }
+
+    try {
+      const response = await fetch(url, {
+        method: 'PATCH',
+        headers: { 'X-CSRF-Token': getCsrfToken() }
+      });
+
+      if (response.ok) {
+        li.dataset.unread = targetUnread ? 'true' : 'false';
+        const button = li.querySelector('button');
+        if (button) {
+          this.resetReadStatus(button);
+        }
+        fireChangeReadStatusEvent(li);
+        return true;
+      }
+
+      console.error('Failed to update read status', response);
+      console.warn('Read status request returned non-ok response', { url, targetUnread, status: response.status });
+      return false;
+    } catch (error) {
+      console.error('Error:', error);
+      console.warn('Read status request threw an exception', { url, targetUnread, error });
+      return false;
+    }
   }
 
   //
-  deleteItem(evt) {
-    const me = this;
-    const li = this.detectLiFrom(evt.target);
-    const url = li.dataset['urlDisable'];
+  async deleteItem(evt) {
+    await this.deleteSelectedItems(evt);
+  }
 
-    return fetch(url, {
-      method: 'PATCH',
-      headers: { 'X-CSRF-Token': getCsrfToken() }
-    })
-    .then(response => {
+  async deleteSelectedItems(evt) {
+    const deleteTargets = this.collectDeleteTargets(evt);
+    if (deleteTargets.length === 0) {
+      return;
+    }
+
+    const nextFocusTarget = this.detectPostDeleteFocusTarget(deleteTargets);
+    const deletedItems = await this.disableSelectedItems(deleteTargets);
+    deletedItems.forEach(li => li.remove());
+
+    if (nextFocusTarget && this.element.contains(nextFocusTarget)) {
+      this.activateItem(nextFocusTarget);
+    }
+    else {
+      this.fireSelectionChanged(null);
+    }
+  }
+
+  collectDeleteTargets(evt) {
+    const selectedItems = Array.from(this.getSelectedItems());
+    if (selectedItems.length > 0) {
+      return selectedItems;
+    }
+
+    const li = this.detectLiFrom(evt.target);
+    return li ? [li] : [];
+  }
+
+  detectPostDeleteFocusTarget(deleteTargets) {
+    const allItems = this.listItemTargets;
+    const deletingSet = new Set(deleteTargets);
+    const deletingIndexes = deleteTargets
+      .map(li => allItems.indexOf(li))
+      .filter(index => index !== -1);
+
+    if (deletingIndexes.length === 0) {
+      return null;
+    }
+
+    const firstDeletingIndex = Math.min(...deletingIndexes);
+    for (let i = firstDeletingIndex; i < allItems.length; ++i) {
+      if (!deletingSet.has(allItems[i])) {
+        return allItems[i];
+      }
+    }
+
+    for (let i = firstDeletingIndex - 1; 0 <= i; --i) {
+      if (!deletingSet.has(allItems[i])) {
+        return allItems[i];
+      }
+    }
+
+    return null;
+  }
+
+  async disableSelectedItems(deleteTargets) {
+    const deletedItems = [];
+    for (const li of deleteTargets) {
+      const disabled = await this.disableItem(li);
+      if (disabled) {
+        deletedItems.push(li);
+      }
+    }
+
+    return deletedItems;
+  }
+
+  async disableItem(li) {
+    const request = this.buildDeleteRequest(li);
+    if (!request) {
+      console.warn('Failed to build delete request', { li });
+      return false;
+    }
+
+    const { method, url } = request;
+    if (!url) {
+      console.warn('Delete URL is missing', { method, li });
+      return false;
+    }
+
+    try {
+      const response = await fetch(url, {
+        method,
+        headers: { 'X-CSRF-Token': getCsrfToken() }
+      });
+
       if (response.ok) {
         fireChangeReadStatusEvent(li);
-        li.remove();
-      }
-      else {
+        return true;
+      } else {
         console.error('Failed to delete the item', response);
+        console.warn('Delete request returned non-ok response', { method, url, status: response.status });
+        return false;
       }
-    })
-    .catch(error => console.error('Error:', error));
+    } catch (error) {
+      console.error('Error:', error);
+      console.warn('Delete request threw an exception', { method, url, error });
+      return false;
+    }
+  }
+
+  buildDeleteRequest(li) {
+    const isDisabledItem = li.dataset['disabled'] === 'true';
+    if (isDisabledItem) {
+      return {
+        method: 'DELETE',
+        url: li.dataset['urlDestroy'],
+      };
+    }
+
+    return {
+      method: 'PATCH',
+      url: li.dataset['urlDisable'],
+    };
   }
 
   //

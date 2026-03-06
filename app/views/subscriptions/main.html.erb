@@ -2,8 +2,8 @@
   data-controller="pane-focus"
   data-action="
     changeReadStatus->pane-focus#onChangeReadStatus
-    connectArticles->pane-focus#onConnectArticles
     emptyTrash->pane-focus#onEmptyTrash
+    connectedSelectedLiBaseController->pane-focus#onConnectedSelectedLiBaseController
   "
   data-pane-focus-adapt-subscriptions-controller-value="subscriptions"
   data-pane-focus-adapt-articles-controller-value="articles"
@@ -26,6 +26,28 @@
         data-refresh-concurrency-value="2"
       >
         Refresh
+      </button>
+    </div>
+
+    <div class="mx-2">
+      <button class="px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-indigo-600 border border-transparent rounded-md active:bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:shadow-outline-indigo disabled:bg-gray-400 disabled:cursor-not-allowed"
+        data-pane-focus-target="buttonMarkSelectedRead"
+        data-action="click->pane-focus#markSelectedArticlesRead"
+        title="Mark selected articles read (r toggles selected items)"
+        disabled
+      >
+        Mark Read
+      </button>
+    </div>
+
+    <div class="mx-2">
+      <button class="px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-indigo-600 border border-transparent rounded-md active:bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:shadow-outline-indigo disabled:bg-gray-400 disabled:cursor-not-allowed"
+        data-pane-focus-target="buttonMarkSelectedUnread"
+        data-action="click->pane-focus#markSelectedArticlesUnread"
+        title="Mark selected articles unread (u)"
+        disabled
+      >
+        Mark Unread
       </button>
     </div>
 
@@ -97,6 +119,7 @@
       data-action="
         keydown.left->pane-focus#backToSubscriptionsPane
         keydown.space->pane-focus#forwardContentsOrNextArticle:prevent
+        changeSelectedLi->pane-focus#onChangeSelectedArticleListItems
       "
     >
       <div class="flex-1 bg-white-100 overflow-y-auto overflow-x-hidden pt-2">
