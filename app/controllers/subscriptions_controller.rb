@@ -5,13 +5,13 @@ class SubscriptionsController < ApplicationController
 
   # FOR DEVELOPMENT
   def main
-    @subscriptions = Subscription.all_with_count_articles(unread: true)
+    load_grouped_subscriptions
     render layout: 'viewport_full'
   end
 
   # GET /subscriptions
   def index
-    @subscriptions = Subscription.all_with_count_articles(unread: true)
+    load_grouped_subscriptions
   end
 
   # GET /subscriptions/1
@@ -116,14 +116,29 @@ class SubscriptionsController < ApplicationController
       return render_reorder_error('ordered_ids must not include duplicates')
     end
 
-    all_ids = Subscription.ordered.pluck(:id)
+    group_id = params[:group_id]&.to_i
+    group = Group.find_by(id: group_id)
+
+    if params[:group_id].present? && group.nil?
+      return render_reorder_error('group_id is invalid')
+    end
+
+    scope = if group
+      Subscription.ordered_within_group(group.id)
+    else
+      Subscription.ordered
+    end
+
+    all_ids = scope.pluck(:id)
     unless ids.sort == all_ids.sort
       return render_reorder_error('ordered_ids must include every existing subscription id exactly once')
     end
 
     Subscription.transaction do
       ids.each_with_index do |id, index|
-        Subscription.where(id: id).update_all(position: index + 1)
+        attributes = { position: index + 1 }
+        attributes[:group_id] = group.id if group
+        Subscription.where(id: id).update_all(attributes)
       end
     end
 
@@ -143,5 +158,15 @@ class SubscriptionsController < ApplicationController
 
     def render_reorder_error(message)
       render json: { error: message }, status: :unprocessable_entity
+    end
+
+    def load_grouped_subscriptions
+      Group.default_root!
+      @groups = Group.where(parent_id: nil).ordered.to_a
+      grouped = Subscription
+        .all_with_count_articles(unread: true)
+        .where(group_id: @groups.map(&:id))
+
+      @subscriptions_by_group = grouped.group_by(&:group_id)
     end
 end

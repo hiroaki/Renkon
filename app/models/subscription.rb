@@ -5,12 +5,14 @@ class Subscription < ApplicationRecord
   has_many :feed_caches, dependent: :delete_all
   has_one_attached :favicon
 
+  before_validation :assign_default_group, on: :create
   before_validation :assign_position, on: :create
 
   validates :title, presence: true
   validates :src, presence: true
 
-  scope :ordered, -> { order(position: :asc, id: :asc) }
+  scope :ordered, -> { order(group_id: :asc, position: :asc, id: :asc) }
+  scope :ordered_within_group, ->(group_id) { where(group_id: group_id).order(position: :asc, id: :asc) }
 
   def self.all_with_count_articles(options = {})
     unread = options.fetch(:unread, false)
@@ -46,6 +48,13 @@ class Subscription < ApplicationRecord
     def assign_position
       return if position.present?
 
-      self.position = (Subscription.maximum(:position) || 0) + 1
+      siblings = Subscription.where(group_id: group_id)
+      self.position = (siblings.maximum(:position) || 0) + 1
+    end
+
+    def assign_default_group
+      return if group.present?
+
+      self.group = Group.default_root!
     end
 end

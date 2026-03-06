@@ -28,4 +28,17 @@ RSpec.describe Group, type: :model do
       expect(described_class.ordered.pluck(:id)).to eq([second.id, first.id, third.id])
     end
   end
+
+  describe '.default_root!' do
+    it 'creates a root group when none exists' do
+      expect { described_class.default_root! }.to change(described_class, :count).by(1)
+      expect(described_class.default_root!.name).to eq('Subscriptions')
+    end
+
+    it 'reuses existing root group' do
+      root = FactoryBot.create(:group, name: 'Root', parent: nil, position: 1)
+
+      expect(described_class.default_root!).to eq(root)
+    end
+  end
 end

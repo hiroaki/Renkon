@@ -5,6 +5,7 @@ import { getCsrfToken } from "lib/schema"
 export default class extends Controller {
   static values = {
     url: String,
+    groupId: Number,
   }
 
   connect() {
@@ -43,7 +44,10 @@ export default class extends Controller {
         'Accept': 'application/json',
         'X-CSRF-Token': getCsrfToken(),
       },
-      body: JSON.stringify({ ordered_ids: orderedIds }),
+      body: JSON.stringify({
+        ordered_ids: orderedIds,
+        group_id: this.groupIdValue,
+      }),
     })
 
     if (!response.ok) {

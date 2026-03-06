@@ -21,7 +21,7 @@ class CreateGroupsAndAddGroupToSubscriptions < ActiveRecord::Migration[8.0]
     add_reference :subscriptions, :group, foreign_key: true, null: true
 
     say_with_time 'Creating default root group and assigning subscriptions' do
-      root = MigrationGroup.create!(name: 'Default', parent_id: nil, position: 1)
+      root = MigrationGroup.create!(name: 'Subscriptions', parent_id: nil, position: 1)
       MigrationSubscription.update_all(group_id: root.id)
     end
   end

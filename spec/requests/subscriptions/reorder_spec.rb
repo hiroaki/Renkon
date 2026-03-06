@@ -2,9 +2,10 @@ require 'rails_helper'
 
 RSpec.describe 'Subscriptions reorder', type: :request do
   describe 'PATCH /subscriptions/reorder' do
-    let!(:first) { FactoryBot.create(:subscription, position: 1) }
-    let!(:second) { FactoryBot.create(:subscription, position: 2) }
-    let!(:third) { FactoryBot.create(:subscription, position: 3) }
+    let!(:group) { FactoryBot.create(:group, name: 'Main') }
+    let!(:first) { FactoryBot.create(:subscription, group: group, position: 1) }
+    let!(:second) { FactoryBot.create(:subscription, group: group, position: 2) }
+    let!(:third) { FactoryBot.create(:subscription, group: group, position: 3) }
 
     it 'returns unprocessable_entity when ordered_ids is missing' do
       patch reorder_subscriptions_path, params: {}
@@ -35,6 +36,27 @@ RSpec.describe 'Subscriptions reorder', type: :request do
       expect(third.reload.position).to eq(1)
       expect(first.reload.position).to eq(2)
       expect(second.reload.position).to eq(3)
+    end
+
+    it 'returns unprocessable_entity when group_id is invalid' do
+      patch reorder_subscriptions_path, params: { group_id: -1, ordered_ids: [first.id, second.id, third.id] }
+
+      expect(response).to have_http_status(422)
+      expect(response.parsed_body['error']).to include('group_id is invalid')
+    end
+
+    it 'reorders only subscriptions in the specified group' do
+      other_group = FactoryBot.create(:group, name: 'Other')
+      outsider = FactoryBot.create(:subscription, group: other_group, position: 1)
+
+      patch reorder_subscriptions_path, params: {
+        group_id: group.id,
+        ordered_ids: [second.id, third.id, first.id],
+      }
+
+      expect(response).to have_http_status(:no_content)
+      expect(Subscription.ordered_within_group(group.id).pluck(:id)).to eq([second.id, third.id, first.id])
+      expect(outsider.reload.position).to eq(1)
     end
   end
 end
