@@ -1,4 +1,6 @@
 class Subscription < ApplicationRecord
+  belongs_to :group, optional: true
+
   has_many :articles, dependent: :delete_all
   has_many :feed_caches, dependent: :delete_all
   has_one_attached :favicon

@@ -3,6 +3,7 @@ FactoryBot.define do
     title { "String" }
     src { "http://example.com/rss" }
     sequence(:position) { |n| n }
+    group { nil }
 
     trait :with_articles do
       transient do
