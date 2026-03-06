@@ -10,7 +10,8 @@
 
 <%= turbo_frame_tag 'subscriptions' do %>
 <div class="flex flex-col h-full">
-  <ul class="container h-full select-none" tabindex="-1" data-controller="subscriptions"
+  <ul class="container h-full select-none" tabindex="-1" data-controller="subscriptions subscriptions-sort"
+    data-subscriptions-sort-url-value="<%= reorder_subscriptions_path %>"
     data-action="
       keydown.enter->subscriptions#openUrl
       dblclick->subscriptions#openUrl
