@@ -1,7 +1,7 @@
 class SubscriptionsController < ApplicationController
   include Factory
 
-  before_action :set_subscription, only: %i[ show edit update destroy fetch ]
+  before_action :set_subscription, only: %i[ edit update destroy fetch ]
 
   # FOR DEVELOPMENT
   def main
@@ -16,7 +16,11 @@ class SubscriptionsController < ApplicationController
 
   # GET /subscriptions/1
   def show
-    # NOTE: 追加のパラメータ short: true をビューで使っています
+    @subscription = if params[:short] == 'true'
+      Subscription.all_with_count_articles(unread: true).find(params[:id])
+    else
+      Subscription.find(params[:id])
+    end
   end
 
   # GET /subscriptions/new
