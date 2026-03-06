@@ -14,6 +14,10 @@ Rails.application.routes.draw do
   delete 'trash', to: 'articles#empty_trash'
 
   resources :subscriptions do
+    collection do
+      patch :reorder
+    end
+
     resources :articles do
       member do
         patch :disable

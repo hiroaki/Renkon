@@ -94,6 +94,38 @@ class SubscriptionsController < ApplicationController
     redirect_to subscription_url(@subscription, short: !!params[:short]), notice: "Subscription was successfully refreshed.", status: :see_other
   end
 
+  # reorder_subscriptions PATCH /subscriptions/reorder(.:format)
+  def reorder
+    ordered_ids = params[:ordered_ids]
+
+    unless ordered_ids.is_a?(Array)
+      return render_reorder_error('ordered_ids must be an array')
+    end
+
+    ids = ordered_ids.map(&:to_i)
+
+    if ids.empty?
+      return render_reorder_error('ordered_ids must not be empty')
+    end
+
+    if ids.uniq.length != ids.length
+      return render_reorder_error('ordered_ids must not include duplicates')
+    end
+
+    all_ids = Subscription.ordered.pluck(:id)
+    unless ids.sort == all_ids.sort
+      return render_reorder_error('ordered_ids must include every existing subscription id exactly once')
+    end
+
+    Subscription.transaction do
+      ids.each_with_index do |id, index|
+        Subscription.where(id: id).update_all(position: index + 1)
+      end
+    end
+
+    head :no_content
+  end
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_subscription
@@ -103,5 +135,9 @@ class SubscriptionsController < ApplicationController
     # Only allow a list of trusted parameters through.
     def subscription_params
       params.require(:subscription).permit(:title, :src, :description, :last_build_date, :url, :favicon)
+    end
+
+    def render_reorder_error(message)
+      render json: { error: message }, status: :unprocessable_entity
     end
 end
