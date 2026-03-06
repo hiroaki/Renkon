@@ -11,8 +11,13 @@ export default class extends Controller {
   connect() {
     this.sortable = new Sortable(this.element, {
       animation: 150,
+      group: {
+        name: 'subscriptions-grouped',
+        pull: true,
+        put: true,
+      },
       draggable: 'li[data-item-type="subscription"]',
-      onEnd: () => this.persistOrder(),
+      onEnd: () => this.persistGroupedOrders(),
     })
   }
 
@@ -23,17 +28,25 @@ export default class extends Controller {
     }
   }
 
-  async persistOrder() {
+  async persistGroupedOrders() {
     if (!this.urlValue) {
       console.error('subscriptions-sort: urlValue is missing')
       return
     }
 
-    const orderedIds = Array.from(this.element.querySelectorAll('li[data-item-type="subscription"]'))
-      .map((li) => Number(li.dataset.subscription))
-      .filter((id) => Number.isInteger(id) && id > 0)
+    const groupedOrders = Array.from(document.querySelectorAll('ul[data-controller~="subscriptions-sort"]'))
+      .map((list) => {
+        const groupId = Number(list.dataset.subscriptionsSortGroupIdValue)
+        const orderedIds = Array.from(list.querySelectorAll('li[data-item-type="subscription"]'))
+          .map((li) => Number(li.dataset.subscription))
+          .filter((id) => Number.isInteger(id) && id > 0)
 
-    if (orderedIds.length === 0) {
+        return { group_id: groupId, ordered_ids: orderedIds }
+      })
+      .filter((entry) => Number.isInteger(entry.group_id) && entry.group_id > 0)
+
+    const allOrderedIds = groupedOrders.flatMap((entry) => entry.ordered_ids)
+    if (allOrderedIds.length === 0) {
       return
     }
 
@@ -45,8 +58,7 @@ export default class extends Controller {
         'X-CSRF-Token': getCsrfToken(),
       },
       body: JSON.stringify({
-        ordered_ids: orderedIds,
-        group_id: this.groupIdValue,
+        grouped_orders: groupedOrders,
       }),
     })
 

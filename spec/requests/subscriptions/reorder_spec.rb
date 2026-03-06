@@ -58,5 +58,34 @@ RSpec.describe 'Subscriptions reorder', type: :request do
       expect(Subscription.ordered_within_group(group.id).pluck(:id)).to eq([second.id, third.id, first.id])
       expect(outsider.reload.position).to eq(1)
     end
+
+    it 'moves subscriptions across groups with grouped_orders payload' do
+      other_group = FactoryBot.create(:group, name: 'Other')
+      outsider = FactoryBot.create(:subscription, group: other_group, position: 1)
+
+      patch reorder_subscriptions_path, params: {
+        grouped_orders: [
+          { group_id: group.id, ordered_ids: [second.id] },
+          { group_id: other_group.id, ordered_ids: [outsider.id, third.id, first.id] },
+        ],
+      }
+
+      expect(response).to have_http_status(:no_content)
+      expect(Subscription.ordered_within_group(group.id).pluck(:id)).to eq([second.id])
+      expect(Subscription.ordered_within_group(other_group.id).pluck(:id)).to eq([outsider.id, third.id, first.id])
+      expect(first.reload.group_id).to eq(other_group.id)
+      expect(first.reload.position).to eq(3)
+    end
+
+    it 'returns unprocessable_entity when grouped_orders has duplicate ids' do
+      patch reorder_subscriptions_path, params: {
+        grouped_orders: [
+          { group_id: group.id, ordered_ids: [first.id, first.id, second.id, third.id] },
+        ],
+      }
+
+      expect(response).to have_http_status(422)
+      expect(response.parsed_body['error']).to include('duplicates')
+    end
   end
 end
