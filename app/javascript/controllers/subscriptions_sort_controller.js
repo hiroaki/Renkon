@@ -37,7 +37,8 @@ export default class extends Controller {
     const groupedOrders = Array.from(document.querySelectorAll('ul[data-controller~="subscriptions-sort"]'))
       .map((list) => {
         const groupId = Number(list.dataset.subscriptionsSortGroupIdValue)
-        const orderedIds = Array.from(list.querySelectorAll('li[data-item-type="subscription"]'))
+        const orderedIds = Array.from(list.children)
+          .filter((elem) => elem.matches('li[data-item-type="subscription"]'))
           .map((li) => Number(li.dataset.subscription))
           .filter((id) => Number.isInteger(id) && id > 0)
 
