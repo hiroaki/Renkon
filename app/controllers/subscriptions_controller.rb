@@ -216,7 +216,10 @@ class SubscriptionsController < ApplicationController
 
     def load_grouped_subscriptions
       Group.default_root!
-      @groups = Group.where(parent_id: nil).ordered.to_a
+      @groups = Group.ordered.to_a
+      @root_groups = @groups.select { |group| group.parent_id.nil? }
+      @groups_by_parent_id = @groups.group_by(&:parent_id)
+
       grouped = Subscription
         .all_with_count_articles(unread: true)
         .where(group_id: @groups.map(&:id))

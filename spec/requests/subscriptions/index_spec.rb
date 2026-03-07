@@ -37,5 +37,16 @@ RSpec.describe 'Subscriptions index', type: :request do
       expect(response).to have_http_status(:ok)
       expect(response.body).to include('Main Group')
     end
+
+      it 'renders subscriptions in nested child groups' do
+        child_group = FactoryBot.create(:group, name: 'Child Group', parent: group, position: 1)
+        nested_subscription = FactoryBot.create(:subscription, title: 'Nested', position: 1, group: child_group)
+
+        get subscriptions_path, params: { short: true }
+
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include('Child Group')
+        expect(response.body).to include("data-subscription=\"#{nested_subscription.id}\"")
+      end
   end
 end

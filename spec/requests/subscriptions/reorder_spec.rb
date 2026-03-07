@@ -87,5 +87,23 @@ RSpec.describe 'Subscriptions reorder', type: :request do
       expect(response).to have_http_status(422)
       expect(response.parsed_body['error']).to include('duplicates')
     end
+
+    it 'moves subscriptions into a nested child group' do
+      child_group = FactoryBot.create(:group, name: 'Child', parent: group, position: 1)
+      child_subscription = FactoryBot.create(:subscription, group: child_group, position: 1)
+
+      patch reorder_subscriptions_path, params: {
+        grouped_orders: [
+          { group_id: group.id, ordered_ids: [third.id] },
+          { group_id: child_group.id, ordered_ids: [child_subscription.id, first.id, second.id] },
+        ],
+      }
+
+      expect(response).to have_http_status(:no_content)
+      expect(Subscription.ordered_within_group(group.id).pluck(:id)).to eq([third.id])
+      expect(Subscription.ordered_within_group(child_group.id).pluck(:id)).to eq([child_subscription.id, first.id, second.id])
+      expect(first.reload.group_id).to eq(child_group.id)
+      expect(first.reload.position).to eq(2)
+    end
   end
 end
