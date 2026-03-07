@@ -1,9 +1,10 @@
 <li class="container mt-1" data-item-type="group" data-group-id="<%= group.id %>">
   <div class="px-2 py-1 text-xs font-semibold uppercase tracking-wide text-gray-500"><%= group.name %></div>
 
-  <ul class="ml-2" data-controller="subscriptions-sort"
+  <ul class="ml-2" data-controller="subscriptions-sort groups-sort"
     data-subscriptions-sort-url-value="<%= reorder_subscriptions_path %>"
     data-subscriptions-sort-group-id-value="<%= group.id %>"
+    data-groups-sort-url-value="<%= reorder_groups_path %>"
   >
     <% (subscriptions_by_group[group.id] || []).each do |subscription| %>
       <li tabindex="0" class="container focus:outline-none"
