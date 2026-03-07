@@ -55,6 +55,8 @@
       <%=
         link_to('New subscription', new_subscription_path,
           'data-turbo-frame' => 'modal',
+          'data-pane-focus-target' => 'linkNewSubscription',
+          'data-base-href' => new_subscription_path,
           'class' => 'px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-green-600 border border-transparent rounded-md active:bg-green-600 hover:bg-green-700 focus:outline-none focus:shadow-outline-green inline-block hover:text-white'
         )
       %>
@@ -73,6 +75,8 @@
       <%=
         link_to('New group', new_group_path,
           'data-turbo-frame' => 'modal',
+          'data-pane-focus-target' => 'linkNewGroup',
+          'data-base-href' => new_group_path,
           'class' => 'px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-green-600 border border-transparent rounded-md active:bg-green-600 hover:bg-green-700 focus:outline-none focus:shadow-outline-green inline-block hover:text-white'
         )
       %>

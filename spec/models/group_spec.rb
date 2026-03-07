@@ -12,12 +12,21 @@ RSpec.describe Group, type: :model do
   end
 
   describe 'position ordering' do
-    it 'assigns next position among siblings' do
+    it 'assigns next position among mixed siblings within parent group' do
       parent = FactoryBot.create(:group, position: 1)
       FactoryBot.create(:group, parent: parent, position: 1)
+      FactoryBot.create(:subscription, group: parent, position: 4)
 
       child = described_class.create!(name: 'Child', parent: parent)
-      expect(child.position).to eq(2)
+      expect(child.position).to eq(5)
+    end
+
+    it 'assigns next position among mixed siblings at top-level' do
+      FactoryBot.create(:group, parent: nil, position: 2)
+      FactoryBot.create(:subscription, group: nil, position: 6)
+
+      top_group = described_class.create!(name: 'Top Group', parent: nil)
+      expect(top_group.position).to eq(7)
     end
 
     it 'orders by position and id' do

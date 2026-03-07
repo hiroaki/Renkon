@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
-  static targets = ['navigationPane', 'subscriptionsPane', 'articlesPane', 'contentsPane', 'linkEditSubscription', 'linkEditGroup', 'buttonMarkSelectedRead', 'buttonMarkSelectedUnread'];
+  static targets = ['navigationPane', 'subscriptionsPane', 'articlesPane', 'contentsPane', 'linkNewSubscription', 'linkNewGroup', 'linkEditSubscription', 'linkEditGroup', 'buttonMarkSelectedRead', 'buttonMarkSelectedUnread'];
   static values = {
     adaptSubscriptionsController: String, // 接続する Subscriptions コントローラの識別子
     adaptArticlesController: String, // 接続する Articles コントローラの識別子
@@ -284,8 +284,64 @@ export default class extends Controller {
     const subscriptionEditUrl = li && li.dataset.itemType === 'subscription' ? li.dataset['urlEdit'] : null;
     const groupEditUrl = li && li.dataset.itemType === 'group' ? li.dataset['urlEdit'] : null;
 
+    this.#resetNewSubscriptionLinkHref(li);
+    this.#resetNewGroupLinkHref(li);
     this.#resetEditSubscriptionLinkHref(subscriptionEditUrl);
     this.#resetEditGroupLinkHref(groupEditUrl);
+  }
+
+  #resetNewSubscriptionLinkHref(li) {
+    const baseHref = this.linkNewSubscriptionTarget.dataset.baseHref || this.linkNewSubscriptionTarget.href;
+
+    if (!li || !li.dataset.itemType || li.dataset.itemType === 'trash') {
+      this.linkNewSubscriptionTarget.href = baseHref;
+      return;
+    }
+
+    const url = new URL(baseHref, window.location.origin);
+
+    if (li.dataset.itemType === 'subscription' && li.dataset.subscription) {
+      url.searchParams.set('insert_context_type', 'subscription');
+      url.searchParams.set('insert_context_id', li.dataset.subscription);
+      this.linkNewSubscriptionTarget.href = url.pathname + url.search;
+      return;
+    }
+
+    if (li.dataset.itemType === 'group' && li.dataset.groupId) {
+      url.searchParams.set('insert_context_type', 'group');
+      url.searchParams.set('insert_context_id', li.dataset.groupId);
+      this.linkNewSubscriptionTarget.href = url.pathname + url.search;
+      return;
+    }
+
+    this.linkNewSubscriptionTarget.href = baseHref;
+  }
+
+  #resetNewGroupLinkHref(li) {
+    const baseHref = this.linkNewGroupTarget.dataset.baseHref || this.linkNewGroupTarget.href;
+
+    if (!li || !li.dataset.itemType || li.dataset.itemType === 'trash') {
+      this.linkNewGroupTarget.href = baseHref;
+      return;
+    }
+
+    const url = new URL(baseHref, window.location.origin);
+
+    if (li.dataset.itemType === 'subscription' && li.dataset.subscription) {
+      url.searchParams.set('insert_context_type', 'subscription');
+      url.searchParams.set('insert_context_id', li.dataset.subscription);
+      this.linkNewGroupTarget.href = url.pathname + url.search;
+      return;
+    }
+
+    if (li.dataset.itemType === 'group' && li.dataset.groupId) {
+      url.searchParams.set('insert_context_type', 'group');
+      url.searchParams.set('insert_context_id', li.dataset.groupId);
+      this.linkNewGroupTarget.href = url.pathname + url.search;
+      return;
+    }
+
+    this.linkNewGroupTarget.href = baseHref;
   }
 
   #resetEditSubscriptionLinkHref(settingHref) {

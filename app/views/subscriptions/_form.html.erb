@@ -1,4 +1,7 @@
 <%= form_with(model: subscription) do |form| %>
+  <%= hidden_field_tag :insert_context_type, local_assigns[:insert_context_type] %>
+  <%= hidden_field_tag :insert_context_id, local_assigns[:insert_context_id] %>
+
   <% if subscription.errors.any? %>
     <div style="color: red">
       <h2><%= pluralize(subscription.errors.count, "error") %> prohibited this subscription from being saved:</h2>

@@ -1,6 +1,9 @@
 <% show_parent_selector = local_assigns.fetch(:show_parent_selector, true) %>
 
 <%= form_with(model: group) do |form| %>
+  <%= hidden_field_tag :insert_context_type, local_assigns[:insert_context_type] %>
+  <%= hidden_field_tag :insert_context_id, local_assigns[:insert_context_id] %>
+
   <% if group.errors.any? %>
     <div style="color: red">
       <h2><%= pluralize(group.errors.count, "error") %> prohibited this group from being saved:</h2>

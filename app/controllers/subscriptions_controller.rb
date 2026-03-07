@@ -26,6 +26,8 @@ class SubscriptionsController < ApplicationController
   # GET /subscriptions/new
   def new
     @subscription = Subscription.new
+    @insert_context_type = params[:insert_context_type]
+    @insert_context_id = params[:insert_context_id]
   end
 
   # GET /subscriptions/1/edit
@@ -35,10 +37,13 @@ class SubscriptionsController < ApplicationController
   # POST /subscriptions
   def create
     @subscription = Subscription.new(subscription_params)
+    apply_insert_context(@subscription)
 
     if @subscription.save
       redirect_to @subscription, notice: "Subscription was successfully created."
     else
+      @insert_context_type = params[:insert_context_type]
+      @insert_context_id = params[:insert_context_id]
       render :new, status: :unprocessable_entity
     end
   end
@@ -215,5 +220,57 @@ class SubscriptionsController < ApplicationController
 
       @subscriptions_by_group = grouped.group_by(&:group_id)
       @top_level_subscriptions = @subscriptions_by_group[nil] || []
+    end
+
+    def apply_insert_context(subscription)
+      context_type = params[:insert_context_type].to_s
+      context_id = params[:insert_context_id].to_i
+
+      if context_type == 'subscription' && context_id > 0
+        anchor = Subscription.find_by(id: context_id)
+        return append_to_top_level(subscription) unless anchor
+
+        parent_group_id = anchor.group_id
+        insert_position = anchor.position.to_i + 1
+
+        Subscription.transaction do
+          shift_mixed_sibling_positions(parent_group_id, insert_position)
+          subscription.group_id = parent_group_id
+          subscription.position = insert_position
+        end
+        return
+      end
+
+      if context_type == 'group' && context_id > 0
+        group = Group.find_by(id: context_id)
+        return append_to_top_level(subscription) unless group
+
+        subscription.group_id = group.id
+        subscription.position = next_mixed_position(group.id)
+        return
+      end
+
+      append_to_top_level(subscription)
+    end
+
+    def append_to_top_level(subscription)
+      subscription.group_id = nil
+      subscription.position = next_mixed_position(nil)
+    end
+
+    def next_mixed_position(parent_group_id)
+      sibling_group_max = Group.where(parent_id: parent_group_id).maximum(:position) || 0
+      sibling_subscription_max = Subscription.where(group_id: parent_group_id).maximum(:position) || 0
+      [sibling_group_max, sibling_subscription_max].max + 1
+    end
+
+    def shift_mixed_sibling_positions(parent_group_id, from_position)
+      Group.where(parent_id: parent_group_id)
+        .where('position >= ?', from_position)
+        .update_all('position = position + 1')
+
+      Subscription.where(group_id: parent_group_id)
+        .where('position >= ?', from_position)
+        .update_all('position = position + 1')
     end
 end

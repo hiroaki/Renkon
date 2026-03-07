@@ -1,4 +1,4 @@
-<% form = capture { render "form", subscription: @subscription } %>
+<% form = capture { render "form", subscription: @subscription, insert_context_type: @insert_context_type, insert_context_id: @insert_context_id } %>
 
 <% unless turbo_frame_request? %>
   <h2>New subscription</h2>

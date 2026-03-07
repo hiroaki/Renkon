@@ -20,7 +20,9 @@ class Group < ApplicationRecord
     def assign_position
       return if position.present?
 
-      siblings = Group.where(parent_id: parent_id)
-      self.position = (siblings.maximum(:position) || 0) + 1
+      sibling_group_max = Group.where(parent_id: parent_id).maximum(:position) || 0
+      sibling_subscription_max = Subscription.where(group_id: parent_id).maximum(:position) || 0
+
+      self.position = [sibling_group_max, sibling_subscription_max].max + 1
     end
 end

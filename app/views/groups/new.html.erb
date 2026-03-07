@@ -1,4 +1,4 @@
-<% form = capture { render 'form', group: @group } %>
+<% form = capture { render 'form', group: @group, show_parent_selector: false, insert_context_type: @insert_context_type, insert_context_id: @insert_context_id } %>
 
 <% unless turbo_frame_request? %>
   <h2>New group</h2>
