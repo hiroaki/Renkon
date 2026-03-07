@@ -18,7 +18,9 @@
       keydown.enter->subscriptions#openUrl
       dblclick->subscriptions#openUrl
       keydown.backspace->subscriptions#confirmDestroy
-      keydown.backspace->subscriptions#destroySubscription
+      keydown.backspace->subscriptions#destroySelectedItem
+      keydown.delete->subscriptions#confirmDestroy
+      keydown.delete->subscriptions#destroySelectedItem
 
       keydown.up->subscriptions#selectPrevItem:prevent
       keydown.down->subscriptions#selectNextItem:prevent

@@ -2,8 +2,8 @@ class Group < ApplicationRecord
   ROOT_NAME = 'Subscriptions'.freeze
 
   belongs_to :parent, class_name: 'Group', optional: true
-  has_many :children, class_name: 'Group', foreign_key: :parent_id, dependent: :nullify
-  has_many :subscriptions, dependent: :nullify
+  has_many :children, class_name: 'Group', foreign_key: :parent_id, dependent: :destroy
+  has_many :subscriptions, dependent: :destroy
 
   validates :name, presence: true
 

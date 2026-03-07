@@ -3,8 +3,8 @@ require 'rails_helper'
 RSpec.describe Group, type: :model do
   describe 'associations' do
     it { should belong_to(:parent).class_name('Group').optional }
-    it { should have_many(:children).class_name('Group').with_foreign_key('parent_id').dependent(:nullify) }
-    it { should have_many(:subscriptions).dependent(:nullify) }
+    it { should have_many(:children).class_name('Group').with_foreign_key('parent_id').dependent(:destroy) }
+    it { should have_many(:subscriptions).dependent(:destroy) }
   end
 
   describe 'validations' do

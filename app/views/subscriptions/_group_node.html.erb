@@ -1,5 +1,15 @@
-<li class="container mt-1" data-item-type="group" data-group-id="<%= group.id %>">
-  <div class="px-2 py-1 text-xs font-semibold uppercase tracking-wide text-gray-500"><%= group.name %></div>
+<li tabindex="0" class="container mt-1 focus:outline-none"
+  data-item-type="group"
+  data-group-id="<%= group.id %>"
+  data-subscriptions-target="listItem"
+  data-url-destroy="<%= group_path(group) %>"
+  data-text-for-confirm-destroy="Delete this group and all nested groups/subscriptions?<%= "\n#{group.name}" %>"
+>
+  <div
+    tabindex="-1"
+    class="px-2 py-1 text-xs font-semibold uppercase tracking-wide text-gray-500 cursor-pointer"
+    data-action="click->subscriptions#handlerEnterItem"
+  ><%= group.name %></div>
 
   <ul class="ml-2" data-controller="subscriptions-sort groups-sort"
     data-subscriptions-sort-url-value="<%= reorder_subscriptions_path %>"

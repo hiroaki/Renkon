@@ -32,7 +32,7 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :groups, only: %i[ new create ] do
+  resources :groups, only: %i[ new create destroy ] do
     collection do
       patch :reorder
     end

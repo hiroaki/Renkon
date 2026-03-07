@@ -38,7 +38,7 @@ export default class extends SelectedLiBaseController {
   // stopImmediatePropagation を呼び出すことにしています。
   confirmDestroy(evt) {
     const li = this.detectLiFrom(evt.target);
-    if (!this.isSubscriptionItem(li)) {
+    if (!this.isDestroyableItem(li)) {
       return;
     }
 
@@ -48,10 +48,10 @@ export default class extends SelectedLiBaseController {
     }
   }
 
-  // Subscription の削除処理をリクエストします。
-  async destroySubscription(evt) {
+  // 選択中アイテム（購読/グループ）の削除処理をリクエストします。
+  async destroySelectedItem(evt) {
     const li = this.detectLiFrom(evt.target);
-    if (!this.isSubscriptionItem(li)) {
+    if (!this.isDestroyableItem(li)) {
       return;
     }
 
@@ -60,7 +60,10 @@ export default class extends SelectedLiBaseController {
     try {
       const response = await fetch(url, {
         method: 'DELETE',
-        headers: { 'X-CSRF-Token': getCsrfToken() }
+        headers: {
+          'X-CSRF-Token': getCsrfToken(),
+          'X-Requested-With': 'XMLHttpRequest',
+        }
       });
 
       if (response.ok) {
@@ -85,7 +88,7 @@ export default class extends SelectedLiBaseController {
 
   _destroySubscription(evt) {
     const li = this.detectLiFrom(evt.target);
-    if (!this.isSubscriptionItem(li)) {
+    if (!this.isDestroyableItem(li)) {
       return;
     }
 
@@ -133,5 +136,13 @@ export default class extends SelectedLiBaseController {
 
   isSubscriptionItem(li) {
     return !!li && li.dataset.itemType === 'subscription';
+  }
+
+  isGroupItem(li) {
+    return !!li && li.dataset.itemType === 'group';
+  }
+
+  isDestroyableItem(li) {
+    return this.isSubscriptionItem(li) || this.isGroupItem(li);
   }
 }
