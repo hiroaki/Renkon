@@ -41,6 +41,11 @@ RSpec.describe "Main Page", type: :system do
       expect(page).to have_link('New group', href: new_group_path)
     end
 
+    it "has an 'Edit group' link" do
+      visit root_path
+      expect(page).to have_link('Edit group', href: '#')
+    end
+
     it "has an 'Empty Trash' button" do
       visit root_path
       expect(page).to have_selector('button', text: 'Empty Trash')

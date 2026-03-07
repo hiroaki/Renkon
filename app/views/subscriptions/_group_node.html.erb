@@ -2,6 +2,7 @@
   data-item-type="group"
   data-group-id="<%= group.id %>"
   data-subscriptions-target="listItem"
+  data-url-edit="<%= edit_group_path(group) %>"
   data-url-destroy="<%= group_path(group) %>"
   data-text-for-confirm-destroy="Delete this group and all nested groups/subscriptions?<%= "\n#{group.name}" %>"
 >

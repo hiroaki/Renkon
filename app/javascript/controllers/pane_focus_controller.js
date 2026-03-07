@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
-  static targets = ['navigationPane', 'subscriptionsPane', 'articlesPane', 'contentsPane', 'linkEditSubscription', 'buttonMarkSelectedRead', 'buttonMarkSelectedUnread'];
+  static targets = ['navigationPane', 'subscriptionsPane', 'articlesPane', 'contentsPane', 'linkEditSubscription', 'linkEditGroup', 'buttonMarkSelectedRead', 'buttonMarkSelectedUnread'];
   static values = {
     adaptSubscriptionsController: String, // 接続する Subscriptions コントローラの識別子
     adaptArticlesController: String, // 接続する Articles コントローラの識別子
@@ -17,7 +17,7 @@ export default class extends Controller {
     });
 
     // initialize state for Edit subscription button
-    this.#resetEditSubscriptionLinkBySubscriptionListItem(this.getSelectedSubscriptionListItem());
+    this.#syncSubscriptionAndGroupActions(this.getSelectedSubscriptionListItem());
     this.updateBulkReadButtons([]);
 
     //
@@ -178,7 +178,7 @@ export default class extends Controller {
   // 選択されている "購読" が変わった時、操作バー上の「編集」ボタンの操作対象を当該購読の内容に変更します。
   onChangeSelectedSubscriptionListItem(evt) {
     const li = evt.detail.selected;
-    this.#resetEditSubscriptionLinkBySubscriptionListItem(li);
+    this.#syncSubscriptionAndGroupActions(li);
   }
 
   onChangeSelectedArticleListItems(evt) {
@@ -280,9 +280,12 @@ export default class extends Controller {
     frame.hidden = false;
   }
 
-  #resetEditSubscriptionLinkBySubscriptionListItem(li) {
-    const urlEdit = li ? li.dataset['urlEdit'] : null;
-    this.#resetEditSubscriptionLinkHref(urlEdit);
+  #syncSubscriptionAndGroupActions(li) {
+    const subscriptionEditUrl = li && li.dataset.itemType === 'subscription' ? li.dataset['urlEdit'] : null;
+    const groupEditUrl = li && li.dataset.itemType === 'group' ? li.dataset['urlEdit'] : null;
+
+    this.#resetEditSubscriptionLinkHref(subscriptionEditUrl);
+    this.#resetEditGroupLinkHref(groupEditUrl);
   }
 
   #resetEditSubscriptionLinkHref(settingHref) {
@@ -293,6 +296,17 @@ export default class extends Controller {
     else {
       this.linkEditSubscriptionTarget.href = settingHref;
       this.linkEditSubscriptionTarget.dataset['disabled'] = false;
+    }
+  }
+
+  #resetEditGroupLinkHref(settingHref) {
+    if (settingHref == null) {
+      this.linkEditGroupTarget.href = '#';
+      this.linkEditGroupTarget.dataset['disabled'] = true;
+    }
+    else {
+      this.linkEditGroupTarget.href = settingHref;
+      this.linkEditGroupTarget.dataset['disabled'] = false;
     }
   }
 

@@ -6,7 +6,11 @@
 import { Application, defaultSchema } from "@hotwired/stimulus"
 const customSchema = {
   ...defaultSchema,
-  keyMappings: { ...defaultSchema.keyMappings, backspace: 'Backspace' },
+  keyMappings: {
+    ...defaultSchema.keyMappings,
+    backspace: 'Backspace',
+    delete: 'Delete',
+  },
 }
 console.log(customSchema);
 const application = Application.start(document.documentElement, customSchema)
