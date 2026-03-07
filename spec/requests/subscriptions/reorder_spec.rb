@@ -76,5 +76,78 @@ RSpec.describe 'Subscriptions reorder', type: :request do
       expect(response).to have_http_status(422)
       expect(response.parsed_body['error']).to include('parent_group_id is invalid')
     end
+
+    it 'moves a subscription to top-level' do
+      patch reorder_tree_subscriptions_path, params: {
+        tree_nodes: [
+          { item_type: 'group', id: group.id, parent_group_id: nil, position: 1 },
+          { item_type: 'subscription', id: first.id, parent_group_id: nil, position: 2 },
+          { item_type: 'subscription', id: second.id, parent_group_id: group.id, position: 1 },
+          { item_type: 'subscription', id: third.id, parent_group_id: group.id, position: 2 },
+        ],
+      }
+
+      expect(response).to have_http_status(:no_content)
+      expect(first.reload.group_id).to be_nil
+      expect(first.reload.position).to eq(2)
+      expect(Subscription.ordered_within_group(group.id).pluck(:id)).to eq([second.id, third.id])
+    end
+
+    it 'updates group parent hierarchy through the same payload' do
+      parent = FactoryBot.create(:group, name: 'Parent', parent: nil, position: 2)
+      child = FactoryBot.create(:group, name: 'Child', parent: nil, position: 3)
+      outsider = FactoryBot.create(:subscription, group: parent, position: 1)
+
+      patch reorder_tree_subscriptions_path, params: {
+        tree_nodes: [
+          { item_type: 'group', id: group.id, parent_group_id: nil, position: 1 },
+          { item_type: 'group', id: parent.id, parent_group_id: nil, position: 2 },
+          { item_type: 'group', id: child.id, parent_group_id: parent.id, position: 1 },
+          { item_type: 'subscription', id: first.id, parent_group_id: group.id, position: 1 },
+          { item_type: 'subscription', id: second.id, parent_group_id: group.id, position: 2 },
+          { item_type: 'subscription', id: third.id, parent_group_id: group.id, position: 3 },
+          { item_type: 'subscription', id: outsider.id, parent_group_id: parent.id, position: 2 },
+        ],
+      }
+
+      expect(response).to have_http_status(:no_content)
+      expect(child.reload.parent_id).to eq(parent.id)
+      expect(child.reload.position).to eq(1)
+    end
+
+    it 'returns unprocessable_entity when group hierarchy contains cycles' do
+      parent = FactoryBot.create(:group, name: 'Parent', parent: nil, position: 2)
+      child = FactoryBot.create(:group, name: 'Child', parent: parent, position: 1)
+      outsider = FactoryBot.create(:subscription, group: parent, position: 1)
+
+      patch reorder_tree_subscriptions_path, params: {
+        tree_nodes: [
+          { item_type: 'group', id: group.id, parent_group_id: nil, position: 1 },
+          { item_type: 'group', id: parent.id, parent_group_id: child.id, position: 1 },
+          { item_type: 'group', id: child.id, parent_group_id: parent.id, position: 1 },
+          { item_type: 'subscription', id: first.id, parent_group_id: group.id, position: 1 },
+          { item_type: 'subscription', id: second.id, parent_group_id: group.id, position: 2 },
+          { item_type: 'subscription', id: third.id, parent_group_id: group.id, position: 3 },
+          { item_type: 'subscription', id: outsider.id, parent_group_id: parent.id, position: 2 },
+        ],
+      }
+
+      expect(response).to have_http_status(422)
+      expect(response.parsed_body['error']).to include('cycles')
+    end
+
+    it 'returns unprocessable_entity when sibling positions are duplicated across mixed items' do
+      patch reorder_tree_subscriptions_path, params: {
+        tree_nodes: [
+          { item_type: 'group', id: group.id, parent_group_id: nil, position: 1 },
+          { item_type: 'subscription', id: first.id, parent_group_id: group.id, position: 1 },
+          { item_type: 'subscription', id: second.id, parent_group_id: group.id, position: 1 },
+          { item_type: 'subscription', id: third.id, parent_group_id: group.id, position: 3 },
+        ],
+      }
+
+      expect(response).to have_http_status(422)
+      expect(response.parsed_body['error']).to include('position must be unique')
+    end
   end
 end

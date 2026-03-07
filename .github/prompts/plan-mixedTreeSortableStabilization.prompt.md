@@ -2,6 +2,19 @@
 
 グループと記事（subscription）を同一ソート面で扱うため、Sortableの管理対象を「全階層のUL」に統一し、`tree_nodes` を常に完全送信して `reorder_tree` で原子的に保存する。まずは判定を「ドロップ先リスト基準」に限定し、同列配置と子配置を確実に実現する。将来の横方向しきい値判定は拡張余地として分離する。
 
+**Status Snapshot (2026-03-07)**
+- 完了: nested sortable の主要挙動（group/subscription混在移動、子化、top-level復帰、リロード後の順序保持）は実装済み。
+- 完了: `reorder_tree` 保存経路、`tree_nodes` 全量送信、root mixed描画（group/subscriptionをposition順で表示）。
+- 完了: 公式 Nested Sortables Example に近い初期化（全ULへ Sortable 適用、`fallbackOnBody`/`swapThreshold`/`invertSwap`）。
+- 未完了: 旧経路の整理（`PATCH /subscriptions/reorder` と `PATCH /groups/reorder` の退役方針確定・反映）。
+- 未完了: DnD専用 system spec の新設（現在は既存 system/request で回帰確認）。
+- 要判断: ルートグループの扱い（「固定かつ非表示」の方針に完全一致させるか、現状の表示運用を維持するか）。
+
+**Open Questions (for next batch)**
+1. 旧 `reorder` 系エンドポイントはこのタイミングで削除するか、互換のため1サイクル残すか。
+2. ルートグループ（`Group.default_root!`）をUI非表示に寄せるか、現状どおり表示可能にするか。
+3. DnD専用 system spec は今の区切りで追加するか、次の細かなUI調整と同じバッチで追加するか。
+
 **Steps**
 1. フェーズ1: 仕様固定（実装前合意）
 2. 仕様を次で固定する: `subscription` は top-level 配置を許可、同一親で group/subscription を混在順序化、group へのドロップは子リストに入った場合のみ内包、ルートは「固定かつ非表示」の内部ノードとして扱う。*完了済み合意の文書化*

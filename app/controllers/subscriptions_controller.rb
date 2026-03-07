@@ -98,57 +98,6 @@ class SubscriptionsController < ApplicationController
     redirect_to subscription_url(@subscription, short: !!params[:short]), notice: "Subscription was successfully refreshed.", status: :see_other
   end
 
-  # reorder_subscriptions PATCH /subscriptions/reorder(.:format)
-  def reorder
-    if params[:grouped_orders].present?
-      return reorder_grouped_orders(params[:grouped_orders])
-    end
-
-    ordered_ids = params[:ordered_ids]
-
-    unless ordered_ids.is_a?(Array)
-      return render_reorder_error('ordered_ids must be an array')
-    end
-
-    ids = ordered_ids.map(&:to_i)
-
-    if ids.empty?
-      return render_reorder_error('ordered_ids must not be empty')
-    end
-
-    if ids.uniq.length != ids.length
-      return render_reorder_error('ordered_ids must not include duplicates')
-    end
-
-    group_id = params[:group_id]&.to_i
-    group = Group.find_by(id: group_id)
-
-    if params[:group_id].present? && group.nil?
-      return render_reorder_error('group_id is invalid')
-    end
-
-    scope = if group
-      Subscription.ordered_within_group(group.id)
-    else
-      Subscription.ordered
-    end
-
-    all_ids = scope.pluck(:id)
-    unless ids.sort == all_ids.sort
-      return render_reorder_error('ordered_ids must include every existing subscription id exactly once')
-    end
-
-    Subscription.transaction do
-      ids.each_with_index do |id, index|
-        attributes = { position: index + 1 }
-        attributes[:group_id] = group.id if group
-        Subscription.where(id: id).update_all(attributes)
-      end
-    end
-
-    head :no_content
-  end
-
   # reorder_tree_subscriptions PATCH /subscriptions/reorder_tree(.:format)
   def reorder_tree
     raw_nodes = params[:tree_nodes]
@@ -253,56 +202,6 @@ class SubscriptionsController < ApplicationController
 
         false
       end
-    end
-
-    def reorder_grouped_orders(raw_grouped_orders)
-      unless raw_grouped_orders.is_a?(Array)
-        return render_reorder_error('grouped_orders must be an array')
-      end
-
-      grouped_orders = raw_grouped_orders.map do |entry|
-        group_id = entry[:group_id].to_i
-        ordered_ids = Array(entry[:ordered_ids]).map(&:to_i)
-
-        { group_id: group_id, ordered_ids: ordered_ids }
-      end
-
-      if grouped_orders.empty?
-        return render_reorder_error('grouped_orders must not be empty')
-      end
-
-      group_ids = grouped_orders.map { |entry| entry[:group_id] }
-      if group_ids.any? { |id| id <= 0 } || group_ids.uniq.length != group_ids.length
-        return render_reorder_error('group_id is invalid')
-      end
-
-      unless Group.where(id: group_ids).count == group_ids.length
-        return render_reorder_error('group_id is invalid')
-      end
-
-      ids = grouped_orders.flat_map { |entry| entry[:ordered_ids] }
-      if ids.empty?
-        return render_reorder_error('ordered_ids must not be empty')
-      end
-
-      if ids.uniq.length != ids.length
-        return render_reorder_error('ordered_ids must not include duplicates')
-      end
-
-      all_ids = Subscription.ordered.pluck(:id)
-      unless ids.sort == all_ids.sort
-        return render_reorder_error('ordered_ids must include every existing subscription id exactly once')
-      end
-
-      Subscription.transaction do
-        grouped_orders.each do |entry|
-          entry[:ordered_ids].each_with_index do |id, index|
-            Subscription.where(id: id).update_all(group_id: entry[:group_id], position: index + 1)
-          end
-        end
-      end
-
-      head :no_content
     end
 
     def load_grouped_subscriptions

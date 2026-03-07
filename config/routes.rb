@@ -15,7 +15,6 @@ Rails.application.routes.draw do
 
   resources :subscriptions do
     collection do
-      patch :reorder
       patch :reorder_tree
     end
 
@@ -33,9 +32,5 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :groups, only: %i[ new create destroy ] do
-    collection do
-      patch :reorder
-    end
-  end
+  resources :groups, only: %i[ new create destroy ]
 end
