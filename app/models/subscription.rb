@@ -5,7 +5,6 @@ class Subscription < ApplicationRecord
   has_many :feed_caches, dependent: :delete_all
   has_one_attached :favicon
 
-  before_validation :assign_default_group, on: :create
   before_validation :assign_position, on: :create
 
   validates :title, presence: true
@@ -50,11 +49,5 @@ class Subscription < ApplicationRecord
 
       siblings = Subscription.where(group_id: group_id)
       self.position = (siblings.maximum(:position) || 0) + 1
-    end
-
-    def assign_default_group
-      return if group.present?
-
-      self.group = Group.default_root!
     end
 end

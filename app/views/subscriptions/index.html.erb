@@ -12,8 +12,8 @@
 
 <%= turbo_frame_tag 'subscriptions' do %>
 <div class="flex flex-col h-full">
-  <ul class="container h-full select-none" tabindex="-1" data-controller="subscriptions groups-sort"
-    data-groups-sort-url-value="<%= reorder_groups_path %>"
+  <ul class="container h-full select-none" tabindex="-1" data-controller="subscriptions subscriptions-tree-sort"
+    data-subscriptions-tree-sort-url-value="<%= reorder_tree_subscriptions_path %>"
     data-action="
       keydown.enter->subscriptions#openUrl
       dblclick->subscriptions#openUrl
@@ -54,12 +54,18 @@
       </div>
     </li>
 
-    <% @root_groups.each do |group| %>
-      <%= render partial: 'subscriptions/group_node', locals: {
-        group: group,
-        groups_by_parent_id: @groups_by_parent_id,
-        subscriptions_by_group: @subscriptions_by_group,
-      } %>
+    <% root_group_nodes = @root_groups.map { |item| { item_type: 'group', item: item, position: item.position } } %>
+    <% root_subscription_nodes = @top_level_subscriptions.map { |item| { item_type: 'subscription', item: item, position: item.position } } %>
+    <% (root_group_nodes + root_subscription_nodes).sort_by { |node| [node[:position], node[:item].id] }.each do |node| %>
+      <% if node[:item_type] == 'group' %>
+        <%= render partial: 'subscriptions/group_node', locals: {
+          group: node[:item],
+          groups_by_parent_id: @groups_by_parent_id,
+          subscriptions_by_group: @subscriptions_by_group,
+        } %>
+      <% else %>
+        <%= render partial: 'subscriptions/subscription_node', locals: { subscription: node[:item] } %>
+      <% end %>
     <% end %>
   </ul>
 </div>

@@ -11,66 +11,19 @@
     data-action="click->subscriptions#handlerEnterItem"
   ><%= group.name %></div>
 
-  <ul class="ml-2" data-controller="subscriptions-sort groups-sort"
-    data-subscriptions-sort-url-value="<%= reorder_subscriptions_path %>"
-    data-subscriptions-sort-group-id-value="<%= group.id %>"
-    data-groups-sort-url-value="<%= reorder_groups_path %>"
-  >
-    <% (subscriptions_by_group[group.id] || []).each do |subscription| %>
-      <li tabindex="0" class="container focus:outline-none"
-        data-item-type="subscription"
-        data-subscription="<%= subscription.id %>"
-        data-subscriptions-target="listItem"
-        data-url-source="<%= subscription.url %>"
-        data-url-destroy="<%= subscription_path(subscription) %>"
-        data-text-for-confirm-destroy="Are you sure you want to delete this subscription?<%= "\n#{subscription.title}" %>"
-        data-url-refresh="<%= fetch_subscription_path(subscription, short: true) %>"
-        data-url-edit="<%= edit_subscription_path(subscription) %>"
-      >
-        <div class="container overflow-hidden text-nowrap text-xs">
-          <span
-            tabindex="-1"
-            class="pl-2 pr-1 py-0.5 block no-underline text-inherit hover:no-underline hover:text-inherit cursor-pointer"
-            data-turbo-frame="<%= turbo_frame_if_turbo_frame_request('articles') %>"
-            data-action="click->subscriptions#handlerEnterItem"
-            data-link-to-url="<%= subscription_articles_path(subscription) %>"
-            data-link-to-frame="articles"
-          >
-            <%=
-              turbo_frame_tag(dom_id(subscription)) do
-            %>
-              <%= render partial: 'subscriptions/subscription_row', locals: { subscription: subscription } %>
-            <% end %>
-          </span>
-
-          <%= capture_unless_turbo_frame_request do %>
-            <p>
-              <%=
-                link_to(
-                  'Refresh subscription', fetch_subscription_path(subscription),
-                  data: { turbo_method: :patch, turbo_frame: dom_id(subscription) },
-                )
-              %>
-              |
-              <%= link_to('Show this subscription', subscription, data: { turbo_frame: '_top' }) %>
-              |
-              <%=
-                link_to('articles of this subscription', subscription_articles_path(subscription), data: {
-                  turbo_frame: '_top',
-                })
-              %>
-            </p>
-          <% end %>
-        </div>
-      </li>
-    <% end %>
-
-    <% (groups_by_parent_id[group.id] || []).each do |child_group| %>
-      <%= render partial: 'subscriptions/group_node', locals: {
-        group: child_group,
-        groups_by_parent_id: groups_by_parent_id,
-        subscriptions_by_group: subscriptions_by_group,
-      } %>
+  <ul class="ml-2 min-h-3" data-tree-sort-list>
+    <% group_nodes = (groups_by_parent_id[group.id] || []).map { |item| { item_type: 'group', item: item, position: item.position } } %>
+    <% subscription_nodes = (subscriptions_by_group[group.id] || []).map { |item| { item_type: 'subscription', item: item, position: item.position } } %>
+    <% (group_nodes + subscription_nodes).sort_by { |node| [node[:position], node[:item].id] }.each do |node| %>
+      <% if node[:item_type] == 'group' %>
+        <%= render partial: 'subscriptions/group_node', locals: {
+          group: node[:item],
+          groups_by_parent_id: groups_by_parent_id,
+          subscriptions_by_group: subscriptions_by_group,
+        } %>
+      <% else %>
+        <%= render partial: 'subscriptions/subscription_node', locals: { subscription: node[:item] } %>
+      <% end %>
     <% end %>
   </ul>
 </li>

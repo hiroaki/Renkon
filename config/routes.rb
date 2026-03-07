@@ -16,6 +16,7 @@ Rails.application.routes.draw do
   resources :subscriptions do
     collection do
       patch :reorder
+      patch :reorder_tree
     end
 
     resources :articles do

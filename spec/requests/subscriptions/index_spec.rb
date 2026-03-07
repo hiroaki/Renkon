@@ -38,6 +38,23 @@ RSpec.describe 'Subscriptions index', type: :request do
       expect(response.body).to include('Main Group')
     end
 
+    it 'renders top-level groups and subscriptions in mixed position order' do
+      top_a = FactoryBot.create(:subscription, title: 'Top A', group: nil, position: 1)
+      top_group = FactoryBot.create(:group, name: 'Top Group', parent: nil, position: 2)
+      top_b = FactoryBot.create(:subscription, title: 'Top B', group: nil, position: 3)
+
+      get subscriptions_path, params: { short: true }
+
+      expect(response).to have_http_status(:ok)
+
+      first_index = response.body.index("data-subscription=\"#{top_a.id}\"")
+      group_index = response.body.index("data-group-id=\"#{top_group.id}\"")
+      third_index = response.body.index("data-subscription=\"#{top_b.id}\"")
+
+      expect(first_index).to be < group_index
+      expect(group_index).to be < third_index
+    end
+
       it 'renders subscriptions in nested child groups' do
         child_group = FactoryBot.create(:group, name: 'Child Group', parent: group, position: 1)
         nested_subscription = FactoryBot.create(:subscription, title: 'Nested', position: 1, group: child_group)
