@@ -31,4 +31,10 @@ Rails.application.routes.draw do
       patch :fetch
     end
   end
+
+  resources :groups, only: [] do
+    collection do
+      patch :reorder
+    end
+  end
 end
