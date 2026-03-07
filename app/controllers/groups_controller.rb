@@ -1,4 +1,18 @@
 class GroupsController < ApplicationController
+  def new
+    @group = Group.new(parent_id: params[:parent_id])
+  end
+
+  def create
+    @group = Group.new(group_params)
+
+    if @group.save
+      redirect_to subscriptions_path, notice: 'Group was successfully created.', status: :see_other
+    else
+      render :new, status: :unprocessable_entity
+    end
+  end
+
   # reorder_groups PATCH /groups/reorder(.:format)
   def reorder
     raw_nodes = params[:group_nodes]
@@ -57,6 +71,10 @@ class GroupsController < ApplicationController
   end
 
   private
+
+    def group_params
+      params.require(:group).permit(:name, :parent_id)
+    end
 
     def cyclic_group_hierarchy?(parent_ids_by_group)
       parent_ids_by_group.keys.any? do |group_id|
