@@ -30,5 +30,19 @@ RSpec.describe 'Groups create', type: :request do
       expect(response).to have_http_status(422)
       expect(response.body).to include('Name can&#39;t be blank')
     end
+
+    it 'returns turbo stream updates when created from modal frame' do
+      post groups_path,
+        params: { group: { name: 'From Modal', parent_id: parent_group.id } },
+        headers: {
+          'Turbo-Frame' => 'modal',
+          'Accept' => 'text/vnd.turbo-stream.html',
+        }
+
+      expect(response).to have_http_status(:ok)
+      expect(response.media_type).to eq('text/vnd.turbo-stream.html')
+      expect(response.body).to include('turbo-stream action="replace" target="subscriptions"')
+      expect(response.body).to include('turbo-stream action="update" target="modal"')
+    end
   end
 end

@@ -9,7 +9,15 @@ class GroupsController < ApplicationController
     @group = Group.new(group_params)
 
     if @group.save
-      redirect_to subscriptions_path, notice: 'Group was successfully created.', status: :see_other
+      if turbo_frame_request?
+        flash.now[:notice] = 'Group was successfully created.'
+        render turbo_stream: [
+          turbo_stream.replace('subscriptions', helpers.turbo_frame_tag('subscriptions', src: subscriptions_path(short: true))),
+          turbo_stream.update('modal', ''),
+        ]
+      else
+        redirect_to subscriptions_path, notice: 'Group was successfully created.', status: :see_other
+      end
     else
       render :new, status: :unprocessable_entity
     end
