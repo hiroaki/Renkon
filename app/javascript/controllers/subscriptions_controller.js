@@ -20,7 +20,22 @@ class RefreshSubscriptionDelegator extends TurboFrameDelegator {
 export default class extends SelectedLiBaseController {
   connect() {
     super.connect();
+    this.restoreGroupCollapseState();
     this.fireSelectionChanged(this.getSelectedItem());
+  }
+
+  toggleGroupCollapse(evt) {
+    evt.preventDefault();
+    evt.stopPropagation();
+
+    const button = evt.currentTarget;
+    const li = button.closest('li[data-item-type="group"][data-group-id]');
+    if (!li) {
+      return;
+    }
+
+    const collapsed = li.dataset.collapsed === 'true';
+    this.setGroupCollapsed(li, !collapsed, true);
   }
 
   openUrl(evt) {
@@ -144,5 +159,46 @@ export default class extends SelectedLiBaseController {
 
   isDestroyableItem(li) {
     return this.isSubscriptionItem(li) || this.isGroupItem(li);
+  }
+
+  restoreGroupCollapseState() {
+    this.listItemTargets
+      .filter((li) => this.isGroupItem(li))
+      .forEach((li) => {
+        const key = this.collapseStorageKey(li.dataset.groupId);
+        const stored = window.localStorage.getItem(key);
+        if (stored === null) {
+          return;
+        }
+
+        this.setGroupCollapsed(li, stored === 'true', false);
+      });
+  }
+
+  setGroupCollapsed(li, collapsed, persist) {
+    li.dataset.collapsed = collapsed ? 'true' : 'false';
+
+    const nested = li.querySelector(':scope > ul[data-tree-sort-list]');
+    if (nested) {
+      nested.hidden = collapsed;
+    }
+
+    const button = li.querySelector(':scope > div .group-collapse-toggle');
+    if (button) {
+      button.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+    }
+
+    const icon = li.querySelector(':scope > div [data-collapse-icon]');
+    if (icon) {
+      icon.textContent = collapsed ? '▸' : '▾';
+    }
+
+    if (persist && li.dataset.groupId) {
+      window.localStorage.setItem(this.collapseStorageKey(li.dataset.groupId), collapsed ? 'true' : 'false');
+    }
+  }
+
+  collapseStorageKey(groupId) {
+    return `renkon.groupCollapsed.${groupId}`;
   }
 }

@@ -15,7 +15,7 @@ RSpec.describe 'Subscriptions selection', type: :system do
     expect(page).to have_selector('turbo-frame#subscriptions')
     expect(page).to have_selector("li[data-item-type='group'][data-group-id='#{parent_group.id}']", wait: 10)
 
-    find("li[data-item-type='group'][data-group-id='#{parent_group.id}'] > div").click
+    find("li[data-item-type='group'][data-group-id='#{parent_group.id}'] .group-select-label", match: :first).click
 
     selected_ids = page.evaluate_script(<<~JS)
       Array.from(document.querySelectorAll('#subscriptions-pane li[data-selected="true"]'))

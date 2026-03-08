@@ -20,6 +20,8 @@ export default class extends Controller {
         invertSwap: true,
         dragoverBubble: true,
         draggable: 'li[data-item-type="subscription"], li[data-item-type="group"]',
+        filter: '.group-collapse-toggle',
+        preventOnFilter: false,
         onEnd: () => this.queuePersistTreeOrder(),
       })
     })
