@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
-  static targets = ['navigationPane', 'subscriptionsPane', 'articlesPane', 'contentsPane', 'linkNewSubscription', 'linkNewGroup', 'linkEditSubscription', 'linkEditGroup', 'buttonMarkSelectedRead', 'buttonMarkSelectedUnread'];
+  static targets = ['navigationPane', 'subscriptionsPane', 'articlesPane', 'contentsPane', 'linkNewSubscription', 'linkNewGroup', 'linkEditSubscription', 'linkEditGroup', 'buttonMarkSelectedRead', 'buttonMarkSelectedUnread', 'statusArea', 'statusText', 'statusIdle'];
   static values = {
     adaptSubscriptionsController: String, // 接続する Subscriptions コントローラの識別子
     adaptArticlesController: String, // 接続する Articles コントローラの識別子
@@ -19,6 +19,7 @@ export default class extends Controller {
     // initialize state for Edit subscription button
     this.#syncSubscriptionAndGroupActions(this.getSelectedSubscriptionListItem());
     this.updateBulkReadButtons([]);
+    this.clearStatusMessage();
 
     //
     this.observeArticlePaneChanges();
@@ -393,5 +394,24 @@ export default class extends Controller {
     if (frame) {
       frame.innerHTML = '';
     }
+  }
+
+  onStatusError(evt) {
+    const message = evt?.detail?.message || "Couldn't save the new order. Please try again.";
+    this.statusTextTarget.textContent = message;
+    this.statusAreaTarget.classList.remove('hidden');
+    this.statusAreaTarget.classList.add('flex');
+    this.statusIdleTarget.classList.add('hidden');
+  }
+
+  clearStatusMessage() {
+    if (!this.hasStatusAreaTarget || !this.hasStatusTextTarget || !this.hasStatusIdleTarget) {
+      return;
+    }
+
+    this.statusTextTarget.textContent = '';
+    this.statusAreaTarget.classList.remove('flex');
+    this.statusAreaTarget.classList.add('hidden');
+    this.statusIdleTarget.classList.remove('hidden');
   }
 }

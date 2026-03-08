@@ -100,12 +100,24 @@ export default class extends Controller {
       if (!response.ok) {
         const body = await response.text()
         console.error('subscriptions-tree-sort: failed to persist order', response.status, body)
+        this.notifyPersistError()
       }
+    } catch (error) {
+      console.error('subscriptions-tree-sort: request error while persisting order', error)
+      this.notifyPersistError()
     } finally {
       persistInFlight = false
       if (persistQueued) {
         this.persistTreeOrder()
       }
     }
+  }
+
+  notifyPersistError() {
+    window.dispatchEvent(new CustomEvent('renkon:status-error', {
+      detail: {
+        message: "Couldn't save the new order. Please try again.",
+      },
+    }))
   }
 }
