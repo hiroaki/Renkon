@@ -1,11 +1,8 @@
 import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
+  static outlets = ['subscriptions', 'articles'];
   static targets = ['navigationPane', 'subscriptionsPane', 'articlesPane', 'contentsPane', 'linkNewSubscription', 'linkNewGroup', 'linkEditSubscription', 'linkEditGroup', 'buttonMarkSelectedRead', 'buttonMarkSelectedUnread', 'statusArea', 'statusText', 'statusIdle'];
-  static values = {
-    adaptSubscriptionsController: String, // 接続する Subscriptions コントローラの識別子
-    adaptArticlesController: String, // 接続する Articles コントローラの識別子
-  }
 
   connect() {
     // それぞれの Pane は、その範囲の要素がクリックされることで "focused" のマークがつくようにします。
@@ -54,23 +51,12 @@ export default class extends Controller {
 
   // INTERFACE of subscriptionsController inherited SelectedLiBaseController
   subscriptionsController() {
-    return this.getController(this.adaptSubscriptionsControllerValue);
+    return this.hasSubscriptionsOutlet ? this.subscriptionsOutlet : null;
   }
 
   // INTERFACE of articlesController inherited SelectedLiBaseController
   articlesController() {
-    return this.getController(this.adaptArticlesControllerValue);
-  }
-
-  getController(identifier) {
-    // data-controller can contain multiple identifiers separated by spaces.
-    const controllerElement = this.element.querySelector(`[data-controller~="${identifier}"]`);
-    if (controllerElement) {
-      return controllerElement[identifier];
-    } else {
-      // not connected (loaded) yet
-      return null;
-    }
+    return this.hasArticlesOutlet ? this.articlesOutlet : null;
   }
 
   // 選択されている Subscription 項目があればそれを返します。なければ null です。
@@ -371,7 +357,7 @@ export default class extends Controller {
   // "購読" または "記事" コントローラが接続されたとき。
   onConnectedSelectedLiBaseController(evt) {
     let controller_id = evt.detail.identifier;
-    let controller = this.getController(controller_id);
+    let controller = controller_id === 'subscriptions' ? this.subscriptionsController() : this.articlesController();
     console.log("connectedSelectedLiBaseController", controller_id, controller);
   }
 
