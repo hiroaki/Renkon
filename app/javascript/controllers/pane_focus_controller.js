@@ -63,7 +63,8 @@ export default class extends Controller {
   }
 
   getController(identifier) {
-    const controllerElement = this.element.querySelector(`[data-controller="${identifier}"]`);
+    // data-controller can contain multiple identifiers separated by spaces.
+    const controllerElement = this.element.querySelector(`[data-controller~="${identifier}"]`);
     if (controllerElement) {
       return controllerElement[identifier];
     } else {
