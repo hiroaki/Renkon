@@ -8,4 +8,4 @@ pin_all_from "app/javascript/controllers", under: "controllers"
 pin "promise-queue" # @2.2.5
 pin "process" # @2.0.1
 pin_all_from "app/javascript/lib", under: "lib"
-pin "sortablejs", to: "https://ga.jspm.io/npm:sortablejs@1.15.6/modular/sortable.esm.js"
+pin "sortablejs" # @1.15.7
