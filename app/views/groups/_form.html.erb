@@ -1,0 +1,33 @@
+<% show_parent_selector = local_assigns.fetch(:show_parent_selector, true) %>
+
+<%= form_with(model: group) do |form| %>
+  <%= hidden_field_tag :insert_context_type, local_assigns[:insert_context_type] %>
+  <%= hidden_field_tag :insert_context_id, local_assigns[:insert_context_id] %>
+
+  <% if group.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(group.errors.count, "error") %> prohibited this group from being saved:</h2>
+      <ul>
+        <% group.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :name, class: 'block text-sm' %>
+    <%= form.text_field :name, class: 'input-text' %>
+  </div>
+
+  <% if show_parent_selector %>
+    <div>
+      <%= form.label :parent_id, 'Parent group', class: 'block text-sm' %>
+      <%= form.collection_select :parent_id, Group.ordered, :id, :name, { include_blank: '(top level)' }, class: 'input-text' %>
+    </div>
+  <% end %>
+
+  <div class="my-4">
+    <%= form.submit nil, class: 'button-notice' %>
+  </div>
+<% end %>

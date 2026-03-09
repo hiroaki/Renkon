@@ -60,12 +60,20 @@
 
 @layer utilities {
   /* フォーカスされたペイン内の <li> に対する濃いハイライト */
-  [data-pane-focus-target].focused [data-selected="true"] {
+  [data-pane-focus-target].focused [data-selected="true"] > :first-child {
     @apply bg-gray-500 text-white;
   }
 
   /* 非フォーカスペイン内の <li> に対する薄いハイライト */
-  [data-pane-focus-target]:not(.focused) [data-selected="true"] {
+  [data-pane-focus-target]:not(.focused) [data-selected="true"] > :first-child {
     @apply bg-gray-300;
+  }
+
+  li[data-item-type="group"] > ul[data-tree-sort-list] {
+    @apply transition-all duration-150 ease-in-out;
+  }
+
+  li[data-item-type="group"] .group-collapse-toggle {
+    @apply inline-flex items-center justify-center rounded hover:bg-gray-200;
   }
 }

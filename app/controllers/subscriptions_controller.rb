@@ -1,27 +1,33 @@
 class SubscriptionsController < ApplicationController
   include Factory
 
-  before_action :set_subscription, only: %i[ show edit update destroy fetch ]
+  before_action :set_subscription, only: %i[ edit update destroy fetch ]
 
   # FOR DEVELOPMENT
   def main
-    @subscriptions = Subscription.all_with_count_articles(unread: true)
+    load_grouped_subscriptions
     render layout: 'viewport_full'
   end
 
   # GET /subscriptions
   def index
-    @subscriptions = Subscription.all_with_count_articles(unread: true)
+    load_grouped_subscriptions
   end
 
   # GET /subscriptions/1
   def show
-    # NOTE: 追加のパラメータ short: true をビューで使っています
+    @subscription = if params[:short] == 'true'
+      Subscription.all_with_count_articles(unread: true).find(params[:id])
+    else
+      Subscription.find(params[:id])
+    end
   end
 
   # GET /subscriptions/new
   def new
     @subscription = Subscription.new
+    @insert_context_type = params[:insert_context_type]
+    @insert_context_id = params[:insert_context_id]
   end
 
   # GET /subscriptions/1/edit
@@ -31,10 +37,13 @@ class SubscriptionsController < ApplicationController
   # POST /subscriptions
   def create
     @subscription = Subscription.new(subscription_params)
+    apply_insert_context(@subscription)
 
     if @subscription.save
       redirect_to @subscription, notice: "Subscription was successfully created."
     else
+      @insert_context_type = params[:insert_context_type]
+      @insert_context_id = params[:insert_context_id]
       render :new, status: :unprocessable_entity
     end
   end
@@ -94,6 +103,77 @@ class SubscriptionsController < ApplicationController
     redirect_to subscription_url(@subscription, short: !!params[:short]), notice: "Subscription was successfully refreshed.", status: :see_other
   end
 
+  # reorder_tree_subscriptions PATCH /subscriptions/reorder_tree(.:format)
+  def reorder_tree
+    raw_nodes = params[:tree_nodes]
+    unless raw_nodes.is_a?(Array)
+      return render_reorder_error('tree_nodes must be an array')
+    end
+
+    nodes = raw_nodes.map do |node|
+      {
+        item_type: node[:item_type].to_s,
+        id: node[:id].to_i,
+        parent_group_id: node[:parent_group_id].presence&.to_i,
+        position: node[:position].to_i,
+      }
+    end
+
+    if nodes.empty?
+      return render_reorder_error('tree_nodes must not be empty')
+    end
+
+    group_nodes = nodes.select { |n| n[:item_type] == 'group' }
+    subscription_nodes = nodes.select { |n| n[:item_type] == 'subscription' }
+
+    if group_nodes.length + subscription_nodes.length != nodes.length
+      return render_reorder_error('item_type is invalid')
+    end
+
+    group_ids = group_nodes.map { |n| n[:id] }
+    subscription_ids = subscription_nodes.map { |n| n[:id] }
+
+    if invalid_or_duplicate_ids?(group_ids) || invalid_or_duplicate_ids?(subscription_ids)
+      return render_reorder_error('id is invalid')
+    end
+
+    unless group_ids.sort == Group.ordered.pluck(:id).sort
+      return render_reorder_error('tree_nodes must include every existing group id exactly once')
+    end
+
+    unless subscription_ids.sort == Subscription.ordered.pluck(:id).sort
+      return render_reorder_error('tree_nodes must include every existing subscription id exactly once')
+    end
+
+    parent_ids = nodes.map { |n| n[:parent_group_id] }.compact
+    unless (parent_ids - group_ids).empty?
+      return render_reorder_error('parent_group_id is invalid')
+    end
+
+    parent_ids_by_group = group_nodes.to_h { |n| [n[:id], n[:parent_group_id]] }
+    if cyclic_group_hierarchy?(parent_ids_by_group)
+      return render_reorder_error('group hierarchy must not contain cycles')
+    end
+
+    siblings = nodes.group_by { |n| n[:parent_group_id] }
+    siblings.each_value do |items|
+      positions = items.map { |n| n[:position] }
+      return render_reorder_error('position must be unique within the same parent') unless positions.uniq.length == positions.length
+    end
+
+    Subscription.transaction do
+      group_nodes.each do |node|
+        Group.where(id: node[:id]).update_all(parent_id: node[:parent_group_id], position: node[:position])
+      end
+
+      subscription_nodes.each do |node|
+        Subscription.where(id: node[:id]).update_all(group_id: node[:parent_group_id], position: node[:position])
+      end
+    end
+
+    head :no_content
+  end
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_subscription
@@ -103,5 +183,94 @@ class SubscriptionsController < ApplicationController
     # Only allow a list of trusted parameters through.
     def subscription_params
       params.require(:subscription).permit(:title, :src, :description, :last_build_date, :url, :favicon)
+    end
+
+    def render_reorder_error(message)
+      render json: { error: message }, status: :unprocessable_entity
+    end
+
+    def invalid_or_duplicate_ids?(ids)
+      ids.any? { |id| id <= 0 } || ids.uniq.length != ids.length
+    end
+
+    def cyclic_group_hierarchy?(parent_ids_by_group)
+      parent_ids_by_group.keys.any? do |group_id|
+        visited = {}
+        current = group_id
+
+        while current
+          return true if visited[current]
+
+          visited[current] = true
+          current = parent_ids_by_group[current]
+        end
+
+        false
+      end
+    end
+
+    def load_grouped_subscriptions
+      Group.default_root!
+      @groups = Group.ordered.to_a
+      @root_groups = @groups.select { |group| group.parent_id.nil? }
+      @groups_by_parent_id = @groups.group_by(&:parent_id)
+
+      grouped = Subscription
+        .all_with_count_articles(unread: true)
+
+      @subscriptions_by_group = grouped.group_by(&:group_id)
+      @top_level_subscriptions = @subscriptions_by_group[nil] || []
+    end
+
+    def apply_insert_context(subscription)
+      context_type = params[:insert_context_type].to_s
+      context_id = params[:insert_context_id].to_i
+
+      if context_type == 'subscription' && context_id > 0
+        anchor = Subscription.find_by(id: context_id)
+        return append_to_top_level(subscription) unless anchor
+
+        parent_group_id = anchor.group_id
+        insert_position = anchor.position.to_i + 1
+
+        Subscription.transaction do
+          shift_mixed_sibling_positions(parent_group_id, insert_position)
+          subscription.group_id = parent_group_id
+          subscription.position = insert_position
+        end
+        return
+      end
+
+      if context_type == 'group' && context_id > 0
+        group = Group.find_by(id: context_id)
+        return append_to_top_level(subscription) unless group
+
+        subscription.group_id = group.id
+        subscription.position = next_mixed_position(group.id)
+        return
+      end
+
+      append_to_top_level(subscription)
+    end
+
+    def append_to_top_level(subscription)
+      subscription.group_id = nil
+      subscription.position = next_mixed_position(nil)
+    end
+
+    def next_mixed_position(parent_group_id)
+      sibling_group_max = Group.where(parent_id: parent_group_id).maximum(:position) || 0
+      sibling_subscription_max = Subscription.where(group_id: parent_group_id).maximum(:position) || 0
+      [sibling_group_max, sibling_subscription_max].max + 1
+    end
+
+    def shift_mixed_sibling_positions(parent_group_id, from_position)
+      Group.where(parent_id: parent_group_id)
+        .where('position >= ?', from_position)
+        .update_all('position = position + 1')
+
+      Subscription.where(group_id: parent_group_id)
+        .where('position >= ?', from_position)
+        .update_all('position = position + 1')
     end
 end

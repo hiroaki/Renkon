@@ -15,6 +15,7 @@ RSpec.describe 'Bulk read and unread actions', type: :system do
     click_list_item_in_subscriptions_pane('Bulk Read Subscription')
     expect(page).to have_selector("li[data-article-id='#{article1.id}']")
     expect(page).to have_selector("li[data-article-id='#{article2.id}']")
+    expect(page).to have_selector("li[data-subscription='#{subscription.id}'] span[data-unread-count]", text: '2')
 
     mark_read_button = find('button', text: 'Mark Read')
     mark_unread_button = find('button', text: 'Mark Unread')
@@ -52,11 +53,13 @@ RSpec.describe 'Bulk read and unread actions', type: :system do
 
     expect(page).to have_selector("li[data-article-id='#{article1.id}'][data-unread='false']")
     expect(page).to have_selector("li[data-article-id='#{article2.id}'][data-unread='false']")
+    expect(page).to have_selector("li[data-subscription='#{subscription.id}'] span[data-unread-count]", text: '0')
 
     mark_unread_button.click
 
     expect(page).to have_selector("li[data-article-id='#{article1.id}'][data-unread='true']")
     expect(page).to have_selector("li[data-article-id='#{article2.id}'][data-unread='true']")
+    expect(page).to have_selector("li[data-subscription='#{subscription.id}'] span[data-unread-count]", text: '2')
   end
 
   it 'toggles selected unread articles to read with r key' do

@@ -1,11 +1,8 @@
 import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
-  static targets = ['navigationPane', 'subscriptionsPane', 'articlesPane', 'contentsPane', 'linkEditSubscription', 'buttonMarkSelectedRead', 'buttonMarkSelectedUnread'];
-  static values = {
-    adaptSubscriptionsController: String, // 接続する Subscriptions コントローラの識別子
-    adaptArticlesController: String, // 接続する Articles コントローラの識別子
-  }
+  static outlets = ['subscriptions', 'articles'];
+  static targets = ['navigationPane', 'subscriptionsPane', 'articlesPane', 'contentsPane', 'linkNewSubscription', 'linkNewGroup', 'linkEditSubscription', 'linkEditGroup', 'buttonMarkSelectedRead', 'buttonMarkSelectedUnread', 'statusArea', 'statusText', 'statusIdle'];
 
   connect() {
     // それぞれの Pane は、その範囲の要素がクリックされることで "focused" のマークがつくようにします。
@@ -17,8 +14,9 @@ export default class extends Controller {
     });
 
     // initialize state for Edit subscription button
-    this.#resetEditSubscriptionLinkBySubscriptionListItem(this.getSelectedSubscriptionListItem());
+    this.#syncSubscriptionAndGroupActions(this.getSelectedSubscriptionListItem());
     this.updateBulkReadButtons([]);
+    this.clearStatusMessage();
 
     //
     this.observeArticlePaneChanges();
@@ -53,22 +51,12 @@ export default class extends Controller {
 
   // INTERFACE of subscriptionsController inherited SelectedLiBaseController
   subscriptionsController() {
-    return this.getController(this.adaptSubscriptionsControllerValue);
+    return this.hasSubscriptionsOutlet ? this.subscriptionsOutlet : null;
   }
 
   // INTERFACE of articlesController inherited SelectedLiBaseController
   articlesController() {
-    return this.getController(this.adaptArticlesControllerValue);
-  }
-
-  getController(identifier) {
-    const controllerElement = this.element.querySelector(`[data-controller="${identifier}"]`);
-    if (controllerElement) {
-      return controllerElement[identifier];
-    } else {
-      // not connected (loaded) yet
-      return null;
-    }
+    return this.hasArticlesOutlet ? this.articlesOutlet : null;
   }
 
   // 選択されている Subscription 項目があればそれを返します。なければ null です。
@@ -178,7 +166,7 @@ export default class extends Controller {
   // 選択されている "購読" が変わった時、操作バー上の「編集」ボタンの操作対象を当該購読の内容に変更します。
   onChangeSelectedSubscriptionListItem(evt) {
     const li = evt.detail.selected;
-    this.#resetEditSubscriptionLinkBySubscriptionListItem(li);
+    this.#syncSubscriptionAndGroupActions(li);
   }
 
   onChangeSelectedArticleListItems(evt) {
@@ -280,9 +268,68 @@ export default class extends Controller {
     frame.hidden = false;
   }
 
-  #resetEditSubscriptionLinkBySubscriptionListItem(li) {
-    const urlEdit = li ? li.dataset['urlEdit'] : null;
-    this.#resetEditSubscriptionLinkHref(urlEdit);
+  #syncSubscriptionAndGroupActions(li) {
+    const subscriptionEditUrl = li && li.dataset.itemType === 'subscription' ? li.dataset['urlEdit'] : null;
+    const groupEditUrl = li && li.dataset.itemType === 'group' ? li.dataset['urlEdit'] : null;
+
+    this.#resetNewSubscriptionLinkHref(li);
+    this.#resetNewGroupLinkHref(li);
+    this.#resetEditSubscriptionLinkHref(subscriptionEditUrl);
+    this.#resetEditGroupLinkHref(groupEditUrl);
+  }
+
+  #resetNewSubscriptionLinkHref(li) {
+    const baseHref = this.linkNewSubscriptionTarget.dataset.baseHref || this.linkNewSubscriptionTarget.href;
+
+    if (!li || !li.dataset.itemType || li.dataset.itemType === 'trash') {
+      this.linkNewSubscriptionTarget.href = baseHref;
+      return;
+    }
+
+    const url = new URL(baseHref, window.location.origin);
+
+    if (li.dataset.itemType === 'subscription' && li.dataset.subscription) {
+      url.searchParams.set('insert_context_type', 'subscription');
+      url.searchParams.set('insert_context_id', li.dataset.subscription);
+      this.linkNewSubscriptionTarget.href = url.pathname + url.search;
+      return;
+    }
+
+    if (li.dataset.itemType === 'group' && li.dataset.groupId) {
+      url.searchParams.set('insert_context_type', 'group');
+      url.searchParams.set('insert_context_id', li.dataset.groupId);
+      this.linkNewSubscriptionTarget.href = url.pathname + url.search;
+      return;
+    }
+
+    this.linkNewSubscriptionTarget.href = baseHref;
+  }
+
+  #resetNewGroupLinkHref(li) {
+    const baseHref = this.linkNewGroupTarget.dataset.baseHref || this.linkNewGroupTarget.href;
+
+    if (!li || !li.dataset.itemType || li.dataset.itemType === 'trash') {
+      this.linkNewGroupTarget.href = baseHref;
+      return;
+    }
+
+    const url = new URL(baseHref, window.location.origin);
+
+    if (li.dataset.itemType === 'subscription' && li.dataset.subscription) {
+      url.searchParams.set('insert_context_type', 'subscription');
+      url.searchParams.set('insert_context_id', li.dataset.subscription);
+      this.linkNewGroupTarget.href = url.pathname + url.search;
+      return;
+    }
+
+    if (li.dataset.itemType === 'group' && li.dataset.groupId) {
+      url.searchParams.set('insert_context_type', 'group');
+      url.searchParams.set('insert_context_id', li.dataset.groupId);
+      this.linkNewGroupTarget.href = url.pathname + url.search;
+      return;
+    }
+
+    this.linkNewGroupTarget.href = baseHref;
   }
 
   #resetEditSubscriptionLinkHref(settingHref) {
@@ -296,10 +343,21 @@ export default class extends Controller {
     }
   }
 
+  #resetEditGroupLinkHref(settingHref) {
+    if (settingHref == null) {
+      this.linkEditGroupTarget.href = '#';
+      this.linkEditGroupTarget.dataset['disabled'] = true;
+    }
+    else {
+      this.linkEditGroupTarget.href = settingHref;
+      this.linkEditGroupTarget.dataset['disabled'] = false;
+    }
+  }
+
   // "購読" または "記事" コントローラが接続されたとき。
   onConnectedSelectedLiBaseController(evt) {
     let controller_id = evt.detail.identifier;
-    let controller = this.getController(controller_id);
+    let controller = controller_id === 'subscriptions' ? this.subscriptionsController() : this.articlesController();
     console.log("connectedSelectedLiBaseController", controller_id, controller);
   }
 
@@ -323,5 +381,24 @@ export default class extends Controller {
     if (frame) {
       frame.innerHTML = '';
     }
+  }
+
+  onStatusError(evt) {
+    const message = evt?.detail?.message || "Couldn't save the new order. Please try again.";
+    this.statusTextTarget.textContent = message;
+    this.statusAreaTarget.classList.remove('hidden');
+    this.statusAreaTarget.classList.add('flex');
+    this.statusIdleTarget.classList.add('hidden');
+  }
+
+  clearStatusMessage() {
+    if (!this.hasStatusAreaTarget || !this.hasStatusTextTarget || !this.hasStatusIdleTarget) {
+      return;
+    }
+
+    this.statusTextTarget.textContent = '';
+    this.statusAreaTarget.classList.remove('flex');
+    this.statusAreaTarget.classList.add('hidden');
+    this.statusIdleTarget.classList.remove('hidden');
   }
 }

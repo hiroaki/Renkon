@@ -4,9 +4,10 @@
     changeReadStatus->pane-focus#onChangeReadStatus
     emptyTrash->pane-focus#onEmptyTrash
     connectedSelectedLiBaseController->pane-focus#onConnectedSelectedLiBaseController
+    renkon:status-error@window->pane-focus#onStatusError
   "
-  data-pane-focus-adapt-subscriptions-controller-value="subscriptions"
-  data-pane-focus-adapt-articles-controller-value="articles"
+  data-pane-focus-subscriptions-outlet='[data-controller~="subscriptions"]'
+  data-pane-focus-articles-outlet='[data-controller~="articles"]'
 >
   <nav class="flex-shrink-0 h-12 bg-gray-200 px-1 flex flex-row place-items-center"
     data-pane-focus-target="navigationPane",
@@ -55,6 +56,8 @@
       <%=
         link_to('New subscription', new_subscription_path,
           'data-turbo-frame' => 'modal',
+          'data-pane-focus-target' => 'linkNewSubscription',
+          'data-base-href' => new_subscription_path,
           'class' => 'px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-green-600 border border-transparent rounded-md active:bg-green-600 hover:bg-green-700 focus:outline-none focus:shadow-outline-green inline-block hover:text-white'
         )
       %>
@@ -64,6 +67,27 @@
         link_to('Edit subscription', '#',
           'data-turbo-frame' => 'modal',
           'data-pane-focus-target' => 'linkEditSubscription',
+          'class' => 'px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-green-600 border border-transparent rounded-md active:bg-green-600 hover:bg-green-700 focus:outline-none focus:shadow-outline-green inline-block hover:text-white data-[disabled=true]:bg-gray-400',
+        )
+      %>
+    </div>
+
+    <div class="mx-2">
+      <%=
+        link_to('New group', new_group_path,
+          'data-turbo-frame' => 'modal',
+          'data-pane-focus-target' => 'linkNewGroup',
+          'data-base-href' => new_group_path,
+          'class' => 'px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-green-600 border border-transparent rounded-md active:bg-green-600 hover:bg-green-700 focus:outline-none focus:shadow-outline-green inline-block hover:text-white'
+        )
+      %>
+    </div>
+
+    <div class="mx-2">
+      <%=
+        link_to('Edit group', '#',
+          'data-turbo-frame' => 'modal',
+          'data-pane-focus-target' => 'linkEditGroup',
           'class' => 'px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-green-600 border border-transparent rounded-md active:bg-green-600 hover:bg-green-700 focus:outline-none focus:shadow-outline-green inline-block hover:text-white data-[disabled=true]:bg-gray-400',
         )
       %>
@@ -147,7 +171,24 @@
     </div>
   </main>
 
-  <footer class="flex-shrink-0 h-4 bg-gray-200 text-xs px-1">
-    <p>Status</p>
+  <footer class="flex-shrink-0 h-6 bg-gray-200 text-xs px-2 flex items-center">
+    <p
+      class="hidden items-center gap-1 text-red-700"
+      data-pane-focus-target="statusArea"
+      role="status"
+      aria-live="polite"
+    >
+      <span aria-hidden="true">!</span>
+      <span data-pane-focus-target="statusText"></span>
+      <button
+        type="button"
+        class="ml-2 text-red-700 hover:text-red-900"
+        data-action="click->pane-focus#clearStatusMessage"
+        aria-label="Clear status message"
+      >
+        x
+      </button>
+    </p>
+    <p data-pane-focus-target="statusIdle">Status</p>
   </footer>
 </div>

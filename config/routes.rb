@@ -14,6 +14,10 @@ Rails.application.routes.draw do
   delete 'trash', to: 'articles#empty_trash'
 
   resources :subscriptions do
+    collection do
+      patch :reorder_tree
+    end
+
     resources :articles do
       member do
         patch :disable
@@ -27,4 +31,6 @@ Rails.application.routes.draw do
       patch :fetch
     end
   end
+
+  resources :groups, only: %i[ new create edit update destroy ]
 end

@@ -1,7 +1,7 @@
-<% form = capture { render "form", subscription: @subscription, insert_context_type: @insert_context_type, insert_context_id: @insert_context_id } %>
+<% form = capture { render 'form', group: @group, show_parent_selector: false, insert_context_type: @insert_context_type, insert_context_id: @insert_context_id } %>
 
 <% unless turbo_frame_request? %>
-  <h2>New subscription</h2>
+  <h2>New group</h2>
 
   <%= form %>
 <% else %>
@@ -16,20 +16,20 @@
       <%= button_to(nil, nil,
         type: :button,
         method: :get,
-        form: { data: {action: "modal#hide"} },
-        class: "fixed inset-0 block w-full h-screen cursor-default bg-gray-900/30"
+        form: { data: { action: 'modal#hide' } },
+        class: 'fixed inset-0 block w-full h-screen cursor-default bg-gray-900/30'
       ) %>
 
       <div class="relative z-20 w-full max-w-2xl max-h-screen overflow-y-auto bg-white shadow-lg rounded-md p-8">
-        <h2>New subscription</h2>
+        <h2>New group</h2>
 
         <%= form %>
 
         <%= button_tag('Cancel',
           type: :button,
           method: :get,
-          data: { action: "modal#hide" },
-          class: "px-3 py-1 text-sm leading-6 font-medium text-gray-700 bg-white border border-gray-200 rounded-md hover:border-gray-300"
+          data: { action: 'modal#hide' },
+          class: 'px-3 py-1 text-sm leading-6 font-medium text-gray-700 bg-white border border-gray-200 rounded-md hover:border-gray-300'
         ) %>
       </div>
     </div>
@@ -39,5 +39,5 @@
 <hr>
 
 <div class="contaner">
-  <%= link_to "Back to subscriptions", subscriptions_path %>
+  <%= link_to 'Back to subscriptions', subscriptions_path %>
 </div>
