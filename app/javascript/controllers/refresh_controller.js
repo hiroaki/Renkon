@@ -40,13 +40,18 @@ export default class extends Controller {
 
     const que = new Queue(this.concurrencyValue);
 
-    document.getElementById('subscriptions').querySelectorAll('li').forEach(li => {
+    document.getElementById('subscriptions').querySelectorAll('li[data-item-type="subscription"]').forEach(li => {
+      const urlRefresh = li.dataset['urlRefresh'];
       const turboFrame = li.querySelector('turbo-frame');
-      if (turboFrame) { // "trash" has no turbo-frame
-        que.add(
-          generateFetchFunction(li.dataset['urlRefresh'], 'PATCH', turboFrame.id)
-        )
+
+      // Skip nodes that are not refreshable subscriptions.
+      if (!urlRefresh || !turboFrame) {
+        return;
       }
+
+      que.add(
+        generateFetchFunction(urlRefresh, 'PATCH', turboFrame.id)
+      )
     });
   }
 }

@@ -7,14 +7,14 @@ RSpec.describe 'Subscriptions reorder', type: :request do
     let!(:second) { FactoryBot.create(:subscription, group: group, position: 2) }
     let!(:third) { FactoryBot.create(:subscription, group: group, position: 3) }
 
-    it 'returns unprocessable_entity when tree_nodes is missing' do
+    it 'returns unprocessable_content when tree_nodes is missing' do
       patch reorder_tree_subscriptions_path, params: {}
 
-      expect(response).to have_http_status(422)
-      expect(response.parsed_body['error']).to include('tree_nodes must be an array')
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(json_body['error']).to include('tree_nodes must be an array')
     end
 
-    it 'returns unprocessable_entity when subscription ids have duplicates' do
+    it 'returns unprocessable_content when subscription ids have duplicates' do
       patch reorder_tree_subscriptions_path, params: {
         tree_nodes: [
           { item_type: 'group', id: group.id, parent_group_id: nil, position: 1 },
@@ -24,8 +24,8 @@ RSpec.describe 'Subscriptions reorder', type: :request do
         ],
       }
 
-      expect(response).to have_http_status(422)
-      expect(response.parsed_body['error']).to include('id is invalid')
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(json_body['error']).to include('id is invalid')
     end
 
     it 'updates positions in mixed order with groups and subscriptions' do
@@ -63,7 +63,7 @@ RSpec.describe 'Subscriptions reorder', type: :request do
       expect(first.reload.group_id).to eq(other_group.id)
     end
 
-    it 'returns unprocessable_entity when parent_group_id is invalid' do
+    it 'returns unprocessable_content when parent_group_id is invalid' do
       patch reorder_tree_subscriptions_path, params: {
         tree_nodes: [
           { item_type: 'group', id: group.id, parent_group_id: nil, position: 1 },
@@ -73,8 +73,8 @@ RSpec.describe 'Subscriptions reorder', type: :request do
         ],
       }
 
-      expect(response).to have_http_status(422)
-      expect(response.parsed_body['error']).to include('parent_group_id is invalid')
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(json_body['error']).to include('parent_group_id is invalid')
     end
 
     it 'moves a subscription to top-level' do
@@ -115,7 +115,7 @@ RSpec.describe 'Subscriptions reorder', type: :request do
       expect(child.reload.position).to eq(1)
     end
 
-    it 'returns unprocessable_entity when group hierarchy contains cycles' do
+    it 'returns unprocessable_content when group hierarchy contains cycles' do
       parent = FactoryBot.create(:group, name: 'Parent', parent: nil, position: 2)
       child = FactoryBot.create(:group, name: 'Child', parent: parent, position: 1)
       outsider = FactoryBot.create(:subscription, group: parent, position: 1)
@@ -132,11 +132,11 @@ RSpec.describe 'Subscriptions reorder', type: :request do
         ],
       }
 
-      expect(response).to have_http_status(422)
-      expect(response.parsed_body['error']).to include('cycles')
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(json_body['error']).to include('cycles')
     end
 
-    it 'returns unprocessable_entity when sibling positions are duplicated across mixed items' do
+    it 'returns unprocessable_content when sibling positions are duplicated across mixed items' do
       patch reorder_tree_subscriptions_path, params: {
         tree_nodes: [
           { item_type: 'group', id: group.id, parent_group_id: nil, position: 1 },
@@ -146,8 +146,8 @@ RSpec.describe 'Subscriptions reorder', type: :request do
         ],
       }
 
-      expect(response).to have_http_status(422)
-      expect(response.parsed_body['error']).to include('position must be unique')
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(json_body['error']).to include('position must be unique')
     end
   end
 end

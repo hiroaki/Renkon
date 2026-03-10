@@ -24,7 +24,7 @@ class GroupsController < ApplicationController
     else
       @insert_context_type = params[:insert_context_type]
       @insert_context_id = params[:insert_context_id]
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
   end
 
@@ -43,7 +43,7 @@ class GroupsController < ApplicationController
         redirect_to subscriptions_path, notice: 'Group was successfully updated.', status: :see_other
       end
     else
-      render :edit, status: :unprocessable_entity
+      render :edit, status: :unprocessable_content
     end
   end
 

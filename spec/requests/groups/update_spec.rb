@@ -40,7 +40,7 @@ RSpec.describe 'Groups update', type: :request do
       expect(response.body).to include('turbo-stream action="update" target="modal"')
     end
 
-    it 'returns unprocessable_entity when name is blank' do
+    it 'returns unprocessable_content when name is blank' do
       patch group_path(group), params: { group: { name: '' } }
 
       expect(response).to have_http_status(422)

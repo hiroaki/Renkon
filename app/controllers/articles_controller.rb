@@ -29,7 +29,7 @@ class ArticlesController < ApplicationController
     if @article.save
       redirect_to [@subscription, @article], notice: "Article was successfully created."
     else
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
   end
 
@@ -71,75 +71,23 @@ class ArticlesController < ApplicationController
       return render_bulk_error('target_unread must be true or false')
     end
 
-    succeeded_ids = []
-    failed_ids = []
-    errors = {}
+    result = Articles::BulkUpdateReadStatusService.call(
+      article_ids: @bulk_article_ids,
+      articles_by_id: @bulk_articles_by_id,
+      target_unread: target_unread,
+    )
 
-    @bulk_article_ids.each do |article_id|
-      article = @bulk_articles_by_id[article_id]
-      if article.nil?
-        failed_ids << article_id
-        errors[article_id.to_s] = 'article not found in the subscription'
-        next
-      end
-
-      if article.update(unread: target_unread)
-        succeeded_ids << article_id
-      else
-        failed_ids << article_id
-        errors[article_id.to_s] = article.errors.full_messages.join(', ').presence || 'failed to update read status'
-      end
-    end
-
-    render json: {
-      succeeded_ids: succeeded_ids,
-      failed_ids: failed_ids,
-      errors: errors,
-    }, status: :ok
+    render json: result, status: :ok
   end
 
   # bulk_delete_subscription_articles PATCH /subscriptions/:subscription_id/articles/bulk_delete(.:format)
   def bulk_delete
-    disabled_ids = []
-    destroyed_ids = []
-    succeeded_ids = []
-    failed_ids = []
-    errors = {}
+    result = Articles::BulkDeleteService.call(
+      article_ids: @bulk_article_ids,
+      articles_by_id: @bulk_articles_by_id,
+    )
 
-    @bulk_article_ids.each do |article_id|
-      article = @bulk_articles_by_id[article_id]
-      if article.nil?
-        failed_ids << article_id
-        errors[article_id.to_s] = 'article not found in the subscription'
-        next
-      end
-
-      if article.disabled?
-        if article.destroy
-          destroyed_ids << article_id
-          succeeded_ids << article_id
-        else
-          failed_ids << article_id
-          errors[article_id.to_s] = article.errors.full_messages.join(', ').presence || 'failed to destroy article'
-        end
-      else
-        if article.update(disabled: true)
-          disabled_ids << article_id
-          succeeded_ids << article_id
-        else
-          failed_ids << article_id
-          errors[article_id.to_s] = article.errors.full_messages.join(', ').presence || 'failed to disable article'
-        end
-      end
-    end
-
-    render json: {
-      succeeded_ids: succeeded_ids,
-      disabled_ids: disabled_ids,
-      destroyed_ids: destroyed_ids,
-      failed_ids: failed_ids,
-      errors: errors,
-    }, status: :ok
+    render json: result, status: :ok
   end
 
   # trash GET /trash(.:format)
@@ -208,12 +156,12 @@ class ArticlesController < ApplicationController
       if @article.update(params)
         redirect_to [@subscription, @article], notice: "Article was successfully updated.", status: :see_other
       else
-        render :edit, status: :unprocessable_entity
+        render :edit, status: :unprocessable_content
       end
     end
 
     def render_bulk_error(message)
-      render json: { error: message }, status: :unprocessable_entity
+      render json: { error: message }, status: :unprocessable_content
     end
 
     def normalize_article_ids(raw_ids)

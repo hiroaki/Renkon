@@ -15,7 +15,7 @@ RSpec.describe 'Article bulk operations', type: :request do
         as: :json
 
       expect(response).to have_http_status(:ok)
-      body = JSON.parse(response.body)
+      body = json_body
       expect(body['succeeded_ids']).to contain_exactly(article1.id, article2.id)
       expect(body['failed_ids']).to eq([])
 
@@ -37,7 +37,7 @@ RSpec.describe 'Article bulk operations', type: :request do
         as: :json
 
       expect(response).to have_http_status(:ok)
-      body = JSON.parse(response.body)
+      body = json_body
       expect(body['succeeded_ids']).to eq([article.id])
       expect(body['failed_ids']).to eq([external.id])
       expect(body['errors'][external.id.to_s]).to eq('article not found in the subscription')
@@ -56,8 +56,8 @@ RSpec.describe 'Article bulk operations', type: :request do
         },
         as: :json
 
-      expect(response).to have_http_status(:unprocessable_entity)
-      expect(JSON.parse(response.body)['error']).to eq('article_ids contains invalid id')
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(json_body['error']).to eq('article_ids contains invalid id')
     end
   end
 
@@ -74,7 +74,7 @@ RSpec.describe 'Article bulk operations', type: :request do
         as: :json
 
       expect(response).to have_http_status(:ok)
-      body = JSON.parse(response.body)
+      body = json_body
       expect(body['succeeded_ids']).to contain_exactly(enabled.id, disabled.id)
       expect(body['disabled_ids']).to eq([enabled.id])
       expect(body['destroyed_ids']).to eq([disabled.id])
@@ -97,7 +97,7 @@ RSpec.describe 'Article bulk operations', type: :request do
         as: :json
 
       expect(response).to have_http_status(:ok)
-      body = JSON.parse(response.body)
+      body = json_body
       expect(body['succeeded_ids']).to eq([article.id])
       expect(body['failed_ids']).to eq([external.id])
       expect(body['errors'][external.id.to_s]).to eq('article not found in the subscription')
@@ -115,8 +115,8 @@ RSpec.describe 'Article bulk operations', type: :request do
         },
         as: :json
 
-      expect(response).to have_http_status(:unprocessable_entity)
-      expect(JSON.parse(response.body)['error']).to eq('article_ids must not be empty')
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(json_body['error']).to eq('article_ids must not be empty')
     end
   end
 end

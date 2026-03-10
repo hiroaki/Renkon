@@ -1,6 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 import Sortable from "sortablejs"
 import { getCsrfToken } from "lib/schema"
+import { fireStatusErrorEvent } from "lib/pane_focus_events"
 
 let persistInFlight = false
 let persistQueued = false
@@ -114,10 +115,6 @@ export default class extends Controller {
   }
 
   notifyPersistError() {
-    window.dispatchEvent(new CustomEvent('renkon:status-error', {
-      detail: {
-        message: "Couldn't save the new order. Please try again.",
-      },
-    }))
+    fireStatusErrorEvent(window, "Couldn't save the new order. Please try again.")
   }
 }
