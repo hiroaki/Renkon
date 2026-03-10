@@ -68,3 +68,28 @@ Delete押しっぱなし、記事選択時の contents 更新、DnD 後の再読
 - 既知の注意点:
 	- 連続削除の入力処理は「実行中 + 予約1件」に制限済み。さらなる高速化は別タスクとして扱う。
 	- `ArticlesController#show` は stale Turbo Frame リクエスト時に `204` を返す仕様。
+
+**Clarifications (Resolved for New Sessions)**
+1. フェーズ1のイベント契約一元化の範囲
+	- `subscriptions_controller.js` などに残る直接 `new CustomEvent(...)` も一元化対象に含める。
+	- ただし互換性のため、移行期は既存イベント名を維持し、発火実装のみ共通ヘルパーへ寄せる。
+
+2. pane_focus から抽出する「純粋ロジック」の境界
+	- 方針は「URL算出だけ pure 関数化し、DOM反映は controller 残し」で進める。
+	- `#resetNewSubscriptionLinkHref` / `#resetNewGroupLinkHref` はまず URL計算部を分離し、target 代入は現状維持。
+
+3. contents 同期モジュールの責務（表示順）
+	- 現在の表示順仕様（選択順で末尾へ寄せる）は維持する。
+	- リファクタ段階では挙動変更しない。順序仕様変更は別タスクで扱う。
+
+4. service 抽出時の API 契約厳密度
+	- レスポンスの文言・キー名・ステータスは既存仕様を維持する（1文字レベルで互換維持）。
+	- 既存 request spec を契約テストとして扱い、サービス抽出は内部構造変更に限定する。
+
+5. reorder_tree の DB 更新方式
+	- 現行どおり `update_all` ベース（callback/validation非通過）を維持する。
+	- service 化は検証・整形ロジックの抽出に留め、更新戦略変更は別途合意後に実施。
+
+6. helper 化の出力形式
+	- `data` ハッシュを返す helper 方式で進めて問題ない。
+	- 過度な抽象化は避け、`_list.html.erb` の可読性向上を第一目的にする。
