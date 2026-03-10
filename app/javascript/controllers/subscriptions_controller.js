@@ -1,6 +1,7 @@
 import SelectedLiBaseController from 'lib/selected_li_base_controller'
 import TurboFrameDelegator from 'lib/turbo_frame_delegator'
 import { getCsrfToken } from 'lib/schema'
+import { fireChangeSelectedLiEvent } from 'lib/pane_focus_events'
 
 class RefreshSubscriptionDelegator extends TurboFrameDelegator {
   // override
@@ -87,11 +88,7 @@ export default class extends SelectedLiBaseController {
         // イベントを通知してから削除してます。
         // 他の（上層の）要素で dispatch して通知を送ればよいのですが、
         // どの要素が適切かの見極めができていないため、とりあえずの処置です。
-        const event = new CustomEvent('changeSelectedLi', {
-          detail: { selected: null },
-          bubbles: true,
-        });
-        li.dispatchEvent(event);
+        fireChangeSelectedLiEvent(li, { selected: null });
         li.remove();
       } else {
         console.error('Failed to delete the subscription', response);
@@ -120,11 +117,7 @@ export default class extends SelectedLiBaseController {
         // イベントを通知してから削除してます。
         // 他の（上層の）要素で dispatch して通知を送ればよいのですが、
         // どの要素が適切かの見極めができていないため、とりあえずの処置です。
-        const event = new CustomEvent('changeSelectedLi', {
-          detail: { selected: null },
-          bubbles: true,
-        });
-        li.dispatchEvent(event);
+        fireChangeSelectedLiEvent(li, { selected: null });
         li.remove();
       }
       else {

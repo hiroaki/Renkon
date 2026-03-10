@@ -1,16 +1,27 @@
 // コントローラ pane_focus_controller で捕捉するカスタムイベント
 
+export const PANE_FOCUS_EVENTS = {
+  CHANGE_READ_STATUS: 'changeReadStatus',
+  EMPTY_TRASH: 'emptyTrash',
+  CHANGE_SELECTED_LI: 'changeSelectedLi',
+  CONNECTED_SELECTED_LI_BASE_CONTROLLER: 'connectedSelectedLiBaseController',
+};
+
+export function dispatchPaneFocusEvent(target, eventName, detail = {}) {
+  const event = new CustomEvent(eventName, {
+    detail,
+    bubbles: true,
+  });
+
+  target.dispatchEvent(event);
+}
+
 /* イベント - changeReadStatus
   既読ステータス (item.unread) を変更したときに発生させるイベント
   引数 li には発生元の <li> を与えてください。
   */
 export function fireChangeReadStatusEvent(li) {
-  const event = new CustomEvent('changeReadStatus', {
-    detail: {},
-    bubbles: true
-  });
-
-  li.dispatchEvent(event);
+  dispatchPaneFocusEvent(li, PANE_FOCUS_EVENTS.CHANGE_READ_STATUS);
 }
 
 /* イベント - emptyTrash
@@ -18,32 +29,22 @@ export function fireChangeReadStatusEvent(li) {
   引数 elem は pane-focus のスコープ内の任意の要素を渡してください。
   */
 export function fireEmptyTrashEvent(elem) {
-  const event = new CustomEvent('emptyTrash', {
-    detail: {},
-    bubbles: true
-  });
-
-  elem.dispatchEvent(event);
+  dispatchPaneFocusEvent(elem, PANE_FOCUS_EVENTS.EMPTY_TRASH);
 }
 
 /* イベント - changeSelectedLiEvent
   */
 export function fireChangeSelectedLiEvent(elem, detail = {}) {
-  const event = new CustomEvent('changeSelectedLi', {
-    detail,
-    bubbles: true,
-  });
-
-  elem.dispatchEvent(event);
+  dispatchPaneFocusEvent(elem, PANE_FOCUS_EVENTS.CHANGE_SELECTED_LI, detail);
 }
 
 /*
   */
 export function fireConnectedSelectedLiBaseController(controller) {
   // NOTE: メモリリークを懸念してインスタンスを渡していません、識別子（文字列）のみです
-  const event = new CustomEvent('connectedSelectedLiBaseController', {
-    detail: { identifier: controller.identifier },
-    bubbles: true
-  });
-  controller.element.dispatchEvent(event);
+  dispatchPaneFocusEvent(
+    controller.element,
+    PANE_FOCUS_EVENTS.CONNECTED_SELECTED_LI_BASE_CONTROLLER,
+    { identifier: controller.identifier }
+  );
 }

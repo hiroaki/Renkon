@@ -1,4 +1,6 @@
 import { Controller } from "@hotwired/stimulus";
+import { buildInsertContextHref } from 'lib/pane_focus_link_urls';
+import { syncContentsPaneBySelectedArticles } from 'lib/pane_focus_contents_sync';
 
 export default class extends Controller {
   static outlets = ['subscriptions', 'articles'];
@@ -205,67 +207,11 @@ export default class extends Controller {
     if (!contentsFrame) {
       return;
     }
-
-    const selectedEntries = selectedItems
-      .map(li => {
-        return {
-          articleId: li.dataset.articleId,
-          contentUrl: li.dataset.urlContent,
-        };
-      })
-      .filter(entry => entry.articleId && entry.contentUrl);
-
-    const selectedIdSet = new Set(selectedEntries.map(entry => entry.articleId));
-
-    const existingById = this.getArticleContentsFrameMap(contentsFrame);
-
-    existingById.forEach((frame, articleId) => {
-      if (!selectedIdSet.has(articleId)) {
-        this.hideArticleContentsFrame(frame);
-      }
-    });
-
-    selectedEntries.forEach(entry => {
-      let frame = existingById.get(entry.articleId);
-      if (!frame) {
-        frame = this.createArticleContentsFrame(entry.articleId, entry.contentUrl);
-      }
-      else {
-        console.debug('[contents-cache] reused', {
-          articleId: entry.articleId,
-          frameId: frame.id,
-        });
-      }
-
-      this.showArticleContentsFrame(frame);
-      contentsFrame.appendChild(frame);
-    });
+    syncContentsPaneBySelectedArticles(contentsFrame, selectedItems);
   }
 
   getContentsFrame() {
     return this.contentsPaneTarget.querySelector('turbo-frame#contents');
-  }
-
-  getArticleContentsFrameMap(contentsFrame) {
-    const frames = Array.from(contentsFrame.querySelectorAll('turbo-frame[data-article-id]'));
-    return new Map(frames.map(frame => [frame.dataset.articleId, frame]));
-  }
-
-  createArticleContentsFrame(articleId, contentUrl) {
-    const frame = document.createElement('turbo-frame');
-    frame.id = `contents-article-${articleId}`;
-    frame.dataset.articleId = articleId;
-    frame.dataset.cached = 'true';
-    frame.src = contentUrl;
-    return frame;
-  }
-
-  hideArticleContentsFrame(frame) {
-    frame.hidden = true;
-  }
-
-  showArticleContentsFrame(frame) {
-    frame.hidden = false;
   }
 
   #syncSubscriptionAndGroupActions(li) {
@@ -280,56 +226,12 @@ export default class extends Controller {
 
   #resetNewSubscriptionLinkHref(li) {
     const baseHref = this.linkNewSubscriptionTarget.dataset.baseHref || this.linkNewSubscriptionTarget.href;
-
-    if (!li || !li.dataset.itemType || li.dataset.itemType === 'trash') {
-      this.linkNewSubscriptionTarget.href = baseHref;
-      return;
-    }
-
-    const url = new URL(baseHref, window.location.origin);
-
-    if (li.dataset.itemType === 'subscription' && li.dataset.subscription) {
-      url.searchParams.set('insert_context_type', 'subscription');
-      url.searchParams.set('insert_context_id', li.dataset.subscription);
-      this.linkNewSubscriptionTarget.href = url.pathname + url.search;
-      return;
-    }
-
-    if (li.dataset.itemType === 'group' && li.dataset.groupId) {
-      url.searchParams.set('insert_context_type', 'group');
-      url.searchParams.set('insert_context_id', li.dataset.groupId);
-      this.linkNewSubscriptionTarget.href = url.pathname + url.search;
-      return;
-    }
-
-    this.linkNewSubscriptionTarget.href = baseHref;
+    this.linkNewSubscriptionTarget.href = buildInsertContextHref(baseHref, li, window.location.origin);
   }
 
   #resetNewGroupLinkHref(li) {
     const baseHref = this.linkNewGroupTarget.dataset.baseHref || this.linkNewGroupTarget.href;
-
-    if (!li || !li.dataset.itemType || li.dataset.itemType === 'trash') {
-      this.linkNewGroupTarget.href = baseHref;
-      return;
-    }
-
-    const url = new URL(baseHref, window.location.origin);
-
-    if (li.dataset.itemType === 'subscription' && li.dataset.subscription) {
-      url.searchParams.set('insert_context_type', 'subscription');
-      url.searchParams.set('insert_context_id', li.dataset.subscription);
-      this.linkNewGroupTarget.href = url.pathname + url.search;
-      return;
-    }
-
-    if (li.dataset.itemType === 'group' && li.dataset.groupId) {
-      url.searchParams.set('insert_context_type', 'group');
-      url.searchParams.set('insert_context_id', li.dataset.groupId);
-      this.linkNewGroupTarget.href = url.pathname + url.search;
-      return;
-    }
-
-    this.linkNewGroupTarget.href = baseHref;
+    this.linkNewGroupTarget.href = buildInsertContextHref(baseHref, li, window.location.origin);
   }
 
   #resetEditSubscriptionLinkHref(settingHref) {
