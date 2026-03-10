@@ -6,7 +6,7 @@ export default class extends SelectedLiBaseController {
   connect() {
     super.connect();
     this.deleteRequestInFlight = false;
-    this.deleteRequestQueueCount = 0;
+    this.deleteRequestQueued = false;
   }
 
   //
@@ -128,7 +128,8 @@ export default class extends SelectedLiBaseController {
 
   async deleteSelectedItems(evt) {
     if (this.deleteRequestInFlight) {
-      this.deleteRequestQueueCount += 1;
+      // Keep at most one queued delete request while current request is in flight.
+      this.deleteRequestQueued = true;
       return;
     }
 
@@ -138,8 +139,8 @@ export default class extends SelectedLiBaseController {
     } finally {
       this.deleteRequestInFlight = false;
 
-      if (this.deleteRequestQueueCount > 0) {
-        this.deleteRequestQueueCount -= 1;
+      if (this.deleteRequestQueued) {
+        this.deleteRequestQueued = false;
         // Continue hold-to-delete behavior without overlapping requests.
         void this.deleteSelectedItems();
       }

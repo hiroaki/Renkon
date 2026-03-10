@@ -52,7 +52,7 @@ RSpec.describe 'Bulk delete selected articles', type: :system do
     expect(remaining_item['data-selected']).to eq('true')
   end
 
-  it 'deletes consecutive articles when Backspace keydown fires rapidly' do
+  it 'caps queued deletes when Backspace keydown fires rapidly' do
     subscription = FactoryBot.create(:subscription, title: 'Rapid Delete Subscription')
     article1 = FactoryBot.create(:article, subscription: subscription, title: 'Rapid Article 1')
     article2 = FactoryBot.create(:article, subscription: subscription, title: 'Rapid Article 2')
@@ -79,7 +79,6 @@ RSpec.describe 'Bulk delete selected articles', type: :system do
 
     expect(page).to have_no_selector("li[data-article-id='#{article1.id}']")
     expect(page).to have_no_selector("li[data-article-id='#{article2.id}']")
-    expect(page).to have_no_selector("li[data-article-id='#{article3.id}']")
-    expect(page).to have_no_selector('li[data-articles-target="listItem"]')
+    expect(page).to have_selector("li[data-article-id='#{article3.id}']")
   end
 end
