@@ -5,6 +5,8 @@ import { fireChangeReadStatusEvent } from 'lib/pane_focus_events'
 export default class extends SelectedLiBaseController {
   connect() {
     super.connect();
+    this.deleteRequestInFlight = false;
+    this.deleteRequestQueueCount = 0;
   }
 
   //
@@ -125,6 +127,26 @@ export default class extends SelectedLiBaseController {
   }
 
   async deleteSelectedItems(evt) {
+    if (this.deleteRequestInFlight) {
+      this.deleteRequestQueueCount += 1;
+      return;
+    }
+
+    this.deleteRequestInFlight = true;
+    try {
+      await this.performDeleteSelectedItems(evt);
+    } finally {
+      this.deleteRequestInFlight = false;
+
+      if (this.deleteRequestQueueCount > 0) {
+        this.deleteRequestQueueCount -= 1;
+        // Continue hold-to-delete behavior without overlapping requests.
+        void this.deleteSelectedItems();
+      }
+    }
+  }
+
+  async performDeleteSelectedItems(evt) {
     const deleteTargets = this.collectDeleteTargets(evt);
     if (deleteTargets.length === 0) {
       return;
@@ -146,6 +168,10 @@ export default class extends SelectedLiBaseController {
     const selectedItems = Array.from(this.getSelectedItems());
     if (selectedItems.length > 0) {
       return selectedItems;
+    }
+
+    if (!evt || !evt.target) {
+      return [];
     }
 
     const li = this.detectLiFrom(evt.target);
