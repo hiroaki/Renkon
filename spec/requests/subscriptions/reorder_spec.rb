@@ -10,8 +10,8 @@ RSpec.describe 'Subscriptions reorder', type: :request do
     it 'returns unprocessable_content when tree_nodes is missing' do
       patch reorder_tree_subscriptions_path, params: {}
 
-      expect(response).to have_http_status(422)
-      expect(response.parsed_body['error']).to include('tree_nodes must be an array')
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(json_body['error']).to include('tree_nodes must be an array')
     end
 
     it 'returns unprocessable_content when subscription ids have duplicates' do
@@ -24,8 +24,8 @@ RSpec.describe 'Subscriptions reorder', type: :request do
         ],
       }
 
-      expect(response).to have_http_status(422)
-      expect(response.parsed_body['error']).to include('id is invalid')
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(json_body['error']).to include('id is invalid')
     end
 
     it 'updates positions in mixed order with groups and subscriptions' do
@@ -73,8 +73,8 @@ RSpec.describe 'Subscriptions reorder', type: :request do
         ],
       }
 
-      expect(response).to have_http_status(422)
-      expect(response.parsed_body['error']).to include('parent_group_id is invalid')
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(json_body['error']).to include('parent_group_id is invalid')
     end
 
     it 'moves a subscription to top-level' do
@@ -132,8 +132,8 @@ RSpec.describe 'Subscriptions reorder', type: :request do
         ],
       }
 
-      expect(response).to have_http_status(422)
-      expect(response.parsed_body['error']).to include('cycles')
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(json_body['error']).to include('cycles')
     end
 
     it 'returns unprocessable_content when sibling positions are duplicated across mixed items' do
@@ -146,8 +146,8 @@ RSpec.describe 'Subscriptions reorder', type: :request do
         ],
       }
 
-      expect(response).to have_http_status(422)
-      expect(response.parsed_body['error']).to include('position must be unique')
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(json_body['error']).to include('position must be unique')
     end
   end
 end

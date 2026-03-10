@@ -1,6 +1,8 @@
 import { Controller } from "@hotwired/stimulus";
 import { buildInsertContextHref } from 'lib/pane_focus_link_urls';
 import { syncContentsPaneBySelectedArticles } from 'lib/pane_focus_contents_sync';
+import { setPaneFocusEditLinkState } from 'lib/pane_focus_action_links';
+import { clearPaneFocusStatusMessage, showPaneFocusStatusMessage } from 'lib/pane_focus_status';
 
 export default class extends Controller {
   static outlets = ['subscriptions', 'articles'];
@@ -235,25 +237,11 @@ export default class extends Controller {
   }
 
   #resetEditSubscriptionLinkHref(settingHref) {
-    if (settingHref == null) {
-      this.linkEditSubscriptionTarget.href = '#';
-      this.linkEditSubscriptionTarget.dataset['disabled'] = true;
-    }
-    else {
-      this.linkEditSubscriptionTarget.href = settingHref;
-      this.linkEditSubscriptionTarget.dataset['disabled'] = false;
-    }
+    setPaneFocusEditLinkState(this.linkEditSubscriptionTarget, settingHref);
   }
 
   #resetEditGroupLinkHref(settingHref) {
-    if (settingHref == null) {
-      this.linkEditGroupTarget.href = '#';
-      this.linkEditGroupTarget.dataset['disabled'] = true;
-    }
-    else {
-      this.linkEditGroupTarget.href = settingHref;
-      this.linkEditGroupTarget.dataset['disabled'] = false;
-    }
+    setPaneFocusEditLinkState(this.linkEditGroupTarget, settingHref);
   }
 
   // "購読" または "記事" コントローラが接続されたとき。
@@ -287,10 +275,7 @@ export default class extends Controller {
 
   onStatusError(evt) {
     const message = evt?.detail?.message || "Couldn't save the new order. Please try again.";
-    this.statusTextTarget.textContent = message;
-    this.statusAreaTarget.classList.remove('hidden');
-    this.statusAreaTarget.classList.add('flex');
-    this.statusIdleTarget.classList.add('hidden');
+    showPaneFocusStatusMessage(this.statusAreaTarget, this.statusTextTarget, this.statusIdleTarget, message);
   }
 
   clearStatusMessage() {
@@ -298,9 +283,6 @@ export default class extends Controller {
       return;
     }
 
-    this.statusTextTarget.textContent = '';
-    this.statusAreaTarget.classList.remove('flex');
-    this.statusAreaTarget.classList.add('hidden');
-    this.statusIdleTarget.classList.remove('hidden');
+    clearPaneFocusStatusMessage(this.statusAreaTarget, this.statusTextTarget, this.statusIdleTarget);
   }
 }

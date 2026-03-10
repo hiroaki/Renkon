@@ -5,6 +5,7 @@ export const PANE_FOCUS_EVENTS = {
   EMPTY_TRASH: 'emptyTrash',
   CHANGE_SELECTED_LI: 'changeSelectedLi',
   CONNECTED_SELECTED_LI_BASE_CONTROLLER: 'connectedSelectedLiBaseController',
+  STATUS_ERROR: 'renkon:status-error',
 };
 
 export function dispatchPaneFocusEvent(target, eventName, detail = {}) {
@@ -47,4 +48,8 @@ export function fireConnectedSelectedLiBaseController(controller) {
     PANE_FOCUS_EVENTS.CONNECTED_SELECTED_LI_BASE_CONTROLLER,
     { identifier: controller.identifier }
   );
+}
+
+export function fireStatusErrorEvent(target, message) {
+  dispatchPaneFocusEvent(target, PANE_FOCUS_EVENTS.STATUS_ERROR, { message });
 }
