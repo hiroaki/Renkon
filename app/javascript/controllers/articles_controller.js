@@ -1,6 +1,6 @@
 import SelectedLiBaseController from "lib/selected_li_base_controller"
-import { getCsrfToken } from 'lib/schema'
 import { fireChangeReadStatusEvent } from 'lib/pane_focus_events'
+import { groupItemsByUrl, indexItemsByArticleId, requestBulkOperation } from 'lib/articles_bulk_client'
 
 export default class extends SelectedLiBaseController {
   connect() {
@@ -78,7 +78,7 @@ export default class extends SelectedLiBaseController {
       return;
     }
 
-    const groups = this.groupItemsBy(actionableItems, (li) => li.dataset.urlBulkUpdateReadStatus);
+    const groups = groupItemsByUrl(actionableItems, 'urlBulkUpdateReadStatus');
     const subscriptionEventSources = new Map();
 
     const requests = Array.from(groups.entries()).map(async ([url, groupedItems]) => {
@@ -87,8 +87,8 @@ export default class extends SelectedLiBaseController {
         return;
       }
 
-      const itemById = this.indexItemsByArticleId(groupedItems);
-      const response = await this.requestBulkOperation(url, {
+      const itemById = indexItemsByArticleId(groupedItems);
+      const response = await requestBulkOperation(url, {
         article_ids: Array.from(itemById.keys()),
         target_unread: targetUnread,
       });
@@ -207,7 +207,7 @@ export default class extends SelectedLiBaseController {
   }
 
   async bulkDeleteItems(items) {
-    const groups = this.groupItemsBy(items, (li) => li.dataset.urlBulkDelete);
+    const groups = groupItemsByUrl(items, 'urlBulkDelete');
     const deletedItems = [];
     const subscriptionEventSources = new Map();
 
@@ -217,8 +217,8 @@ export default class extends SelectedLiBaseController {
         return;
       }
 
-      const itemById = this.indexItemsByArticleId(groupedItems);
-      const response = await this.requestBulkOperation(url, {
+      const itemById = indexItemsByArticleId(groupedItems);
+      const response = await requestBulkOperation(url, {
         article_ids: Array.from(itemById.keys()),
       });
 
@@ -244,51 +244,6 @@ export default class extends SelectedLiBaseController {
     await Promise.all(requests);
     this.fireChangeReadStatusBySubscription(subscriptionEventSources);
     return deletedItems;
-  }
-
-  groupItemsBy(items, keySelector) {
-    return items.reduce((acc, item) => {
-      const key = keySelector(item);
-      if (!acc.has(key)) {
-        acc.set(key, []);
-      }
-      acc.get(key).push(item);
-      return acc;
-    }, new Map());
-  }
-
-  indexItemsByArticleId(items) {
-    const entries = items
-      .map((li) => [Number(li.dataset.articleId), li])
-      .filter(([id]) => Number.isInteger(id) && id > 0);
-
-    return new Map(entries);
-  }
-
-  async requestBulkOperation(url, payload) {
-    try {
-      const response = await fetch(url, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'X-CSRF-Token': getCsrfToken(),
-        },
-        body: JSON.stringify(payload),
-      });
-
-      const contentType = response.headers.get('content-type') || '';
-      const data = contentType.includes('application/json') ? await response.json() : null;
-
-      if (!response.ok) {
-        console.error('Bulk article operation failed', { url, status: response.status, data });
-      }
-
-      return { ok: response.ok, data };
-    } catch (error) {
-      console.error('Bulk article operation request error', { url, error });
-      return { ok: false, data: null };
-    }
   }
 
   fireChangeReadStatusBySubscription(subscriptionEventSources) {
