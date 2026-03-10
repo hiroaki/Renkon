@@ -25,6 +25,8 @@
         data-article-id="<%= article.id %>"
         data-url-content="<%= subscription_article_path(article.subscription, article) %>"
         data-url-destroy="<%= subscription_article_path(article.subscription, article) %>"
+        data-url-bulk-delete="<%= bulk_delete_subscription_articles_path(article.subscription) %>"
+        data-url-bulk-update-read-status="<%= bulk_update_read_status_subscription_articles_path(article.subscription) %>"
         data-subscription="<%= article.subscription_id %>"
         data-articles-target="listItem"
         data-url-source="<%= article.url %>"
