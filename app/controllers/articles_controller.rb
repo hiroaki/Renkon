@@ -1,6 +1,8 @@
 class ArticlesController < ApplicationController
   before_action :set_subscription, except: %i[ trash empty_trash ]
-  before_action :set_article, only: %i[ show edit update destroy disable enable unread read ]
+  before_action :set_article_for_show, only: %i[ show ]
+  before_action :set_article, only: %i[ edit update destroy disable enable unread read ]
+  before_action :prepare_bulk_articles, only: %i[ bulk_update_read_status bulk_delete ]
 
   # article_articles GET /articles/:article_id/articles(.:format)
   def index
@@ -64,29 +66,17 @@ class ArticlesController < ApplicationController
 
   # bulk_update_read_status_subscription_articles PATCH /subscriptions/:subscription_id/articles/bulk_update_read_status(.:format)
   def bulk_update_read_status
-    article_ids_result = normalize_article_ids(params[:article_ids])
-    if article_ids_result[:invalid].any?
-      return render_bulk_error('article_ids contains invalid id')
-    end
-
-    article_ids = article_ids_result[:ids]
-    if article_ids.empty?
-      return render_bulk_error('article_ids must not be empty')
-    end
-
     target_unread = normalize_boolean_param(params[:target_unread])
     if target_unread.nil?
       return render_bulk_error('target_unread must be true or false')
     end
 
-    articles_by_id = @subscription.articles.where(id: article_ids).index_by(&:id)
-
     succeeded_ids = []
     failed_ids = []
     errors = {}
 
-    article_ids.each do |article_id|
-      article = articles_by_id[article_id]
+    @bulk_article_ids.each do |article_id|
+      article = @bulk_articles_by_id[article_id]
       if article.nil?
         failed_ids << article_id
         errors[article_id.to_s] = 'article not found in the subscription'
@@ -110,26 +100,14 @@ class ArticlesController < ApplicationController
 
   # bulk_delete_subscription_articles PATCH /subscriptions/:subscription_id/articles/bulk_delete(.:format)
   def bulk_delete
-    article_ids_result = normalize_article_ids(params[:article_ids])
-    if article_ids_result[:invalid].any?
-      return render_bulk_error('article_ids contains invalid id')
-    end
-
-    article_ids = article_ids_result[:ids]
-    if article_ids.empty?
-      return render_bulk_error('article_ids must not be empty')
-    end
-
-    articles_by_id = @subscription.articles.where(id: article_ids).index_by(&:id)
-
     disabled_ids = []
     destroyed_ids = []
     succeeded_ids = []
     failed_ids = []
     errors = {}
 
-    article_ids.each do |article_id|
-      article = articles_by_id[article_id]
+    @bulk_article_ids.each do |article_id|
+      article = @bulk_articles_by_id[article_id]
       if article.nil?
         failed_ids << article_id
         errors[article_id.to_s] = 'article not found in the subscription'
@@ -185,7 +163,37 @@ class ArticlesController < ApplicationController
     end
 
     def set_article
-      @article = Article.find(params[:id])
+      @article = @subscription.articles.find(params[:id])
+    end
+
+    def set_article_for_show
+      @article = @subscription.articles.find_by(id: params[:id])
+      return if @article
+
+      # During rapid delete operations, a stale contents-frame request can arrive
+      # after the target article is gone. Treat this as empty contents, not an exception page.
+      if turbo_frame_request?
+        head :no_content
+        return
+      end
+
+      raise ActiveRecord::RecordNotFound, "Couldn't find Article with 'id'=#{params[:id]}"
+    end
+
+    def prepare_bulk_articles
+      article_ids_result = normalize_article_ids(params[:article_ids])
+      if article_ids_result[:invalid].any?
+        render_bulk_error('article_ids contains invalid id')
+        return
+      end
+
+      if article_ids_result[:ids].empty?
+        render_bulk_error('article_ids must not be empty')
+        return
+      end
+
+      @bulk_article_ids = article_ids_result[:ids]
+      @bulk_articles_by_id = @subscription.articles.where(id: @bulk_article_ids).index_by(&:id)
     end
 
     def article_params
