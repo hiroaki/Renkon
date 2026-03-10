@@ -159,8 +159,10 @@ export default class extends SelectedLiBaseController {
 
     if (nextFocusTarget && this.element.contains(nextFocusTarget)) {
       this.activateItem(nextFocusTarget);
+      this.anchorItem = nextFocusTarget;
     }
     else {
+      this.anchorItem = null;
       this.fireSelectionChanged(null);
     }
   }
