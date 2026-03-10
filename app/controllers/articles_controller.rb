@@ -1,6 +1,8 @@
 class ArticlesController < ApplicationController
   before_action :set_subscription, except: %i[ trash empty_trash ]
-  before_action :set_article, only: %i[ show edit update destroy disable enable unread read ]
+  before_action :set_article_for_show, only: %i[ show ]
+  before_action :set_article, only: %i[ edit update destroy disable enable unread read ]
+  before_action :prepare_bulk_articles, only: %i[ bulk_update_read_status bulk_delete ]
 
   # article_articles GET /articles/:article_id/articles(.:format)
   def index
@@ -62,6 +64,84 @@ class ArticlesController < ApplicationController
     common_action_for_update(unread: false)
   end
 
+  # bulk_update_read_status_subscription_articles PATCH /subscriptions/:subscription_id/articles/bulk_update_read_status(.:format)
+  def bulk_update_read_status
+    target_unread = normalize_boolean_param(params[:target_unread])
+    if target_unread.nil?
+      return render_bulk_error('target_unread must be true or false')
+    end
+
+    succeeded_ids = []
+    failed_ids = []
+    errors = {}
+
+    @bulk_article_ids.each do |article_id|
+      article = @bulk_articles_by_id[article_id]
+      if article.nil?
+        failed_ids << article_id
+        errors[article_id.to_s] = 'article not found in the subscription'
+        next
+      end
+
+      if article.update(unread: target_unread)
+        succeeded_ids << article_id
+      else
+        failed_ids << article_id
+        errors[article_id.to_s] = article.errors.full_messages.join(', ').presence || 'failed to update read status'
+      end
+    end
+
+    render json: {
+      succeeded_ids: succeeded_ids,
+      failed_ids: failed_ids,
+      errors: errors,
+    }, status: :ok
+  end
+
+  # bulk_delete_subscription_articles PATCH /subscriptions/:subscription_id/articles/bulk_delete(.:format)
+  def bulk_delete
+    disabled_ids = []
+    destroyed_ids = []
+    succeeded_ids = []
+    failed_ids = []
+    errors = {}
+
+    @bulk_article_ids.each do |article_id|
+      article = @bulk_articles_by_id[article_id]
+      if article.nil?
+        failed_ids << article_id
+        errors[article_id.to_s] = 'article not found in the subscription'
+        next
+      end
+
+      if article.disabled?
+        if article.destroy
+          destroyed_ids << article_id
+          succeeded_ids << article_id
+        else
+          failed_ids << article_id
+          errors[article_id.to_s] = article.errors.full_messages.join(', ').presence || 'failed to destroy article'
+        end
+      else
+        if article.update(disabled: true)
+          disabled_ids << article_id
+          succeeded_ids << article_id
+        else
+          failed_ids << article_id
+          errors[article_id.to_s] = article.errors.full_messages.join(', ').presence || 'failed to disable article'
+        end
+      end
+    end
+
+    render json: {
+      succeeded_ids: succeeded_ids,
+      disabled_ids: disabled_ids,
+      destroyed_ids: destroyed_ids,
+      failed_ids: failed_ids,
+      errors: errors,
+    }, status: :ok
+  end
+
   # trash GET /trash(.:format)
   def trash
     @articles = Article.where(disabled: true).all
@@ -83,7 +163,37 @@ class ArticlesController < ApplicationController
     end
 
     def set_article
-      @article = Article.find(params[:id])
+      @article = @subscription.articles.find(params[:id])
+    end
+
+    def set_article_for_show
+      @article = @subscription.articles.find_by(id: params[:id])
+      return if @article
+
+      # During rapid delete operations, a stale contents-frame request can arrive
+      # after the target article is gone. Treat this as empty contents, not an exception page.
+      if turbo_frame_request?
+        head :no_content
+        return
+      end
+
+      raise ActiveRecord::RecordNotFound, "Couldn't find Article with 'id'=#{params[:id]}"
+    end
+
+    def prepare_bulk_articles
+      article_ids_result = normalize_article_ids(params[:article_ids])
+      if article_ids_result[:invalid].any?
+        render_bulk_error('article_ids contains invalid id')
+        return
+      end
+
+      if article_ids_result[:ids].empty?
+        render_bulk_error('article_ids must not be empty')
+        return
+      end
+
+      @bulk_article_ids = article_ids_result[:ids]
+      @bulk_articles_by_id = @subscription.articles.where(id: @bulk_article_ids).index_by(&:id)
     end
 
     def article_params
@@ -100,5 +210,34 @@ class ArticlesController < ApplicationController
       else
         render :edit, status: :unprocessable_entity
       end
+    end
+
+    def render_bulk_error(message)
+      render json: { error: message }, status: :unprocessable_entity
+    end
+
+    def normalize_article_ids(raw_ids)
+      return { ids: [], invalid: ['not-array'] } unless raw_ids.is_a?(Array)
+
+      ids = []
+      invalid = []
+
+      raw_ids.each do |raw_id|
+        normalized = Integer(raw_id, exception: false)
+        if normalized.nil? || normalized <= 0
+          invalid << raw_id
+        else
+          ids << normalized
+        end
+      end
+
+      { ids: ids.uniq, invalid: invalid }
+    end
+
+    def normalize_boolean_param(raw)
+      return true if raw == true || raw.to_s == 'true'
+      return false if raw == false || raw.to_s == 'false'
+
+      nil
     end
 end

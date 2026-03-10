@@ -51,4 +51,34 @@ RSpec.describe 'Bulk delete selected articles', type: :system do
     remaining_item = find("li[data-article-id='#{article3.id}']", visible: :all)
     expect(remaining_item['data-selected']).to eq('true')
   end
+
+  it 'caps queued deletes when Backspace keydown fires rapidly' do
+    subscription = FactoryBot.create(:subscription, title: 'Rapid Delete Subscription')
+    article1 = FactoryBot.create(:article, subscription: subscription, title: 'Rapid Article 1')
+    article2 = FactoryBot.create(:article, subscription: subscription, title: 'Rapid Article 2')
+    article3 = FactoryBot.create(:article, subscription: subscription, title: 'Rapid Article 3')
+
+    visit root_path
+
+    click_list_item_in_subscriptions_pane('Rapid Delete Subscription')
+    expect(page).to have_selector('li[data-articles-target="listItem"]', count: 3)
+
+    page.execute_script(<<~JS)
+      (() => {
+        const focused = document.querySelector("li[data-article-id='#{article1.id}']")
+        if (!focused) return
+
+        focused.dataset.selected = 'true'
+        focused.focus()
+
+        for (let i = 0; i < 3; ++i) {
+          focused.dispatchEvent(new KeyboardEvent('keydown', { key: 'Backspace', bubbles: true }))
+        }
+      })()
+    JS
+
+    expect(page).to have_no_selector("li[data-article-id='#{article1.id}']")
+    expect(page).to have_no_selector("li[data-article-id='#{article2.id}']")
+    expect(page).to have_selector("li[data-article-id='#{article3.id}']")
+  end
 end

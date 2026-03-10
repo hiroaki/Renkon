@@ -19,6 +19,11 @@ Rails.application.routes.draw do
     end
 
     resources :articles do
+      collection do
+        patch :bulk_update_read_status
+        patch :bulk_delete
+      end
+
       member do
         patch :disable
         patch :enable
