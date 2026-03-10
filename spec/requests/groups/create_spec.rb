@@ -29,7 +29,7 @@ RSpec.describe 'Groups create', type: :request do
       expect(created.position).to eq(expected_position)
     end
 
-    it 'returns unprocessable_entity when name is blank' do
+    it 'returns unprocessable_content when name is blank' do
       expect do
         post groups_path, params: { group: { name: '', parent_id: parent_group.id } }
       end.not_to change(Group, :count)

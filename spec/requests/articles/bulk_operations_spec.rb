@@ -56,7 +56,7 @@ RSpec.describe 'Article bulk operations', type: :request do
         },
         as: :json
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
       expect(json_body['error']).to eq('article_ids contains invalid id')
     end
   end
@@ -115,7 +115,7 @@ RSpec.describe 'Article bulk operations', type: :request do
         },
         as: :json
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
       expect(json_body['error']).to eq('article_ids must not be empty')
     end
   end

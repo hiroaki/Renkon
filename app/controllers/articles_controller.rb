@@ -29,7 +29,7 @@ class ArticlesController < ApplicationController
     if @article.save
       redirect_to [@subscription, @article], notice: "Article was successfully created."
     else
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
   end
 
@@ -156,12 +156,12 @@ class ArticlesController < ApplicationController
       if @article.update(params)
         redirect_to [@subscription, @article], notice: "Article was successfully updated.", status: :see_other
       else
-        render :edit, status: :unprocessable_entity
+        render :edit, status: :unprocessable_content
       end
     end
 
     def render_bulk_error(message)
-      render json: { error: message }, status: :unprocessable_entity
+      render json: { error: message }, status: :unprocessable_content
     end
 
     def normalize_article_ids(raw_ids)

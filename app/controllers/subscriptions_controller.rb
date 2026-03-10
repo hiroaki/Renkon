@@ -44,7 +44,7 @@ class SubscriptionsController < ApplicationController
     else
       @insert_context_type = params[:insert_context_type]
       @insert_context_id = params[:insert_context_id]
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
   end
 
@@ -69,7 +69,7 @@ class SubscriptionsController < ApplicationController
 
       redirect_to @subscription, notice: "Subscription was successfully updated.", status: :see_other
     else
-      render :edit, status: :unprocessable_entity
+      render :edit, status: :unprocessable_content
     end
   end
 
@@ -89,7 +89,7 @@ class SubscriptionsController < ApplicationController
       end
     else
       flash.now[:notice] = 'Subscription destruction failed.'
-      render :edit, status: :unprocessable_entity
+      render :edit, status: :unprocessable_content
     end
   end
 
@@ -138,7 +138,7 @@ class SubscriptionsController < ApplicationController
     end
 
     def render_reorder_error(message)
-      render json: { error: message }, status: :unprocessable_entity
+      render json: { error: message }, status: :unprocessable_content
     end
 
     def load_grouped_subscriptions
