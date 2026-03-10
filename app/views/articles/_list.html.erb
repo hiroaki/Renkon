@@ -22,21 +22,10 @@
     "
   >
     <% @articles.each do |article| %>
-      <li id="<%= dom_id article %>" tabindex="0" class="container even:bg-gray-100 focus:outline-none"
-        data-article-id="<%= article.id %>"
-        data-url-content="<%= subscription_article_path(article.subscription, article) %>"
-        data-url-destroy="<%= subscription_article_path(article.subscription, article) %>"
-        data-url-bulk-delete="<%= bulk_delete_subscription_articles_path(article.subscription) %>"
-        data-url-bulk-update-read-status="<%= bulk_update_read_status_subscription_articles_path(article.subscription) %>"
-        data-subscription="<%= article.subscription_id %>"
-        data-articles-target="listItem"
-        data-url-source="<%= article.url %>"
-        data-disabled="<%= article.disabled? ? 'true' : 'false' %>"
-        data-unread="<%= article.unread? ? 'true' : 'false' %>"
-        data-url-read="<%= read_subscription_article_path(article.subscription, article) %>"
-        data-url-unread="<%= unread_subscription_article_path(article.subscription, article) %>"
-        data-url-disable="<%= disable_subscription_article_path(article.subscription, article) %>"
-      >
+      <%= tag.li id: dom_id(article),
+        tabindex: 0,
+        class: 'container even:bg-gray-100 focus:outline-none',
+        data: article_list_item_data(article) do %>
         <div class="container overflow-hidden text-nowrap text-xs">
             <div class="container flex flex-row text-xs">
 
@@ -68,7 +57,7 @@
 
             </div>
         </div>
-      </li>
+      <% end %>
     <% end %>
   </ul>
 </div>
