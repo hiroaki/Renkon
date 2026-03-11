@@ -15,6 +15,7 @@
 #   inflect.acronym "RESTful"
 # end
 
+# [Renkon]
 ActiveSupport::Inflector.inflections(:en) do |inflect|
-	inflect.irregular 'cache', 'caches'
+  inflect.irregular 'cache', 'caches'
 end
