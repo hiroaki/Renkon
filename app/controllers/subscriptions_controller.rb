@@ -101,6 +101,8 @@ class SubscriptionsController < ApplicationController
     end
 
     redirect_to subscription_url(@subscription, short: !!params[:short]), notice: "Subscription was successfully refreshed.", status: :see_other
+  rescue FeedUtils::Error => error
+    render_fetch_error(error)
   end
 
   # reorder_tree_subscriptions PATCH /subscriptions/reorder_tree(.:format)
@@ -139,6 +141,17 @@ class SubscriptionsController < ApplicationController
 
     def render_reorder_error(message)
       render json: { error: message }, status: :unprocessable_content
+    end
+
+    def render_fetch_error(error)
+      if params[:short]
+        render json: {
+          error: error.message,
+          category: error.retryable? ? 'temporary' : 'permanent'
+        }, status: error.retryable? ? :service_unavailable : :unprocessable_content
+      else
+        redirect_to subscription_url(@subscription), alert: error.message, status: :see_other
+      end
     end
 
     def load_grouped_subscriptions
