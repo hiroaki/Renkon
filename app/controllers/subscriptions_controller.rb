@@ -1,7 +1,7 @@
 class SubscriptionsController < ApplicationController
   include Factory
 
-  before_action :set_subscription, only: %i[ edit update destroy fetch ]
+  before_action :set_subscription, only: %i[ edit update destroy refresh_feed ]
 
   # FOR DEVELOPMENT
   def main
@@ -93,14 +93,16 @@ class SubscriptionsController < ApplicationController
     end
   end
 
-  # fetch_subscription PATCH /subscriptions/:id/fetch(.:format)
-  def fetch
+  # refresh_feed_subscription PATCH /subscriptions/:id/refresh_feed(.:format)
+  def refresh_feed
     logger.info("params[:dry_run]=[#{params[:dry_run] ? 'true' : 'false'}]")
     unless params[:dry_run]
       fetch_and_merge_feed_entries_for_subscription(@subscription)
     end
 
     redirect_to subscription_url(@subscription, short: !!params[:short]), notice: "Subscription was successfully refreshed.", status: :see_other
+  rescue FeedUtils::Error => error
+    render_refresh_feed_error(error)
   end
 
   # reorder_tree_subscriptions PATCH /subscriptions/reorder_tree(.:format)
@@ -139,6 +141,17 @@ class SubscriptionsController < ApplicationController
 
     def render_reorder_error(message)
       render json: { error: message }, status: :unprocessable_content
+    end
+
+    def render_refresh_feed_error(error)
+      if params[:short]
+        render json: {
+          error: error.message,
+          category: error.retryable? ? 'temporary' : 'permanent'
+        }, status: error.retryable? ? :service_unavailable : :unprocessable_content
+      else
+        redirect_to subscription_url(@subscription), alert: error.message, status: :see_other
+      end
     end
 
     def load_grouped_subscriptions
