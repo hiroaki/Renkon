@@ -4,6 +4,12 @@ import TurboFrameDelegator from "lib/turbo_frame_delegator"
 import { getCsrfToken } from 'lib/schema'
 
 class RefreshChannelsDelegator extends TurboFrameDelegator {
+  constructor(...args) {
+    super(...args)
+    this.failed = false
+    this.failureReason = null
+  }
+
   // override
   prepareRequest(request) {
     super.prepareRequest(request)
@@ -15,6 +21,20 @@ class RefreshChannelsDelegator extends TurboFrameDelegator {
         request.headers["X-CSRF-Token"] = token
       }
     }
+  }
+
+  // override
+  requestFailedWithResponse(request, response) {
+    super.requestFailedWithResponse(request, response)
+    this.failed = true
+    this.failureReason = new Error(`Request failed with status ${response?.status ?? 'unknown'}`)
+  }
+
+  // override
+  requestErrored(request, error) {
+    super.requestErrored(request, error)
+    this.failed = true
+    this.failureReason = error instanceof Error ? error : new Error(String(error))
   }
 }
 
@@ -28,12 +48,22 @@ export default class extends Controller {
 
   // refresh all subscriptions
   all() {
-    const generateFetchFunction = (urlRefresh, method, frame_id) => {
+    const generateFetchFunction = (li, urlRefresh, method, frame_id) => {
       return async () => {
+        this.showLoading(li)
+
         try {
-          await new RefreshChannelsDelegator(urlRefresh, method, frame_id).perform();
+          const delegator = new RefreshChannelsDelegator(urlRefresh, method, frame_id)
+          await delegator.perform()
+
+          if (delegator.failed) {
+            throw delegator.failureReason || new Error(`Failed to refresh frame ${frame_id}`)
+          }
+
+          this.clearStatus(li)
         } catch (error) {
-          console.error(`Failed to refresh frame ${frame_id}:`, error);
+          console.error(`Failed to refresh frame ${frame_id}:`, error)
+          this.showError(li)
         }
       }
     }
@@ -50,8 +80,59 @@ export default class extends Controller {
       }
 
       que.add(
-        generateFetchFunction(urlRefresh, 'PATCH', turboFrame.id)
+        generateFetchFunction(li, urlRefresh, 'PATCH', turboFrame.id)
       )
     });
+  }
+
+  findBadge(li) {
+    return li.querySelector('[data-refresh-badge]')
+  }
+
+  stashBadgeState(badge) {
+    if (badge.dataset.refreshOriginalHtml === undefined) {
+      badge.dataset.refreshOriginalHtml = badge.innerHTML
+    }
+
+    if (badge.dataset.refreshOriginalClass === undefined) {
+      badge.dataset.refreshOriginalClass = badge.className
+    }
+  }
+
+  showLoading(li) {
+    const badge = this.findBadge(li)
+    if (!badge) {
+      return
+    }
+
+    this.stashBadgeState(badge)
+    badge.className = `${badge.dataset.refreshOriginalClass} inline-flex items-center justify-center text-slate-700 bg-slate-100`
+    badge.setAttribute('aria-label', 'Refreshing subscription')
+    badge.innerHTML = '<span class="inline-block h-3 w-3 animate-spin rounded-full border-2 border-slate-400 border-t-transparent" aria-hidden="true"></span>'
+  }
+
+  showError(li) {
+    const badge = this.findBadge(li)
+    if (!badge) {
+      return
+    }
+
+    this.stashBadgeState(badge)
+    badge.className = `${badge.dataset.refreshOriginalClass} inline-flex items-center justify-center text-yellow-800 bg-yellow-100`
+    badge.setAttribute('aria-label', 'Refresh failed')
+    badge.innerHTML = '<span aria-hidden="true">&#9888;</span>'
+  }
+
+  clearStatus(li) {
+    const badge = this.findBadge(li)
+    if (!badge || badge.dataset.refreshOriginalHtml === undefined || badge.dataset.refreshOriginalClass === undefined) {
+      return
+    }
+
+    badge.className = badge.dataset.refreshOriginalClass
+    badge.innerHTML = badge.dataset.refreshOriginalHtml
+    badge.removeAttribute('aria-label')
+    delete badge.dataset.refreshOriginalHtml
+    delete badge.dataset.refreshOriginalClass
   }
 }

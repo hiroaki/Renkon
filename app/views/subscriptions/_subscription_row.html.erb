@@ -10,7 +10,7 @@
       <% end %>
     </span>
     <% unread_count = subscription.attributes.fetch('count_articles').to_i %>
-    <span data-unread-count="<%= unread_count %>" class="right ml-2 px-2 py-1 font-semibold leading-none text-green-700 bg-green-100 rounded-full dark:bg-green-700 dark:text-green-100">
+    <span data-refresh-badge data-unread-count="<%= unread_count %>" class="right ml-2 px-2 py-1 font-semibold leading-none text-green-700 bg-green-100 rounded-full dark:bg-green-700 dark:text-green-100">
       <%= unread_count %>
     </span>
   </div>
