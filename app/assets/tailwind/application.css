@@ -1,0 +1,104 @@
+@import 'tailwindcss';
+
+@plugin '@tailwindcss/forms';
+@plugin '@tailwindcss/typography';
+@plugin '@tailwindcss/container-queries';
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+}
+
+@utility button-danger {
+  @apply my-4 px-4 py-2 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-red-600 border border-transparent rounded-lg active:bg-red-600 hover:bg-red-700 focus:outline-hidden focus:outline;
+}
+
+@utility button-notice {
+  @apply my-4 px-4 py-2 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-orange-600 border border-transparent rounded-lg active:bg-orange-600 hover:bg-orange-700 focus:outline-hidden focus:outline;
+}
+
+@utility button-info {
+  @apply my-4 px-4 py-2 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-blue-600 border border-transparent rounded-lg active:bg-blue-600 hover:bg-blue-700 focus:outline-hidden focus:outline;
+}
+
+@utility input-text {
+  @apply block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-blue-400 focus:outline-hidden focus:outline dark:text-gray-300 dark:focus:outline form-input;
+}
+
+@utility textarea {
+  @apply block w-full mt-1 text-sm dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 form-textarea focus:border-blue-400 focus:outline-hidden focus:outline dark:focus:outline;
+}
+
+@utility input-checkbox {
+  @apply text-blue-600 form-checkbox focus:border-blue-400 focus:outline-hidden focus:outline dark:focus:outline;
+}
+
+@utility focused {
+  /* フォーカスされたペイン内の <li> に対する濃いハイライト */
+  &[data-pane-focus-target] [data-selected='true'] > :first-child {
+    @apply bg-gray-500 text-white;
+  }
+}
+
+@utility group-collapse-toggle {
+  li[data-item-type='group'] & {
+    @apply inline-flex items-center justify-center rounded-sm hover:bg-gray-200;
+  }
+}
+
+/*
+
+@layer components {
+  .btn-primary {
+    @apply py-2 px-4 bg-blue-200;
+  }
+}
+
+*/
+
+@layer components {
+  h1 {
+    @apply text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight dark:text-slate-200;
+  }
+
+  h2 {
+    @apply text-2xl font-semibold text-gray-700 dark:text-gray-200 mb-4;
+  }
+
+  h3 {
+    @apply text-xl font-semibold text-gray-700 dark:text-gray-200 mb-4;
+  }
+
+  a {
+    @apply text-indigo-800 hover:text-indigo-400;
+  }
+
+  hr {
+    @apply my-4;
+  }
+}
+
+@layer utilities {
+
+  /* 非フォーカスペイン内の <li> に対する薄いハイライト */
+  [data-pane-focus-target]:not(.focused) [data-selected="true"] > :first-child {
+    @apply bg-gray-300;
+  }
+
+  li[data-item-type="group"] > ul[data-tree-sort-list] {
+    @apply transition-all duration-150 ease-in-out;
+  }
+}
