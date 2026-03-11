@@ -33,7 +33,7 @@ Rails.application.routes.draw do
     end
 
     member do
-      patch :fetch
+      patch :refresh_feed
     end
   end
 

@@ -49,7 +49,7 @@
 <hr>
 
 <p>
-  <%= link_to "Refresh subscription", fetch_subscription_path(@subscription), data: { turbo_method: :patch, turbo_frame: dom_id(@subscription) } %> |
+  <%= link_to "Refresh subscription", refresh_feed_subscription_path(@subscription), data: { turbo_method: :patch, turbo_frame: dom_id(@subscription) } %> |
   <%= link_to "articles of this subscription", subscription_articles_path(@subscription) %>
 </p>
 
