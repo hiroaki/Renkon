@@ -44,3 +44,6 @@ Procfile.dev
 # simplecov outputs
 coverage
 
+#
+/node_modules
+
