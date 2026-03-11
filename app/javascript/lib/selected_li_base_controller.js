@@ -126,7 +126,9 @@ export default class extends Controller {
     const newSelectedLi = this.selectSingleItem(li);
 
     if (!this.multiSelectValue) {
-      const span = li.querySelector('span[data-link-to-url]');
+      // Ignore links from nested descendant <li> items (e.g. grouped subscriptions).
+      const span = Array.from(li.querySelectorAll('span[data-link-to-url]'))
+        .find((candidate) => candidate.closest('li') === li);
       if (span) {
         const url = span.dataset['linkToUrl'];
         const frame = document.querySelector(`turbo-frame[id=${span.dataset['linkToFrame']}]`);
