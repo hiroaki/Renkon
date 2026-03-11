@@ -67,7 +67,7 @@ end
 
 gem 'feedjira'
 gem 'http'
-gem 'tailwindcss-rails', '~> 2.7'
+gem 'tailwindcss-rails', '~> 4.4'
 gem 'image_processing', '>= 1.2'
 
 # The version is specified to avoid "Unresolved or ambiguous specs" warnings.

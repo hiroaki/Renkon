@@ -24,12 +24,12 @@
     <% @articles.each do |article| %>
       <%= tag.li id: dom_id(article),
         tabindex: 0,
-        class: 'container even:bg-gray-100 focus:outline-none',
+        class: 'container even:bg-gray-100 focus:outline-hidden',
         data: article_list_item_data(article) do %>
         <div class="container overflow-hidden text-nowrap text-xs">
             <div class="container flex flex-row text-xs">
 
-              <button class="w-6 flex-shrink-0 flex justify-center items-center cursor-pointer"
+              <button class="w-6 shrink-0 flex justify-center items-center cursor-pointer"
                 data-action="
                   click->articles#handlerToggleReadStatus
                 "
@@ -37,10 +37,10 @@
                 <%= article.unread? ? '●' : '　' %>
               </button>
 
-              <div class="container flex-grow">
+              <div class="container grow">
                 <span
                   tabindex="-1"
-                  class="pl-2 pr-1 py-0.5 block no-underline text-inherit hover:no-underline hover:text-inherit focus:outline-none cursor-pointer"
+                  class="pl-2 pr-1 py-0.5 block no-underline text-inherit hover:no-underline hover:text-inherit focus:outline-hidden cursor-pointer"
                   data-turbo-frame="<%= turbo_frame_if_turbo_frame_request('contents') %>"
                   data-action="click->articles#handlerEnterItem"
                   data-link-to-url="<%= subscription_article_path(article.subscription, article) %>"
