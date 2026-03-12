@@ -40,7 +40,20 @@ class SubscriptionsController < ApplicationController
     apply_insert_context(@subscription)
 
     if @subscription.save
-      redirect_to @subscription, notice: "Subscription was successfully created."
+      if turbo_frame_request?
+        flash.now[:notice] = 'Subscription was successfully created.'
+        render turbo_stream: [
+          turbo_stream.replace('subscriptions', helpers.turbo_frame_tag('subscriptions', src: subscriptions_path(short: true))),
+          turbo_stream.replace('modal', partial: 'subscriptions/success_modal', locals: {
+            subscription: @subscription,
+            heading: 'Created subscription',
+            message: flash.now[:notice],
+            run_create_flow: true,
+          }),
+        ]
+      else
+        redirect_to @subscription, notice: "Subscription was successfully created."
+      end
     else
       @insert_context_type = params[:insert_context_type]
       @insert_context_id = params[:insert_context_id]
@@ -95,8 +108,10 @@ class SubscriptionsController < ApplicationController
 
   # refresh_feed_subscription PATCH /subscriptions/:id/refresh_feed(.:format)
   def refresh_feed
-    logger.info("params[:dry_run]=[#{params[:dry_run] ? 'true' : 'false'}]")
-    unless params[:dry_run]
+    dry_run = ActiveModel::Type::Boolean.new.cast(params[:dry_run])
+    logger.info("params[:dry_run]=[#{dry_run ? 'true' : 'false'}]")
+
+    unless dry_run
       fetch_and_merge_feed_entries_for_subscription(@subscription)
     end
 

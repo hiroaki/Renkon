@@ -16,6 +16,21 @@ RSpec.describe "Subscriptions", type: :system do
     end
 
     context "when the creation succeeds" do
+      before do
+        stub_request(:get, 'https://example.com/feed').to_return(
+          body: <<~XML
+            <?xml version="1.0" encoding="UTF-8" ?>
+            <rss version="2.0">
+              <channel>
+                <title>Feed</title>
+                <link>https://example.com/feed</link>
+                <description>ok</description>
+              </channel>
+            </rss>
+          XML
+        )
+      end
+
       it "creates a new subscription" do
         expect(page).to have_link("New subscription")
         click_link "New subscription"

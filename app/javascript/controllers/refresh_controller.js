@@ -1,84 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 import Queue from "promise-queue"
-import TurboFrameDelegator from "lib/turbo_frame_delegator"
-import { getCsrfToken } from 'lib/schema'
-
-class RefreshChannelsDelegator extends TurboFrameDelegator {
-  constructor(...args) {
-    super(...args)
-    this.failed = false
-    this.failureReason = null
-    this.failureDetailsPromise = null
-  }
-
-  // override
-  prepareRequest(request) {
-    super.prepareRequest(request)
-    console.log("request", request)
-
-    if (!request.isSafe) {
-      const token = getCsrfToken()
-      if (token) {
-        request.headers["X-CSRF-Token"] = token
-      }
-    }
-  }
-
-  // override
-  requestFailedWithResponse(request, response) {
-    super.requestFailedWithResponse(request, response)
-    this.failed = true
-    this.failureReason = new Error(`Request failed with status ${response?.statusCode ?? 'unknown'}`)
-    this.failureDetailsPromise = this.extractFailureDetails(response)
-  }
-
-  // override
-  requestErrored(request, error) {
-    super.requestErrored(request, error)
-    this.failed = true
-    this.failureReason = error instanceof Error ? error : new Error(String(error))
-    this.failureDetailsPromise = Promise.resolve({
-      category: 'temporary',
-      message: 'Could not reach the feed source. Try again later.',
-    })
-  }
-
-  async getFailureDetails() {
-    if (!this.failureDetailsPromise) {
-      return {
-        category: 'temporary',
-        message: 'Could not refresh this subscription. Try again later.',
-      }
-    }
-
-    return this.failureDetailsPromise
-  }
-
-  async extractFailureDetails(response) {
-    const fallbackCategory = response?.clientError ? 'permanent' : 'temporary'
-    const fallbackMessage = fallbackCategory === 'permanent'
-      ? 'This source is not a valid RSS or Atom feed. Check the subscription URL or settings.'
-      : 'The feed source is temporarily unavailable. Try again later.'
-
-    const contentType = response?.contentType || ''
-
-    if (!contentType.includes('application/json')) {
-      return { category: fallbackCategory, message: fallbackMessage }
-    }
-
-    try {
-      const body = await response.responseText
-      const data = JSON.parse(body)
-
-      return {
-        category: data?.category || fallbackCategory,
-        message: data?.error || fallbackMessage,
-      }
-    } catch (_error) {
-      return { category: fallbackCategory, message: fallbackMessage }
-    }
-  }
-}
+import RefreshDelegator from 'lib/refresh_delegator'
 
 export default class extends Controller {
   static values = { concurrency: Number }
@@ -95,7 +17,7 @@ export default class extends Controller {
         this.showLoading(li)
 
         try {
-          const delegator = new RefreshChannelsDelegator(urlRefresh, method, frame_id)
+          const delegator = new RefreshDelegator(urlRefresh, method, frame_id)
           await delegator.perform()
 
           if (delegator.failed) {
