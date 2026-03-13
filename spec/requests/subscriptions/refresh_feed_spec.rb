@@ -25,5 +25,26 @@ RSpec.describe 'Subscriptions refresh_feed', type: :request do
       expect(json_body['category']).to eq('temporary')
       expect(json_body['error']).to include('Try again later')
     end
+
+    it "fetches feed when dry_run is passed as 'false'" do
+      stub_request(:get, source_url).to_return(
+        status: 200,
+        body: <<~XML
+          <?xml version="1.0" encoding="UTF-8" ?>
+          <rss version="2.0">
+            <channel>
+              <title>Feed</title>
+              <link>https://example.com/feed</link>
+              <description>ok</description>
+            </channel>
+          </rss>
+        XML
+      )
+
+      patch refresh_feed_subscription_path(subscription), params: { short: true, dry_run: 'false' }
+
+      expect(response).to have_http_status(:see_other)
+      expect(a_request(:get, source_url)).to have_been_made.once
+    end
   end
 end

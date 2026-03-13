@@ -278,6 +278,25 @@ export default class extends Controller {
     showPaneFocusStatusMessage(this.statusAreaTarget, this.statusTextTarget, this.statusIdleTarget, message);
   }
 
+  onSubscriptionsRefreshed(_evt) {
+    const selected = this.getSelectedSubscriptionListItem();
+    if (!selected || selected.dataset.itemType !== 'subscription') {
+      return;
+    }
+
+    const subscriptionId = selected.dataset.subscription;
+    if (!subscriptionId) {
+      return;
+    }
+
+    const controller = this.subscriptionsController();
+    if (!controller) {
+      return;
+    }
+
+    controller.reloadArticlesPaneBySubscriptionId(subscriptionId);
+  }
+
   clearStatusMessage() {
     if (!this.hasStatusAreaTarget || !this.hasStatusTextTarget || !this.hasStatusIdleTarget) {
       return;

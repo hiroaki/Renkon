@@ -211,6 +211,16 @@ export default class extends Controller {
     }
   }
 
+  activateItemBySelector(selector) {
+    const li = this.element.querySelector(selector)
+    if (!li) {
+      return null
+    }
+
+    this.activateItem(li)
+    return li
+  }
+
   getSelectedItem() {
     return this.element.querySelector('li[data-selected="true"]');
   }

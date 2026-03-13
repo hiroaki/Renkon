@@ -1,22 +1,7 @@
 import SelectedLiBaseController from 'lib/selected_li_base_controller'
-import TurboFrameDelegator from 'lib/turbo_frame_delegator'
+import RefreshDelegator from 'lib/refresh_delegator'
 import { getCsrfToken } from 'lib/schema'
-import { fireChangeSelectedLiEvent } from 'lib/pane_focus_events'
-
-class RefreshSubscriptionDelegator extends TurboFrameDelegator {
-  // override
-  prepareRequest(request) {
-    super.prepareRequest(request);
-    console.log('request', request);
-
-    if (!request.isSafe) {
-      const token = getCsrfToken();
-      if (token) {
-        request.headers['X-CSRF-Token'] = token
-      }
-    }
-  }
-}
+import { fireChangeSelectedLiEvent, fireStatusErrorEvent } from 'lib/pane_focus_events'
 
 export default class extends SelectedLiBaseController {
   connect() {
@@ -127,19 +112,67 @@ export default class extends SelectedLiBaseController {
     .catch(error => console.error('Error:', error));
   }
 
-  async refreshItem(id) {
+  selectBySubscriptionId(id) {
+    return this.activateItemBySelector(`li[data-item-type="subscription"][data-subscription="${id}"]`)
+  }
+
+  reloadArticlesPaneBySubscriptionId(id) {
+    const li = this.element.querySelector(`li[data-item-type="subscription"][data-subscription="${id}"]`)
+    if (!li) {
+      return false
+    }
+
+    // Ignore links from nested descendant items and use only this row's navigation URL.
+    const span = Array.from(li.querySelectorAll('span[data-link-to-url]'))
+      .find((candidate) => candidate.closest('li') === li)
+    const url = span?.dataset['linkToUrl']
+    const frameId = span?.dataset['linkToFrame']
+    const frame = frameId ? document.querySelector(`turbo-frame[id=${frameId}]`) : null
+
+    if (!url || !frame) {
+      return false
+    }
+
+    // Force reload even when URL did not change.
+    frame.removeAttribute('src')
+    frame.src = url
+    return true
+  }
+
+  async refreshItem(id, options = {}) {
     const li = this.element.querySelector(`li[data-subscription="${id}"]`);
     if (!this.isSubscriptionItem(li)) {
       return;
     }
 
+    const dryRun = options.dryRun ?? true;
+    const showStatusError = options.showStatusError ?? false;
+    const refreshUrl = options.refreshUrl || li.dataset['urlRefresh'];
+
     const turboFrame = li.querySelector('turbo-frame');
-    if (turboFrame) {
-      const delegator = new RefreshSubscriptionDelegator(
-        li.dataset['urlRefresh'], 'PATCH', turboFrame.id, new URLSearchParams({ short: true, dry_run: true })
-      );
-      await delegator.perform();
+    if (!turboFrame || !refreshUrl) {
+      return false;
     }
+
+    const params = new URLSearchParams({ short: 'true' });
+    if (dryRun) {
+      params.set('dry_run', 'true');
+    }
+
+    const delegator = new RefreshDelegator(
+      refreshUrl,
+      'PATCH',
+      turboFrame.id,
+      params
+    );
+    await delegator.perform();
+
+    if (delegator.failed && showStatusError) {
+      const details = await delegator.getFailureDetails();
+      fireStatusErrorEvent(window, details.message);
+    }
+
+    return !delegator.failed;
   }
 
   isSubscriptionItem(li) {

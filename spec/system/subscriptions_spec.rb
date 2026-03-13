@@ -16,6 +16,21 @@ RSpec.describe "Subscriptions", type: :system do
     end
 
     context "when the creation succeeds" do
+      before do
+        stub_request(:get, 'https://example.com/feed').to_return(
+          body: <<~XML
+            <?xml version="1.0" encoding="UTF-8" ?>
+            <rss version="2.0">
+              <channel>
+                <title>Feed</title>
+                <link>https://example.com/feed</link>
+                <description>ok</description>
+              </channel>
+            </rss>
+          XML
+        )
+      end
+
       it "creates a new subscription" do
         expect(page).to have_link("New subscription")
         click_link "New subscription"
@@ -211,6 +226,18 @@ RSpec.describe "Subscriptions", type: :system do
 
       expect(page).to have_selector("li[data-subscription='#{subscription_a.id}'] span[data-unread-count]", text: "2")
       expect(page).to have_selector("li[data-subscription='#{subscription_b.id}'] span[data-unread-count]", text: "4")
+    end
+
+    it "reloads selected subscription articles after refresh all" do
+      visit root_path
+
+      find("li[data-subscription='#{subscription_b.id}']").click
+      expect(page).to have_no_selector('turbo-frame#articles', text: 'New Article 1')
+
+      click_button 'Refresh'
+
+      expect(page).to have_selector('turbo-frame#articles', text: 'New Article 1')
+      expect(page).to have_selector('turbo-frame#articles', text: 'New Article 2')
     end
   end
 

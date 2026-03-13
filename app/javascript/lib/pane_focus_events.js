@@ -6,6 +6,7 @@ export const PANE_FOCUS_EVENTS = {
   CHANGE_SELECTED_LI: 'changeSelectedLi',
   CONNECTED_SELECTED_LI_BASE_CONTROLLER: 'connectedSelectedLiBaseController',
   STATUS_ERROR: 'renkon:status-error',
+  SUBSCRIPTIONS_REFRESHED: 'renkon:subscriptions-refreshed',
 };
 
 export function dispatchPaneFocusEvent(target, eventName, detail = {}) {
@@ -52,4 +53,8 @@ export function fireConnectedSelectedLiBaseController(controller) {
 
 export function fireStatusErrorEvent(target, message) {
   dispatchPaneFocusEvent(target, PANE_FOCUS_EVENTS.STATUS_ERROR, { message });
+}
+
+export function fireSubscriptionsRefreshedEvent(target, detail = {}) {
+  dispatchPaneFocusEvent(target, PANE_FOCUS_EVENTS.SUBSCRIPTIONS_REFRESHED, detail);
 }
