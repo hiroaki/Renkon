@@ -19,7 +19,9 @@ export default class extends Controller {
         fallbackOnBody: true,
         swapThreshold: 0.65,
         invertSwap: true,
-        dragoverBubble: true,
+        // In nested trees, bubbling dragover to parent sortables causes
+        // competing insertion calculations and jitter near group boundaries.
+        dragoverBubble: false,
         draggable: 'li[data-item-type="subscription"], li[data-item-type="group"]',
         filter: '.group-collapse-toggle',
         preventOnFilter: false,
