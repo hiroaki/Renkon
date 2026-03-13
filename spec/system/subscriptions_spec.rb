@@ -227,6 +227,18 @@ RSpec.describe "Subscriptions", type: :system do
       expect(page).to have_selector("li[data-subscription='#{subscription_a.id}'] span[data-unread-count]", text: "2")
       expect(page).to have_selector("li[data-subscription='#{subscription_b.id}'] span[data-unread-count]", text: "4")
     end
+
+    it "reloads selected subscription articles after refresh all" do
+      visit root_path
+
+      find("li[data-subscription='#{subscription_b.id}']").click
+      expect(page).to have_no_selector('turbo-frame#articles', text: 'New Article 1')
+
+      click_button 'Refresh'
+
+      expect(page).to have_selector('turbo-frame#articles', text: 'New Article 1')
+      expect(page).to have_selector('turbo-frame#articles', text: 'New Article 2')
+    end
   end
 
   describe 'Subscription destroy flow' do

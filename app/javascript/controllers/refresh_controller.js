@@ -1,6 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 import Queue from "promise-queue"
 import RefreshDelegator from 'lib/refresh_delegator'
+import { fireSubscriptionsRefreshedEvent } from 'lib/pane_focus_events'
 
 export default class extends Controller {
   static values = { concurrency: Number }
@@ -11,7 +12,7 @@ export default class extends Controller {
   }
 
   // refresh all subscriptions
-  all() {
+  async all() {
     const generateFetchFunction = (li, urlRefresh, method, frame_id) => {
       return async () => {
         this.showLoading(li)
@@ -33,6 +34,7 @@ export default class extends Controller {
     }
 
     const que = new Queue(this.concurrencyValue);
+    const refreshTasks = []
 
     document.getElementById('subscriptions').querySelectorAll('li[data-item-type="subscription"]').forEach(li => {
       const urlRefresh = li.dataset['urlRefresh'];
@@ -43,10 +45,13 @@ export default class extends Controller {
         return;
       }
 
-      que.add(
+      refreshTasks.push(que.add(
         generateFetchFunction(li, urlRefresh, 'PATCH', turboFrame.id)
-      )
+      ))
     });
+
+    await Promise.allSettled(refreshTasks)
+    fireSubscriptionsRefreshedEvent(this.element)
   }
 
   findBadge(li) {
