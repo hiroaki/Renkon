@@ -70,7 +70,8 @@ class SubscriptionsController < ApplicationController
 
   # PATCH/PUT /subscriptions/1
   def update
-    purge_after_update = @subscription.favicon.attached? && params[:subscription][:remove_favicon] == '1'
+    remove_favicon = params[:subscription][:remove_favicon] == '1'
+    purge_after_update = @subscription.favicon.attached? && remove_favicon
     fetch_favicon = params[:subscription][:fetch_favicon] == '1'
 
     # avoid warning "Unpermitted parameter"
@@ -78,13 +79,10 @@ class SubscriptionsController < ApplicationController
     params[:subscription].delete(:fetch_favicon)
 
     if @subscription.update(subscription_params)
-      if purge_after_update
-        @subscription.favicon.purge_later
-      end
-
       if fetch_favicon
-        # TODO: purge が後になった場合...
         fetch_favicon_and_update_for(@subscription)
+      elsif purge_after_update
+        @subscription.favicon.purge_later
       end
 
       redirect_to @subscription, notice: "Subscription was successfully updated.", status: :see_other
