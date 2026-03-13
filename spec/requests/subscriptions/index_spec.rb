@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe 'Subscriptions index', type: :request do
-  describe 'GET /subscriptions' do
+  describe 'GET /subscriptions/list' do
     let!(:group) { FactoryBot.create(:group, name: 'Main Group') }
 
     it 'renders subscriptions in position order' do
@@ -9,7 +9,7 @@ RSpec.describe 'Subscriptions index', type: :request do
       second = FactoryBot.create(:subscription, title: 'Second', position: 20, group: group)
       third = FactoryBot.create(:subscription, title: 'Third', position: 30, group: group)
 
-      get subscriptions_path, params: { short: true }
+      get list_subscriptions_path
 
       expect(response).to have_http_status(:ok)
 
@@ -21,7 +21,7 @@ RSpec.describe 'Subscriptions index', type: :request do
       older = FactoryBot.create(:subscription, title: 'Older', position: 1, group: group)
       newer = FactoryBot.create(:subscription, title: 'Newer', position: 1, group: group)
 
-      get subscriptions_path, params: { short: true }
+      get list_subscriptions_path
 
       expect(response).to have_http_status(:ok)
 
@@ -32,7 +32,7 @@ RSpec.describe 'Subscriptions index', type: :request do
     it 'renders group headers' do
       FactoryBot.create(:subscription, title: 'In Group', position: 1, group: group)
 
-      get subscriptions_path, params: { short: true }
+      get list_subscriptions_path
 
       expect(response).to have_http_status(:ok)
       expect(response.body).to include('Main Group')
@@ -43,7 +43,7 @@ RSpec.describe 'Subscriptions index', type: :request do
       top_group = FactoryBot.create(:group, name: 'Top Group', parent: nil, position: 2)
       top_b = FactoryBot.create(:subscription, title: 'Top B', group: nil, position: 3)
 
-      get subscriptions_path, params: { short: true }
+      get list_subscriptions_path
 
       expect(response).to have_http_status(:ok)
 
@@ -59,7 +59,7 @@ RSpec.describe 'Subscriptions index', type: :request do
         child_group = FactoryBot.create(:group, name: 'Child Group', parent: group, position: 1)
         nested_subscription = FactoryBot.create(:subscription, title: 'Nested', position: 1, group: child_group)
 
-        get subscriptions_path, params: { short: true }
+        get list_subscriptions_path
 
         expect(response).to have_http_status(:ok)
         expect(response.body).to include('Child Group')

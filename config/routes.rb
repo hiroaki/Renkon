@@ -15,6 +15,7 @@ Rails.application.routes.draw do
 
   resources :subscriptions do
     collection do
+      get :list
       patch :reorder_tree
     end
 
@@ -33,7 +34,9 @@ Rails.application.routes.draw do
     end
 
     member do
+      get :row
       patch :refresh_feed
+      patch :refresh_feed_row
     end
   end
 

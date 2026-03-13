@@ -145,25 +145,20 @@ export default class extends SelectedLiBaseController {
       return;
     }
 
-    const dryRun = options.dryRun ?? true;
+    const performFetch = options.performFetch ?? false;
     const showStatusError = options.showStatusError ?? false;
-    const refreshUrl = options.refreshUrl || li.dataset['urlRefresh'];
+    const refreshUrl = options.refreshUrl || (performFetch ? li.dataset['urlRefresh'] : li.dataset['urlRow']);
+    const method = options.method || (performFetch ? 'PATCH' : 'GET');
 
     const turboFrame = li.querySelector('turbo-frame');
     if (!turboFrame || !refreshUrl) {
       return false;
     }
 
-    const params = new URLSearchParams({ short: 'true' });
-    if (dryRun) {
-      params.set('dry_run', 'true');
-    }
-
     const delegator = new RefreshDelegator(
       refreshUrl,
-      'PATCH',
-      turboFrame.id,
-      params
+      method,
+      turboFrame.id
     );
     await delegator.perform();
 

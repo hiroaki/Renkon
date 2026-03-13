@@ -56,7 +56,7 @@ export default class extends Controller {
     this.applied = true
 
     const refreshed = await subscriptionsController.refreshItem(this.subscriptionIdValue, {
-      dryRun: false,
+      performFetch: true,
       showStatusError: true,
       refreshUrl: this.hasRefreshUrlValue ? this.refreshUrlValue : null,
     })

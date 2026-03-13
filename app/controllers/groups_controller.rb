@@ -15,7 +15,7 @@ class GroupsController < ApplicationController
       if turbo_frame_request?
         flash.now[:notice] = 'Group was successfully created.'
         render turbo_stream: [
-          turbo_stream.replace('subscriptions', helpers.turbo_frame_tag('subscriptions', src: subscriptions_path(short: true))),
+          turbo_stream.replace('subscriptions', helpers.turbo_frame_tag('subscriptions', src: list_subscriptions_path)),
           turbo_stream.update('modal', ''),
         ]
       else
@@ -36,7 +36,7 @@ class GroupsController < ApplicationController
       if turbo_frame_request?
         flash.now[:notice] = 'Group was successfully updated.'
         render turbo_stream: [
-          turbo_stream.replace('subscriptions', helpers.turbo_frame_tag('subscriptions', src: subscriptions_path(short: true))),
+          turbo_stream.replace('subscriptions', helpers.turbo_frame_tag('subscriptions', src: list_subscriptions_path)),
           turbo_stream.update('modal', ''),
         ]
       else
@@ -54,7 +54,7 @@ class GroupsController < ApplicationController
     if turbo_frame_request?
       flash.now[:notice] = 'Group was successfully destroyed.'
       render turbo_stream: [
-        turbo_stream.replace('subscriptions', helpers.turbo_frame_tag('subscriptions', src: subscriptions_path(short: true))),
+        turbo_stream.replace('subscriptions', helpers.turbo_frame_tag('subscriptions', src: list_subscriptions_path)),
         turbo_stream.update('modal', ''),
       ]
     elsif request.xhr?

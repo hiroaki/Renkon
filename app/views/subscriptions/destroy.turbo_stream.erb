@@ -1,5 +1,5 @@
 <%= turbo_stream.replace 'subscriptions' do %>
-  <%= turbo_frame_tag('subscriptions', src: subscriptions_path(short: true)) %>
+  <%= turbo_frame_tag('subscriptions', src: list_subscriptions_path) %>
 <% end %>
 
 <%= turbo_stream.replace 'articles' do %>

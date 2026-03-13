@@ -5,7 +5,8 @@
   data-url-source="<%= subscription.url %>"
   data-url-destroy="<%= subscription_path(subscription) %>"
   data-text-for-confirm-destroy="Are you sure you want to delete this subscription?<%= "\n#{subscription.title}" %>"
-  data-url-refresh="<%= refresh_feed_subscription_path(subscription, short: true) %>"
+  data-url-refresh="<%= refresh_feed_row_subscription_path(subscription) %>"
+  data-url-row="<%= row_subscription_path(subscription) %>"
   data-url-edit="<%= edit_subscription_path(subscription) %>"
 >
   <div class="container overflow-hidden text-nowrap text-xs">
@@ -24,7 +25,7 @@
 
     <%= capture_unless_turbo_frame_request do %>
       <p>
-        <%= link_to('Refresh subscription', refresh_feed_subscription_path(subscription), data: { turbo_method: :patch, turbo_frame: dom_id(subscription) }) %>
+        <%= link_to('Refresh subscription', refresh_feed_row_subscription_path(subscription), data: { turbo_method: :patch, turbo_frame: dom_id(subscription) }) %>
         |
         <%= link_to('Show this subscription', subscription, data: { turbo_frame: '_top' }) %>
         |

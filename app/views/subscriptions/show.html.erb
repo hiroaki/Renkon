@@ -1,9 +1,4 @@
-<% if params[:short] == 'true' %>
-  <%= turbo_frame_tag dom_id(@subscription) do %>
-    <%= render partial: 'subscriptions/subscription_row', locals: { subscription: @subscription } %>
-  <% end %>
-
-<% elsif !turbo_frame_request? %>
+<% if !turbo_frame_request? %>
   <header class="contaner">
     <h2>Show subscription</h2>
   </header>
@@ -24,7 +19,7 @@
 <hr>
 
 <p>
-  <%= link_to "Refresh subscription", refresh_feed_subscription_path(@subscription), data: { turbo_method: :patch, turbo_frame: dom_id(@subscription) } %> |
+  <%= link_to "Refresh subscription", refresh_feed_subscription_path(@subscription), data: { turbo_method: :patch } %> |
   <%= link_to "articles of this subscription", subscription_articles_path(@subscription) %>
 </p>
 

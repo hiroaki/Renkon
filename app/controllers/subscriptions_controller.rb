@@ -1,7 +1,8 @@
 class SubscriptionsController < ApplicationController
   include Factory
 
-  before_action :set_subscription, only: %i[ edit update destroy refresh_feed ]
+  before_action :set_subscription, only: %i[ edit update destroy refresh_feed refresh_feed_row ]
+  before_action :set_row_subscription, only: %i[ row ]
 
   # FOR DEVELOPMENT
   def main
@@ -14,13 +15,19 @@ class SubscriptionsController < ApplicationController
     load_grouped_subscriptions
   end
 
+  # GET /subscriptions/list
+  def list
+    load_grouped_subscriptions
+    render :index
+  end
+
   # GET /subscriptions/1
   def show
-    @subscription = if params[:short] == 'true'
-      Subscription.all_with_count_articles(unread: true).find(params[:id])
-    else
-      Subscription.find(params[:id])
-    end
+    @subscription = Subscription.find(params[:id])
+  end
+
+  # GET /subscriptions/1/row
+  def row
   end
 
   # GET /subscriptions/new
@@ -43,7 +50,7 @@ class SubscriptionsController < ApplicationController
       if turbo_frame_request?
         flash.now[:notice] = 'Subscription was successfully created.'
         render turbo_stream: [
-          turbo_stream.replace('subscriptions', helpers.turbo_frame_tag('subscriptions', src: subscriptions_path(short: true))),
+          turbo_stream.replace('subscriptions', helpers.turbo_frame_tag('subscriptions', src: list_subscriptions_path)),
           turbo_stream.replace('modal', partial: 'subscriptions/success_modal', locals: {
             subscription: @subscription,
             heading: 'Created subscription',
@@ -108,16 +115,18 @@ class SubscriptionsController < ApplicationController
 
   # refresh_feed_subscription PATCH /subscriptions/:id/refresh_feed(.:format)
   def refresh_feed
-    dry_run = ActiveModel::Type::Boolean.new.cast(params[:dry_run])
-    logger.info("params[:dry_run]=[#{dry_run ? 'true' : 'false'}]")
-
-    unless dry_run
-      fetch_and_merge_feed_entries_for_subscription(@subscription)
-    end
-
-    redirect_to subscription_url(@subscription, short: !!params[:short]), notice: "Subscription was successfully refreshed.", status: :see_other
+    fetch_and_merge_feed_entries_for_subscription(@subscription)
+    redirect_to subscription_url(@subscription), notice: "Subscription was successfully refreshed.", status: :see_other
   rescue FeedUtils::Error => error
-    render_refresh_feed_error(error)
+    redirect_to subscription_url(@subscription), alert: error.message, status: :see_other
+  end
+
+  # refresh_feed_row_subscription PATCH /subscriptions/:id/refresh_feed_row(.:format)
+  def refresh_feed_row
+    fetch_and_merge_feed_entries_for_subscription(@subscription)
+    redirect_to row_subscription_url(@subscription), status: :see_other
+  rescue FeedUtils::Error => error
+    render_refresh_feed_row_error(error)
   end
 
   # reorder_tree_subscriptions PATCH /subscriptions/reorder_tree(.:format)
@@ -158,15 +167,15 @@ class SubscriptionsController < ApplicationController
       render json: { error: message }, status: :unprocessable_content
     end
 
-    def render_refresh_feed_error(error)
-      if params[:short]
-        render json: {
-          error: error.message,
-          category: error.retryable? ? 'temporary' : 'permanent'
-        }, status: error.retryable? ? :service_unavailable : :unprocessable_content
-      else
-        redirect_to subscription_url(@subscription), alert: error.message, status: :see_other
-      end
+    def render_refresh_feed_row_error(error)
+      render json: {
+        error: error.message,
+        category: error.retryable? ? 'temporary' : 'permanent'
+      }, status: error.retryable? ? :service_unavailable : :unprocessable_content
+    end
+
+    def set_row_subscription
+      @subscription = Subscription.all_with_count_articles(unread: true).find(params[:id])
     end
 
     def load_grouped_subscriptions
