@@ -49,15 +49,10 @@ class SubscriptionsController < ApplicationController
 
     if @subscription.save
       if turbo_frame_request?
-        flash.now[:notice] = 'Subscription was successfully created.'
         render turbo_stream: [
           subscriptions_reload_stream,
-          turbo_stream.replace('modal', partial: 'subscriptions/success_modal', locals: {
-            subscription: @subscription,
-            heading: 'Created subscription',
-            message: flash.now[:notice],
-            run_create_flow: true,
-          }),
+          create_flow_trigger_stream(@subscription),
+          modal_close_stream,
         ]
       else
         redirect_to @subscription, notice: "Subscription was successfully created."

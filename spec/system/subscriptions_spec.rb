@@ -40,9 +40,8 @@ RSpec.describe "Subscriptions", type: :system do
         fill_in "Src", with: "https://example.com/feed"
         click_button "Create Subscription"
 
-        expect(page).to have_content("Subscription was successfully created.")
-        click_button "Close"
         expect(page).to have_selector("turbo-frame#modal", text: "")
+        expect(page).to have_selector("li[data-subscription]", text: "Test Subscription")
       end
     end
 

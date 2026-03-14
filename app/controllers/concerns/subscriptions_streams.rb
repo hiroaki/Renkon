@@ -9,6 +9,14 @@ module SubscriptionsStreams
       turbo_stream.update('modal', '')
     end
 
+    def create_flow_trigger_stream(subscription)
+      turbo_stream.update(
+        'subscription-create-flow-hook',
+        partial: 'subscriptions/create_flow_trigger',
+        locals: { subscription: subscription }
+      )
+    end
+
     def articles_reset_stream
       turbo_stream.replace('articles', helpers.turbo_frame_tag('articles'))
     end
