@@ -66,5 +66,23 @@ RSpec.describe 'Subscriptions update', type: :request do
         expect(response).to have_http_status(:see_other)
       end
     end
+
+    context 'when updating from modal frame' do
+      let!(:subscription) { FactoryBot.create(:subscription) }
+
+      it 'returns turbo stream updates for subscriptions and modal' do
+        patch subscription_path(subscription),
+          params: base_params.deep_merge(subscription: { title: 'Updated in modal' }),
+          headers: {
+            'Turbo-Frame' => 'modal',
+            'Accept' => 'text/vnd.turbo-stream.html',
+          }
+
+        expect(response).to have_http_status(:ok)
+        expect(response.media_type).to eq('text/vnd.turbo-stream.html')
+        expect(response.body).to include('turbo-stream action="replace" target="subscriptions"')
+        expect(response.body).to include('turbo-stream action="update" target="modal"')
+      end
+    end
   end
 end

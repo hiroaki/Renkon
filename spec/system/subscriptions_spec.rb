@@ -40,9 +40,8 @@ RSpec.describe "Subscriptions", type: :system do
         fill_in "Src", with: "https://example.com/feed"
         click_button "Create Subscription"
 
-        expect(page).to have_content("Subscription was successfully created.")
-        click_button "Close"
         expect(page).to have_selector("turbo-frame#modal", text: "")
+        expect(page).to have_selector("li[data-subscription]", text: "Test Subscription")
       end
     end
 
@@ -100,11 +99,8 @@ RSpec.describe "Subscriptions", type: :system do
         fill_in 'subscription_url', with: 'http://updated-url.com'
         click_button 'Update Subscription'
 
+        expect(page).to have_selector('turbo-frame#modal', text: '')
         expect(page).to have_content('Updated Subscription Title')
-        expect(page).to have_content('http://updated-url.com')
-
-        click_button "Close"
-        expect(page).to have_selector("turbo-frame#modal", text: "")
       end
 
       it 'can remove the favicon when updating a subscription' do
@@ -117,12 +113,9 @@ RSpec.describe "Subscriptions", type: :system do
         check 'Remove favicon'
         click_button 'Update Subscription'
 
+        expect(page).to have_selector('turbo-frame#modal', text: '')
         expect(page).to have_content('Updated Subscription Title')
-        expect(page).to have_content('http://updated-url.com')
         expect(page).to have_selector('svg[data-default-favicon="true"]')
-
-        click_button "Close"
-        expect(page).to have_selector("turbo-frame#modal", text: "")
       end
     end
 
@@ -167,9 +160,7 @@ RSpec.describe "Subscriptions", type: :system do
       click_button 'Update Subscription'
 
       expect(controller_instance).to have_received(:fetch_favicon_and_update_for).with(subscription)
-
-      click_button "Close"
-      expect(page).to have_selector("turbo-frame#modal", text: "")
+      expect(page).to have_selector('turbo-frame#modal', text: '')
     end
   end
 
@@ -258,10 +249,8 @@ RSpec.describe "Subscriptions", type: :system do
           click_button "Destroy this subscription"
         end
 
-        expect(page).to have_content("Subscription was successfully destroyed.")
+        expect(page).to have_selector('turbo-frame#modal', text: '')
         expect(page).to have_no_selector("li[data-subscription='#{subscription.id}']", wait: 5)
-        click_button "Close"
-        expect(page).to have_selector("turbo-frame#modal", text: "")
       end
 
       it "shows an error message when destruction fails" do
