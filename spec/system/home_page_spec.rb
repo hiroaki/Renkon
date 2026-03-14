@@ -56,7 +56,7 @@ RSpec.describe "Main Page", type: :system do
     context "when there are no Subscription records" do
       it "displays only 'Trash'" do
         visit root_path
-        within('main > div:first-of-type') do
+        within('main > div#subscriptions-pane') do
           expect(page).to have_content('Trash')
           expect(page).not_to have_selector('li.subscription')
         end
@@ -71,7 +71,7 @@ RSpec.describe "Main Page", type: :system do
 
       it "displays 'Trash' and the list of Subscriptions" do
         visit root_path
-        within('main > div:first-of-type') do
+        within('main > div#subscriptions-pane') do
           expect(page).to have_content('Trash')
           @subscriptions.each do |subscription|
             expect(page).to have_content(subscription.title)
@@ -85,7 +85,7 @@ RSpec.describe "Main Page", type: :system do
         # ウィンドウの高さを設定
         page.driver.resize(1280, 300)
 
-        within('main > div:first-of-type') do
+        within('main > div#subscriptions-pane') do
           parent_div_selector = '#subscriptions-pane > div:first-child'
           last_li_selector = '#subscriptions-pane > div ul li:last-child'
 
