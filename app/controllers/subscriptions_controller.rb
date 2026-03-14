@@ -1,5 +1,6 @@
 class SubscriptionsController < ApplicationController
   include Factory
+  include SubscriptionsStreams
 
   before_action :set_subscription, only: %i[ edit update destroy refresh_feed refresh_feed_row ]
   before_action :set_row_subscription, only: %i[ row ]
@@ -50,7 +51,7 @@ class SubscriptionsController < ApplicationController
       if turbo_frame_request?
         flash.now[:notice] = 'Subscription was successfully created.'
         render turbo_stream: [
-          turbo_stream.replace('subscriptions', helpers.turbo_frame_tag('subscriptions', src: list_subscriptions_path)),
+          subscriptions_reload_stream,
           turbo_stream.replace('modal', partial: 'subscriptions/success_modal', locals: {
             subscription: @subscription,
             heading: 'Created subscription',
@@ -85,7 +86,15 @@ class SubscriptionsController < ApplicationController
         @subscription.favicon.purge_later
       end
 
-      redirect_to @subscription, notice: "Subscription was successfully updated.", status: :see_other
+      if turbo_frame_request?
+        flash.now[:notice] = 'Subscription was successfully updated.'
+        render turbo_stream: [
+          subscriptions_reload_stream,
+          modal_close_stream,
+        ]
+      else
+        redirect_to @subscription, notice: "Subscription was successfully updated.", status: :see_other
+      end
     else
       render :edit, status: :unprocessable_content
     end
@@ -95,13 +104,13 @@ class SubscriptionsController < ApplicationController
   def destroy
     if @subscription.destroy
       if turbo_frame_request?
-        # in turbo-frame "modal"
         flash.now[:notice] = 'Subscription was successfully destroyed.'
-        @subscriptions = Subscription.all_with_count_articles(unread: true)
-        respond_to do |format|
-          format.turbo_stream
-          format.html { render :destroy }
-        end
+        render turbo_stream: [
+          subscriptions_reload_stream,
+          articles_reset_stream,
+          contents_reset_stream,
+          modal_close_stream,
+        ]
       else
         redirect_to subscriptions_url, notice: 'Subscription was successfully destroyed.', status: :see_other
       end

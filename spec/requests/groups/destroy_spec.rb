@@ -31,6 +31,8 @@ RSpec.describe 'Groups destroy', type: :request do
       expect(response).to have_http_status(:ok)
       expect(response.media_type).to eq('text/vnd.turbo-stream.html')
       expect(response.body).to include('turbo-stream action="replace" target="subscriptions"')
+      expect(response.body).to include('turbo-stream action="replace" target="articles"')
+      expect(response.body).to include('turbo-stream action="replace" target="contents"')
       expect(response.body).to include('turbo-stream action="update" target="modal"')
     end
   end
