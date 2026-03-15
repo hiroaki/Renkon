@@ -1,7 +1,6 @@
 <%= render('shared/modal_frame',
   heading: heading,
   message: message,
-  hide_on_submit: false,
   close_label: 'Close'
 ) do %>
   <%= turbo_frame_tag dom_id(subscription) do %>

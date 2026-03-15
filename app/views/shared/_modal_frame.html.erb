@@ -1,18 +1,14 @@
 <%
   heading = local_assigns.fetch(:heading, nil)
   message = local_assigns.fetch(:message, nil)
-  hide_on_submit = local_assigns.fetch(:hide_on_submit, true)
   close_label = local_assigns.fetch(:close_label, 'Cancel')
   show_close_button = local_assigns.fetch(:show_close_button, true)
-
-  actions = ['keydown.esc->modal#hide']
-  actions.unshift('turbo:submit-end->modal#hideOnSubmit') if hide_on_submit
 %>
 
 <turbo-frame id="modal">
   <div role="dialog" tabindex="-1" class="fixed inset-0 z-30 flex items-center justify-center w-full h-screen p-2"
     data-controller="modal"
-    data-action="<%= actions.join(' ') %>"
+    data-action="keydown.esc->modal#hide"
   >
     <%= button_to(nil, nil,
       type: :button,
