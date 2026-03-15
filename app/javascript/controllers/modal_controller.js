@@ -13,12 +13,6 @@ export default class extends Controller {
     this.element.remove();
   }
 
-  hideOnSubmit(event) {
-    if (event.detail.success) {
-      this.hide(event);
-    }
-  }
-
   disconnect() {
     this.#modalTurboFrame.src = null;
   }

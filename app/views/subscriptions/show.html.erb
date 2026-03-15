@@ -1,19 +1,21 @@
-<% if !turbo_frame_request? %>
-  <header class="contaner">
-    <h2>Show subscription</h2>
-  </header>
+<%
+  # NOTE: このビューが turbo_frame_request? として呼ばれることは現在の設計では起こりません。
+  # create/update 成功時はサーバーが turbo_stream (stream_set_for_create / stream_set_for_update) を
+  # 返してモーダルを閉じるため、show アクションが Turbo-Frame: modal ヘッダー付きで
+  # 呼ばれる経路は存在しません。
+  # もしここで turbo_frame_request? が true になる場合は、
+  # SubscriptionsController または SubscriptionsStreams の stream 構成が意図通りになっていない可能性があります。
+  if turbo_frame_request?
+    raise "Unexpected turbo_frame_request in subscriptions#show — check stream_set_for_create/update in SubscriptionsStreams"
+  end
+%>
 
-  <%= turbo_frame_tag dom_id(@subscription) do %>
-    <%= render partial: 'subscriptions/subscription_detail', locals: { subscription: @subscription } %>
-  <% end %>
+<header class="contaner">
+  <h2>Show subscription</h2>
+</header>
 
-<% else %>
-  <%= render partial: 'subscriptions/success_modal', locals: {
-    subscription: @subscription,
-    heading: 'Updated subscription',
-    message: notice,
-    run_create_flow: false,
-  } %>
+<%= turbo_frame_tag dom_id(@subscription) do %>
+  <%= render partial: 'subscriptions/subscription_detail', locals: { subscription: @subscription } %>
 <% end %>
 
 <hr>
