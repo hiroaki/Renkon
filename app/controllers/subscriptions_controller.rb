@@ -49,11 +49,7 @@ class SubscriptionsController < ApplicationController
 
     if @subscription.save
       if turbo_frame_request?
-        render turbo_stream: [
-          subscriptions_reload_stream,
-          create_flow_trigger_stream(@subscription),
-          modal_close_stream,
-        ]
+        render turbo_stream: stream_set_for_create(subscription: @subscription)
       else
         redirect_to @subscription, notice: "Subscription was successfully created."
       end
@@ -83,10 +79,7 @@ class SubscriptionsController < ApplicationController
 
       if turbo_frame_request?
         flash.now[:notice] = 'Subscription was successfully updated.'
-        render turbo_stream: [
-          subscriptions_reload_stream,
-          modal_close_stream,
-        ]
+        render turbo_stream: stream_set_for_update
       else
         redirect_to @subscription, notice: "Subscription was successfully updated.", status: :see_other
       end
@@ -100,12 +93,7 @@ class SubscriptionsController < ApplicationController
     if @subscription.destroy
       if turbo_frame_request?
         flash.now[:notice] = 'Subscription was successfully destroyed.'
-        render turbo_stream: [
-          subscriptions_reload_stream,
-          articles_reset_stream,
-          contents_reset_stream,
-          modal_close_stream,
-        ]
+        render turbo_stream: stream_set_for_destroy
       else
         redirect_to subscriptions_url, notice: 'Subscription was successfully destroyed.', status: :see_other
       end

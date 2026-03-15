@@ -16,10 +16,7 @@ class GroupsController < ApplicationController
     if @group.save
       if turbo_frame_request?
         flash.now[:notice] = 'Group was successfully created.'
-        render turbo_stream: [
-          subscriptions_reload_stream,
-          modal_close_stream,
-        ]
+        render turbo_stream: stream_set_for_create
       else
         redirect_to subscriptions_path, notice: 'Group was successfully created.', status: :see_other
       end
@@ -37,10 +34,7 @@ class GroupsController < ApplicationController
     if @group.update(group_update_params)
       if turbo_frame_request?
         flash.now[:notice] = 'Group was successfully updated.'
-        render turbo_stream: [
-          subscriptions_reload_stream,
-          modal_close_stream,
-        ]
+        render turbo_stream: stream_set_for_update
       else
         redirect_to subscriptions_path, notice: 'Group was successfully updated.', status: :see_other
       end
@@ -55,12 +49,7 @@ class GroupsController < ApplicationController
 
     if turbo_frame_request?
       flash.now[:notice] = 'Group was successfully destroyed.'
-      render turbo_stream: [
-        subscriptions_reload_stream,
-        articles_reset_stream,
-        contents_reset_stream,
-        modal_close_stream,
-      ]
+      render turbo_stream: stream_set_for_destroy
     elsif request.xhr?
       head :no_content
     else
