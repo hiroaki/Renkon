@@ -28,9 +28,11 @@
         data-refresh-concurrency-value="2"
         title="Refresh"
       >
-        <%= icon_refresh(class: 'size-6') %>
+        <%= icon_refresh(class: 'size-5') %>
       </button>
     </div>
+
+    <div class="mx-2 h-4 border-l border-gray-300"></div>
 
     <div class="mx-2">
       <%=
@@ -42,19 +44,7 @@
           'title' => 'New subscription',
         ) do
       %>
-        <%= icon_new_subscription(class: 'size-6') %>
-      <% end %>
-    </div>
-    <div class="mx-2">
-      <%=
-        link_to('#',
-          'data-turbo-frame' => 'modal',
-          'data-pane-focus-target' => 'linkEdit',
-          'class' => 'px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-green-600 border border-transparent rounded-md active:bg-green-600 hover:bg-green-700 focus:outline-hidden focus:shadow-outline-green inline-flex items-center hover:text-white data-[disabled=true]:bg-gray-400',
-          'title' => 'Edit selected item'
-        ) do
-      %>
-        <%= icon_edit_subscription(class: 'size-6') %>
+        <%= icon_new_subscription(class: 'size-5') %>
       <% end %>
     </div>
 
@@ -68,11 +58,24 @@
           'title' => 'New group',
         ) do
       %>
-        <%= icon_new_group(class: 'size-6') %>
+        <%= icon_new_group(class: 'size-5') %>
       <% end %>
     </div>
 
-    <!-- unified Edit button (single target updated by pane_focus_controller) -->
+    <div class="mx-2">
+      <%=
+        link_to('#',
+          'data-turbo-frame' => 'modal',
+          'data-pane-focus-target' => 'linkEdit',
+          'class' => 'px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-green-600 border border-transparent rounded-md active:bg-green-600 hover:bg-green-700 focus:outline-hidden focus:shadow-outline-green inline-flex items-center hover:text-white data-[disabled=true]:bg-gray-400',
+          'title' => 'Edit selected item'
+        ) do
+      %>
+        <%= icon_edit_subscription(class: 'size-5') %>
+      <% end %>
+    </div>
+
+    <div class="mx-2 h-4 border-l border-gray-300"></div>
 
     <div class="mx-2">
       <button class="px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-indigo-600 border border-transparent rounded-md active:bg-indigo-600 hover:bg-indigo-700 focus:outline-hidden focus:shadow-outline-indigo disabled:bg-gray-400 disabled:cursor-not-allowed"
@@ -82,7 +85,7 @@
         disabled
         title="Mark Read"
       >
-        <%= icon_mark_read(class: 'size-6') %>
+        <%= icon_mark_read(class: 'size-5') %>
       </button>
     </div>
 
@@ -94,11 +97,22 @@
         disabled
         title="Mark Unread"
       >
-        <%= icon_mark_unread(class: 'size-6') %>
+        <%= icon_mark_unread(class: 'size-5') %>
       </button>
     </div>
 
     <div class="mx-2">
+      <button class="px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-indigo-600 border border-transparent rounded-md active:bg-indigo-600 hover:bg-indigo-700 focus:outline-hidden focus:shadow-outline-indigo disabled:bg-gray-400 disabled:cursor-not-allowed"
+        data-pane-focus-target="buttonMoveSelectedToTrash"
+        data-action="click->pane-focus#moveSelectedArticlesToTrash"
+        title="Move selected articles to trash (Delete)"
+        disabled
+      >
+        <%= icon_trash(class: 'size-5') %>
+      </button>
+    </div>
+
+    <div class="mx-2 ml-auto">
       <button class="px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-orange-300 border border-transparent rounded-md active:bg-orange-300 hover:bg-orange-400 focus:outline-hidden focus:shadow-outline-orange"
         data-controller="trash"
         data-action="
@@ -109,7 +123,7 @@
         data-text-for-confirm-empty-trash="Are you sure you want to empty the trash?"
         title="Empty Trash"
       >
-        <%= icon_trash(class: 'size-6') %>
+        <%= icon_empty_trash(class: 'size-5') %>
       </button>
     </div>
   </nav>

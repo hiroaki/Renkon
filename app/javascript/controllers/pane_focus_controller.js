@@ -6,7 +6,7 @@ import { clearPaneFocusStatusMessage, showPaneFocusStatusMessage } from 'lib/pan
 
 export default class extends Controller {
   static outlets = ['subscriptions', 'articles'];
-  static targets = ['navigationPane', 'subscriptionsPane', 'articlesPane', 'contentsPane', 'linkNewSubscription', 'linkNewGroup', 'linkEdit', 'buttonMarkSelectedRead', 'buttonMarkSelectedUnread', 'statusArea', 'statusText', 'statusIdle'];
+  static targets = ['navigationPane', 'subscriptionsPane', 'articlesPane', 'contentsPane', 'linkNewSubscription', 'linkNewGroup', 'linkEdit', 'buttonMarkSelectedRead', 'buttonMarkSelectedUnread', 'buttonMoveSelectedToTrash', 'statusArea', 'statusText', 'statusIdle'];
 
   connect() {
     // それぞれの Pane は、その範囲の要素がクリックされることで "focused" のマークがつくようにします。
@@ -183,6 +183,7 @@ export default class extends Controller {
     const hasSelectedArticles = selectedItems.length > 0;
     this.buttonMarkSelectedReadTarget.disabled = !hasSelectedArticles;
     this.buttonMarkSelectedUnreadTarget.disabled = !hasSelectedArticles;
+    this.buttonMoveSelectedToTrashTarget.disabled = !hasSelectedArticles;
   }
 
   resetArticleDependentUi() {
@@ -201,6 +202,13 @@ export default class extends Controller {
     const controller = this.articlesController();
     if (controller) {
       controller.markSelectedItemsUnread();
+    }
+  }
+
+  moveSelectedArticlesToTrash() {
+    const controller = this.articlesController();
+    if (controller) {
+      controller.deleteSelectedItems();
     }
   }
 

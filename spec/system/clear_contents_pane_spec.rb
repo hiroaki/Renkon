@@ -28,8 +28,8 @@ RSpec.describe "Content pane behavior", type: :system do
       expect(page).not_to have_text("Content 1")
     end
 
-    mark_read_button = find('button', text: 'Mark Read')
-    mark_unread_button = find('button', text: 'Mark Unread')
+    mark_read_button = find('[data-pane-focus-target="buttonMarkSelectedRead"]')
+    mark_unread_button = find('[data-pane-focus-target="buttonMarkSelectedUnread"]')
     expect(mark_read_button.disabled?).to be(true)
     expect(mark_unread_button.disabled?).to be(true)
   end
