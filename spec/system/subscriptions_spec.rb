@@ -16,6 +16,21 @@ RSpec.describe "Subscriptions", type: :system do
     end
 
     context "when the creation succeeds" do
+      before do
+        stub_request(:get, 'https://example.com/feed').to_return(
+          body: <<~XML
+            <?xml version="1.0" encoding="UTF-8" ?>
+            <rss version="2.0">
+              <channel>
+                <title>Feed</title>
+                <link>https://example.com/feed</link>
+                <description>ok</description>
+              </channel>
+            </rss>
+          XML
+        )
+      end
+
       it "creates a new subscription" do
         expect(page).to have_link("New subscription")
         click_link "New subscription"
@@ -25,9 +40,8 @@ RSpec.describe "Subscriptions", type: :system do
         fill_in "Src", with: "https://example.com/feed"
         click_button "Create Subscription"
 
-        expect(page).to have_content("Subscription was successfully created.")
-        click_button "Close"
         expect(page).to have_selector("turbo-frame#modal", text: "")
+        expect(page).to have_selector("li[data-subscription]", text: "Test Subscription")
       end
     end
 
@@ -78,23 +92,20 @@ RSpec.describe "Subscriptions", type: :system do
     context "when the update succeeds" do
       it 'can update a subscription from the modal' do
         find("li[data-subscription='#{subscription.id}']").click
-        find('[data-pane-focus-target="linkEditSubscription"]').click
+        find('[data-pane-focus-target="linkEdit"]').click
 
         expect(page).to have_selector("turbo-frame#modal", wait: 5)
         fill_in 'subscription_title', with: 'Updated Subscription Title'
         fill_in 'subscription_url', with: 'http://updated-url.com'
         click_button 'Update Subscription'
 
+        expect(page).to have_selector('turbo-frame#modal', text: '')
         expect(page).to have_content('Updated Subscription Title')
-        expect(page).to have_content('http://updated-url.com')
-
-        click_button "Close"
-        expect(page).to have_selector("turbo-frame#modal", text: "")
       end
 
       it 'can remove the favicon when updating a subscription' do
         find("li[data-subscription='#{subscription_with_favicon.id}']").click
-        find('[data-pane-focus-target="linkEditSubscription"]').click
+        find('[data-pane-focus-target="linkEdit"]').click
 
         expect(page).to have_selector("turbo-frame#modal", wait: 5)
         fill_in 'subscription_title', with: 'Updated Subscription Title'
@@ -102,19 +113,16 @@ RSpec.describe "Subscriptions", type: :system do
         check 'Remove favicon'
         click_button 'Update Subscription'
 
+        expect(page).to have_selector('turbo-frame#modal', text: '')
         expect(page).to have_content('Updated Subscription Title')
-        expect(page).to have_content('http://updated-url.com')
         expect(page).to have_selector('svg[data-default-favicon="true"]')
-
-        click_button "Close"
-        expect(page).to have_selector("turbo-frame#modal", text: "")
       end
     end
 
     context "when the update fails" do
       it "shows an error message when title is blank" do
         find("li[data-subscription='#{subscription.id}']").click
-        find('[data-pane-focus-target="linkEditSubscription"]').click
+        find('[data-pane-focus-target="linkEdit"]').click
 
         expect(page).to have_selector("turbo-frame#modal", wait: 5)
 
@@ -145,16 +153,14 @@ RSpec.describe "Subscriptions", type: :system do
       end
 
       find("li[data-subscription='#{subscription.id}']").click
-      find('[data-pane-focus-target="linkEditSubscription"]').click
+      find('[data-pane-focus-target="linkEdit"]').click
 
       expect(page).to have_selector("turbo-frame#modal", wait: 5)
       check 'Fetch favicon'
       click_button 'Update Subscription'
 
       expect(controller_instance).to have_received(:fetch_favicon_and_update_for).with(subscription)
-
-      click_button "Close"
-      expect(page).to have_selector("turbo-frame#modal", text: "")
+      expect(page).to have_selector('turbo-frame#modal', text: '')
     end
   end
 
@@ -212,6 +218,18 @@ RSpec.describe "Subscriptions", type: :system do
       expect(page).to have_selector("li[data-subscription='#{subscription_a.id}'] span[data-unread-count]", text: "2")
       expect(page).to have_selector("li[data-subscription='#{subscription_b.id}'] span[data-unread-count]", text: "4")
     end
+
+    it "reloads selected subscription articles after refresh all" do
+      visit root_path
+
+      find("li[data-subscription='#{subscription_b.id}']").click
+      expect(page).to have_no_selector('turbo-frame#articles', text: 'New Article 1')
+
+      click_button 'Refresh'
+
+      expect(page).to have_selector('turbo-frame#articles', text: 'New Article 1')
+      expect(page).to have_selector('turbo-frame#articles', text: 'New Article 2')
+    end
   end
 
   describe 'Subscription destroy flow' do
@@ -224,22 +242,21 @@ RSpec.describe "Subscriptions", type: :system do
     context "when destroying from the modal" do
       it "shows a success message and closes the modal" do
         find("li[data-subscription='#{subscription.id}']").click
-        find('[data-pane-focus-target="linkEditSubscription"]').click
+        find('[data-pane-focus-target="linkEdit"]').click
         expect(page).to have_selector("turbo-frame#modal", wait: 5)
 
         accept_confirm "Are you sure?" do
           click_button "Destroy this subscription"
         end
 
-        expect(page).to have_content("Subscription was successfully destroyed.")
-        click_button "Close"
-        expect(page).to have_selector("turbo-frame#modal", text: "")
+        expect(page).to have_selector('turbo-frame#modal', text: '')
+        expect(page).to have_no_selector("li[data-subscription='#{subscription.id}']", wait: 5)
       end
 
       it "shows an error message when destruction fails" do
         allow_any_instance_of(Subscription).to receive(:destroy).and_return(false)
         find("li[data-subscription='#{subscription.id}']").click
-        find('[data-pane-focus-target="linkEditSubscription"]').click
+        find('[data-pane-focus-target="linkEdit"]').click
         expect(page).to have_selector("turbo-frame#modal", wait: 5)
 
         accept_confirm "Are you sure?" do

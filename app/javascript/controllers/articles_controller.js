@@ -1,16 +1,12 @@
 import SelectedLiBaseController from "lib/selected_li_base_controller"
-import { getCsrfToken } from 'lib/schema'
-import { fireConnectArticlesEvent, fireChangeReadStatusEvent } from 'lib/pane_focus_events'
+import { fireChangeReadStatusEvent } from 'lib/pane_focus_events'
+import { groupItemsByUrl, indexItemsByArticleId, requestBulkOperation } from 'lib/articles_bulk_client'
 
 export default class extends SelectedLiBaseController {
   connect() {
     super.connect();
-
-    // NOTE: アイテムリストが取り除かれた時、どちらかといえば disconnect 時に（イベントを bubble-up して）、
-    // pane-controller に取り除かれたことを検知してもらいたいところですが、
-    // disconnect 時この要素は既に無くなっているためここでイベントを作っても、それが伝播しません。
-    // 要素が取り除かれたことを祖先要素で検知するには祖先要素の方で MutationObserver の実装を検討してください。
-    fireConnectArticlesEvent(this.element)
+    this.deleteRequestInFlight = false;
+    this.deleteRequestQueued = false;
   }
 
   //
@@ -19,79 +15,243 @@ export default class extends SelectedLiBaseController {
     this.makeItemRead(li);
   }
 
-  makeItemRead(li) {
+  async makeItemRead(li) {
     if (li.dataset['unread'] == 'true') {
-      const targetElement = li.querySelector('button');
-      const me = this;
-      this.toggleReadStatus(li)
-      .then(() => {
-        me.resetReadStatus(targetElement);
-      });
+      await this.updateItemsUnreadStatus([li], false);
     }
   }
 
   //
   resetReadStatus(targetElement) {
     const li = targetElement.closest('li');
-    if (li.dataset.unread == 'true') {
-       targetElement.textContent = '●'
-    } else {
-      targetElement.textContent = '　'
+    targetElement.textContent = li.dataset.unread == 'true' ? '●' : '　';
+  }
+
+  //
+  async handlerToggleReadStatus(evt) {
+    evt.preventDefault();
+    const targetElement = evt.currentTarget;
+    const li = targetElement.closest('li');
+    await this.toggleReadStatus(li);
+  }
+
+  async toggleReadStatus(li) {
+    const targetUnread = li.dataset.unread !== 'true';
+    await this.updateItemsUnreadStatus([li], targetUnread);
+  }
+
+  async markSelectedItemsRead() {
+    await this.updateSelectedItemsUnreadStatus(false);
+  }
+
+  async markSelectedItemsUnread() {
+    await this.updateSelectedItemsUnreadStatus(true);
+  }
+
+  async toggleSelectedItemsReadStatus() {
+    const selectedItems = Array.from(this.getSelectedItems());
+    if (selectedItems.length === 0) {
+      return;
+    }
+
+    const areAllSelectedItemsUnread = selectedItems.every(li => li.dataset.unread == 'true');
+    if (areAllSelectedItemsUnread) {
+      await this.markSelectedItemsRead();
+      return;
+    }
+
+    await this.markSelectedItemsUnread();
+  }
+
+  async updateSelectedItemsUnreadStatus(targetUnread) {
+    const selectedItems = Array.from(this.getSelectedItems());
+    if (selectedItems.length === 0) {
+      return;
+    }
+
+    await this.updateItemsUnreadStatus(selectedItems, targetUnread);
+  }
+
+  async updateItemsUnreadStatus(items, targetUnread) {
+    const actionableItems = items.filter((li) => li.dataset.unread === (targetUnread ? 'false' : 'true'));
+    if (actionableItems.length === 0) {
+      return;
+    }
+
+    const groups = groupItemsByUrl(actionableItems, 'urlBulkUpdateReadStatus');
+    const subscriptionEventSources = new Map();
+
+    const requests = Array.from(groups.entries()).map(async ([url, groupedItems]) => {
+      if (!url) {
+        console.warn('Bulk read-status URL is missing', { targetUnread, groupedItems });
+        return;
+      }
+
+      const itemById = indexItemsByArticleId(groupedItems);
+      const response = await requestBulkOperation(url, {
+        article_ids: Array.from(itemById.keys()),
+        target_unread: targetUnread,
+      });
+
+      if (!response.ok) {
+        return;
+      }
+
+      const succeededIds = Array.isArray(response.data?.succeeded_ids) ? response.data.succeeded_ids : [];
+      succeededIds.forEach((articleId) => {
+        const li = itemById.get(Number(articleId));
+        if (!li) {
+          return;
+        }
+
+        li.dataset.unread = targetUnread ? 'true' : 'false';
+        const button = li.querySelector('button');
+        if (button) {
+          this.resetReadStatus(button);
+        }
+
+        const subscriptionId = li.dataset.subscription;
+        if (subscriptionId && !subscriptionEventSources.has(subscriptionId)) {
+          subscriptionEventSources.set(subscriptionId, li);
+        }
+      });
+    });
+
+    await Promise.all(requests);
+    this.fireChangeReadStatusBySubscription(subscriptionEventSources);
+  }
+
+  //
+  async deleteItem(evt) {
+    await this.deleteSelectedItems(evt);
+  }
+
+  async deleteSelectedItems(evt) {
+    if (this.deleteRequestInFlight) {
+      // Keep at most one queued delete request while current request is in flight.
+      this.deleteRequestQueued = true;
+      return;
+    }
+
+    this.deleteRequestInFlight = true;
+    try {
+      await this.performDeleteSelectedItems(evt);
+    } finally {
+      this.deleteRequestInFlight = false;
+
+      if (this.deleteRequestQueued) {
+        this.deleteRequestQueued = false;
+        // Continue hold-to-delete behavior without overlapping requests.
+        void this.deleteSelectedItems();
+      }
     }
   }
 
-  //
-  handlerToggleReadStatus(evt) {
-    const targetElement = evt.currentTarget;
-    const li = targetElement.closest('li');
-    const me = this;
-    this.toggleReadStatus(li)
-    .then(() => {
-      me.resetReadStatus(targetElement);
-    });
+  async performDeleteSelectedItems(evt) {
+    const deleteTargets = this.collectDeleteTargets(evt);
+    if (deleteTargets.length === 0) {
+      return;
+    }
+
+    const nextFocusTarget = this.detectPostDeleteFocusTarget(deleteTargets);
+    const deletedItems = await this.bulkDeleteItems(deleteTargets);
+    deletedItems.forEach(li => li.remove());
+
+    if (nextFocusTarget && this.element.contains(nextFocusTarget)) {
+      this.activateItem(nextFocusTarget);
+      this.anchorItem = nextFocusTarget;
+    }
+    else {
+      this.anchorItem = null;
+      this.fireSelectionChanged(null);
+    }
   }
 
-  toggleReadStatus(li) {
-    const me = this;
-    const isUnread = li.dataset.unread == 'true';
-    const url = li.dataset[ isUnread ? 'urlRead' : 'urlUnread' ];
+  collectDeleteTargets(evt) {
+    const selectedItems = Array.from(this.getSelectedItems());
+    if (selectedItems.length > 0) {
+      return selectedItems;
+    }
 
-    return fetch(url, {
-      method: 'PATCH',
-      headers: { 'X-CSRF-Token': getCsrfToken() }
-    })
-    .then(response => {
-      if (response.ok) {
-        li.dataset.unread = isUnread ? 'false' : 'true';
-        fireChangeReadStatusEvent(li);
-      }
-      else {
-        console.error('Failed to update read status', response);
-      }
-    })
-    .catch(error => console.error('Error:', error));
-  }
+    if (!evt || !evt.target) {
+      return [];
+    }
 
-  //
-  deleteItem(evt) {
-    const me = this;
     const li = this.detectLiFrom(evt.target);
-    const url = li.dataset['urlDisable'];
+    return li ? [li] : [];
+  }
 
-    return fetch(url, {
-      method: 'PATCH',
-      headers: { 'X-CSRF-Token': getCsrfToken() }
-    })
-    .then(response => {
-      if (response.ok) {
-        fireChangeReadStatusEvent(li);
-        li.remove();
+  detectPostDeleteFocusTarget(deleteTargets) {
+    const allItems = this.listItemTargets;
+    const deletingSet = new Set(deleteTargets);
+    const deletingIndexes = deleteTargets
+      .map(li => allItems.indexOf(li))
+      .filter(index => index !== -1);
+
+    if (deletingIndexes.length === 0) {
+      return null;
+    }
+
+    const firstDeletingIndex = Math.min(...deletingIndexes);
+    for (let i = firstDeletingIndex; i < allItems.length; ++i) {
+      if (!deletingSet.has(allItems[i])) {
+        return allItems[i];
       }
-      else {
-        console.error('Failed to delete the item', response);
+    }
+
+    for (let i = firstDeletingIndex - 1; 0 <= i; --i) {
+      if (!deletingSet.has(allItems[i])) {
+        return allItems[i];
       }
-    })
-    .catch(error => console.error('Error:', error));
+    }
+
+    return null;
+  }
+
+  async bulkDeleteItems(items) {
+    const groups = groupItemsByUrl(items, 'urlBulkDelete');
+    const deletedItems = [];
+    const subscriptionEventSources = new Map();
+
+    const requests = Array.from(groups.entries()).map(async ([url, groupedItems]) => {
+      if (!url) {
+        console.warn('Bulk delete URL is missing', { groupedItems });
+        return;
+      }
+
+      const itemById = indexItemsByArticleId(groupedItems);
+      const response = await requestBulkOperation(url, {
+        article_ids: Array.from(itemById.keys()),
+      });
+
+      if (!response.ok) {
+        return;
+      }
+
+      const succeededIds = Array.isArray(response.data?.succeeded_ids) ? response.data.succeeded_ids : [];
+      succeededIds.forEach((articleId) => {
+        const li = itemById.get(Number(articleId));
+        if (!li) {
+          return;
+        }
+
+        deletedItems.push(li);
+        const subscriptionId = li.dataset.subscription;
+        if (subscriptionId && !subscriptionEventSources.has(subscriptionId)) {
+          subscriptionEventSources.set(subscriptionId, li);
+        }
+      });
+    });
+
+    await Promise.all(requests);
+    this.fireChangeReadStatusBySubscription(subscriptionEventSources);
+    return deletedItems;
+  }
+
+  fireChangeReadStatusBySubscription(subscriptionEventSources) {
+    subscriptionEventSources.forEach((li) => {
+      fireChangeReadStatusEvent(li);
+    });
   }
 
   //

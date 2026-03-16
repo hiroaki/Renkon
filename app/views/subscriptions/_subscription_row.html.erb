@@ -1,0 +1,17 @@
+<div class="relative w-full">
+  <div class="flex justify-between">
+    <span class="left text-nowrap overflow-hidden">
+      <% if subscription.favicon.attached? %>
+        <%= image_tag subscription.favicon, width: 16, height: 16, class: 'inline' %>
+        <%= subscription.title %>
+      <% else %>
+        <%= default_favicon %>
+        <%= subscription.title %>
+      <% end %>
+    </span>
+    <% unread_count = subscription.attributes.fetch('count_articles').to_i %>
+    <span data-refresh-badge data-unread-count="<%= unread_count %>" class="right ml-2 px-2 py-1 font-semibold leading-none text-green-700 bg-green-100 rounded-full dark:bg-green-700 dark:text-green-100">
+      <%= unread_count %>
+    </span>
+  </div>
+</div>

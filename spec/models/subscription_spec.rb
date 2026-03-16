@@ -11,11 +11,16 @@ RSpec.describe Subscription, type: :model do
     it 'has many articles with dependent delete all' do
       expect(subject).to have_many(:articles).dependent(:delete_all)
     end
+
+    it 'has many feed_caches with dependent delete all' do
+      expect(subject).to have_many(:feed_caches).dependent(:delete_all)
+    end
   end
 
   # Copilot
   describe 'associations' do
     it { should have_many(:articles).dependent(:delete_all) }
+    it { should have_many(:feed_caches).dependent(:delete_all) }
     it { should have_one_attached(:favicon) }
   end
 
@@ -185,6 +190,23 @@ RSpec.describe Subscription, type: :model do
       it 'returns false' do
         expect(subscription.created?).to be false
       end
+    end
+  end
+
+  describe 'position ordering' do
+    it 'assigns the next position on create when position is not given' do
+      FactoryBot.create(:subscription, position: 1)
+      created = described_class.create!(title: 'No Position', src: 'https://example.com/no-position')
+
+      expect(created.position).to eq(2)
+    end
+
+    it 'returns records sorted by position and id' do
+      first = FactoryBot.create(:subscription, position: 2)
+      second = FactoryBot.create(:subscription, position: 1)
+      third = FactoryBot.create(:subscription, position: 2)
+
+      expect(described_class.ordered.pluck(:id)).to eq([second.id, first.id, third.id])
     end
   end
 end

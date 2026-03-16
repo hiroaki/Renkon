@@ -2,13 +2,15 @@
   data-controller="pane-focus"
   data-action="
     changeReadStatus->pane-focus#onChangeReadStatus
-    connectArticles->pane-focus#onConnectArticles
     emptyTrash->pane-focus#onEmptyTrash
+    connectedSelectedLiBaseController->pane-focus#onConnectedSelectedLiBaseController
+    renkon:status-error@window->pane-focus#onStatusError
+    renkon:subscriptions-refreshed@window->pane-focus#onSubscriptionsRefreshed
   "
-  data-pane-focus-adapt-subscriptions-controller-value="subscriptions"
-  data-pane-focus-adapt-articles-controller-value="articles"
+  data-pane-focus-subscriptions-outlet='[data-controller~="subscriptions"]'
+  data-pane-focus-articles-outlet='[data-controller~="articles"]'
 >
-  <nav class="flex-shrink-0 h-12 bg-gray-200 px-1 flex flex-row place-items-center"
+  <nav class="shrink-0 h-12 bg-gray-200 px-1 flex flex-row place-items-center"
     data-pane-focus-target="navigationPane",
   >
     <%= image_tag('renkon.png', size: '46x46') %>
@@ -20,35 +22,98 @@
     </div>
 
     <div class="mx-2">
-      <button class="px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-blue-600 border border-transparent rounded-md active:bg-blue-600 hover:bg-blue-700 focus:outline-none focus:shadow-outline-blue"
+      <button class="px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-blue-600 border border-transparent rounded-md active:bg-blue-600 hover:bg-blue-700 focus:outline-hidden focus:shadow-outline-blue"
         data-controller="refresh"
         data-action="click->refresh#all"
         data-refresh-concurrency-value="2"
+        title="Refresh"
       >
-        Refresh
+        <%= icon_refresh(class: 'size-5') %>
+      </button>
+    </div>
+
+    <div class="mx-2 h-4 border-l border-gray-300"></div>
+
+    <div class="mx-2">
+      <%=
+        link_to(new_subscription_path,
+          'data-turbo-frame' => 'modal',
+          'data-pane-focus-target' => 'linkNewSubscription',
+          'data-base-href' => new_subscription_path,
+          'class' => 'px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-green-600 border border-transparent rounded-md active:bg-green-600 hover:bg-green-700 focus:outline-hidden focus:shadow-outline-green inline-flex items-center hover:text-white',
+          'title' => 'New subscription',
+        ) do
+      %>
+        <%= icon_new_subscription(class: 'size-5') %>
+      <% end %>
+    </div>
+
+    <div class="mx-2">
+      <%=
+        link_to(new_group_path,
+          'data-turbo-frame' => 'modal',
+          'data-pane-focus-target' => 'linkNewGroup',
+          'data-base-href' => new_group_path,
+          'class' => 'px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-green-600 border border-transparent rounded-md active:bg-green-600 hover:bg-green-700 focus:outline-hidden focus:shadow-outline-green inline-flex items-center hover:text-white',
+          'title' => 'New group',
+        ) do
+      %>
+        <%= icon_new_group(class: 'size-5') %>
+      <% end %>
+    </div>
+
+    <div class="mx-2">
+      <%=
+        link_to('#',
+          'data-turbo-frame' => 'modal',
+          'data-pane-focus-target' => 'linkEdit',
+          'class' => 'px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-green-600 border border-transparent rounded-md active:bg-green-600 hover:bg-green-700 focus:outline-hidden focus:shadow-outline-green inline-flex items-center hover:text-white data-[disabled=true]:bg-gray-400',
+          'title' => 'Edit selected item'
+        ) do
+      %>
+        <%= icon_edit_subscription(class: 'size-5') %>
+      <% end %>
+    </div>
+
+    <div class="mx-2 h-4 border-l border-gray-300"></div>
+
+    <div class="mx-2">
+      <button class="px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-indigo-600 border border-transparent rounded-md active:bg-indigo-600 hover:bg-indigo-700 focus:outline-hidden focus:shadow-outline-indigo disabled:bg-gray-400 disabled:cursor-not-allowed"
+        data-pane-focus-target="buttonMarkSelectedRead"
+        data-action="click->pane-focus#markSelectedArticlesRead"
+        title="Mark selected articles read (r toggles selected items)"
+        disabled
+        title="Mark Read"
+      >
+        <%= icon_mark_read(class: 'size-5') %>
       </button>
     </div>
 
     <div class="mx-2">
-      <%=
-        link_to('New subscription', new_subscription_path,
-          'data-turbo-frame' => 'modal',
-          'class' => 'px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-green-600 border border-transparent rounded-md active:bg-green-600 hover:bg-green-700 focus:outline-none focus:shadow-outline-green inline-block hover:text-white'
-        )
-      %>
-    </div>
-    <div class="mx-2">
-      <%=
-        link_to('Edit subscription', '#',
-          'data-turbo-frame' => 'modal',
-          'data-pane-focus-target' => 'linkEditSubscription',
-          'class' => 'px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-green-600 border border-transparent rounded-md active:bg-green-600 hover:bg-green-700 focus:outline-none focus:shadow-outline-green inline-block hover:text-white data-[disabled=true]:bg-gray-400',
-        )
-      %>
+      <button class="px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-indigo-600 border border-transparent rounded-md active:bg-indigo-600 hover:bg-indigo-700 focus:outline-hidden focus:shadow-outline-indigo disabled:bg-gray-400 disabled:cursor-not-allowed"
+        data-pane-focus-target="buttonMarkSelectedUnread"
+        data-action="click->pane-focus#markSelectedArticlesUnread"
+        title="Mark selected articles unread (u)"
+        disabled
+        title="Mark Unread"
+      >
+        <%= icon_mark_unread(class: 'size-5') %>
+      </button>
     </div>
 
     <div class="mx-2">
-      <button class="px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-orange-300 border border-transparent rounded-md active:bg-orange-300 hover:bg-orange-400 focus:outline-none focus:shadow-outline-orange"
+      <button class="px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-indigo-600 border border-transparent rounded-md active:bg-indigo-600 hover:bg-indigo-700 focus:outline-hidden focus:shadow-outline-indigo disabled:bg-gray-400 disabled:cursor-not-allowed"
+        data-pane-focus-target="buttonMoveSelectedToTrash"
+        data-action="click->pane-focus#moveSelectedArticlesToTrash"
+        title="Move selected articles to trash (Delete)"
+        disabled
+      >
+        <%= icon_trash(class: 'size-5') %>
+      </button>
+    </div>
+
+    <div class="mx-2 ml-auto">
+      <button class="px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-orange-300 border border-transparent rounded-md active:bg-orange-300 hover:bg-orange-400 focus:outline-hidden focus:shadow-outline-orange"
         data-controller="trash"
         data-action="
           click->trash#confirmEmptyTrash
@@ -56,15 +121,18 @@
         "
         data-url-empty-trash="<%= trash_path %>"
         data-text-for-confirm-empty-trash="Are you sure you want to empty the trash?"
+        title="Empty Trash"
       >
-        Empty Trash
+        <%= icon_empty_trash(class: 'size-5') %>
       </button>
     </div>
   </nav>
 
   <main class="flex flex-row flex-1 overflow-hidden">
+    <div id="subscription-create-flow-hook"></div>
+
     <!-- -->
-    <div id="subscriptions-pane" tabindex="-1" class="flex flex-row flex-shrink-0 min-w-8 focus:outline-none" style="width: 8rem;"
+    <div id="subscriptions-pane" tabindex="-1" class="flex flex-row shrink-0 min-w-8 focus:outline-hidden" style="width: 8rem;"
       data-controller="frame"
       data-frame-target="adjustable"
       data-frame-storage-key-value="subscriptions-width"
@@ -76,7 +144,7 @@
       "
     >
       <div class="flex-1 bg-blue-100 overflow-y-auto overflow-x-hidden pt-2">
-        <%= turbo_frame_tag('subscriptions', src: subscriptions_path(short: true)) %>
+        <%= turbo_frame_tag('subscriptions', src: list_subscriptions_path) %>
       </div>
       <div class="w-0.5 bg-gray-200 cursor-col-resize" draggable="true"
         data-action="
@@ -89,7 +157,7 @@
     </div>
 
     <!-- -->
-    <div id="articles-pane" tabindex="-1" class="flex flex-row flex-shrink-0 min-w-8 focus:outline-none" style="width: 8rem;"
+    <div id="articles-pane" tabindex="-1" class="flex flex-row shrink-0 min-w-8 focus:outline-hidden" style="width: 8rem;"
       data-controller="frame"
       data-frame-target="adjustable"
       data-frame-storage-key-value="articles-width"
@@ -97,6 +165,7 @@
       data-action="
         keydown.left->pane-focus#backToSubscriptionsPane
         keydown.space->pane-focus#forwardContentsOrNextArticle:prevent
+        changeSelectedLi->pane-focus#onChangeSelectedArticleListItems
       "
     >
       <div class="flex-1 bg-white-100 overflow-y-auto overflow-x-hidden pt-2">
@@ -113,7 +182,7 @@
     </div>
 
     <!-- -->
-    <div id="contents-pane" tabindex="-1" class="flex-1 overflow-y-auto min-w-8 focus:outline-none"
+    <div id="contents-pane" tabindex="-1" class="flex-1 overflow-y-auto min-w-8 focus:outline-hidden"
       data-pane-focus-target="contentsPane"
     >
       <div class="bg-white p-2">
@@ -124,7 +193,24 @@
     </div>
   </main>
 
-  <footer class="flex-shrink-0 h-4 bg-gray-200 text-xs px-1">
-    <p>Status</p>
+  <footer class="shrink-0 h-6 bg-gray-200 text-xs px-2 flex items-center">
+    <p
+      class="hidden items-center gap-1 text-red-700"
+      data-pane-focus-target="statusArea"
+      role="status"
+      aria-live="polite"
+    >
+      <span aria-hidden="true">!</span>
+      <span data-pane-focus-target="statusText"></span>
+      <button
+        type="button"
+        class="ml-2 text-red-700 hover:text-red-900"
+        data-action="click->pane-focus#clearStatusMessage"
+        aria-label="Clear status message"
+      >
+        x
+      </button>
+    </p>
+    <p data-pane-focus-target="statusIdle">Status</p>
   </footer>
 </div>

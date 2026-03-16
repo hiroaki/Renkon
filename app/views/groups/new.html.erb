@@ -1,0 +1,17 @@
+<% form = capture { render 'form', group: @group, show_parent_selector: false, insert_context_type: @insert_context_type, insert_context_id: @insert_context_id } %>
+
+<% unless turbo_frame_request? %>
+  <h2>New group</h2>
+
+  <%= form %>
+<% else %>
+  <%= render('shared/modal_frame', heading: 'New group') do %>
+    <%= form %>
+  <% end %>
+<% end %>
+
+<hr>
+
+<div class="contaner">
+  <%= link_to 'Back to subscriptions', subscriptions_path %>
+</div>

@@ -1,64 +1,95 @@
 import { Controller } from "@hotwired/stimulus"
+import { fireConnectedSelectedLiBaseController, fireChangeSelectedLiEvent } from 'lib/pane_focus_events'
 
 export default class extends Controller {
   static targets = ['listItem'];
+  static values = {
+    multiSelect: { type: Boolean, default: false },
+  }
 
   connect() {
     // INTERFACE - adapted by other controllers via this element
     this.element[this.identifier] = this; // 'subscriptions' or 'articles' which are subclasses
-  }
-
-  fireChangeSelectedLiEvent(elem, newSelectedLi) {
-    const event = new CustomEvent('changeSelectedLi', {
-      detail: { selected: newSelectedLi },
-      bubbles: true,
-    });
-
-    elem.dispatchEvent(event);
+    fireConnectedSelectedLiBaseController(this);
+    console.log(this.listItemTargets.length);
   }
 
   // リストアイテムをクリックした時。そのアイテムを「選択状態」にします。
   handlerEnterItem(evt) {
-    const li = this.detectLiFrom(evt.target);
-    this.activateItem(li);
-  }
+    const withShiftKey = evt.shiftKey; // boolean
+    const withMetaKey = evt.metaKey; // "command" key on macOS, boolean
 
-  // イベントを発生させた要素を含むリストの、イベント要素のひとつ前の li を「選択状態」にします。
-  // ここで想定しているのは、ある li がフォーカスされている状態から、カーソルキーの上を押下したとき。
-  selectPrevItem(evt) {
     const li = this.detectLiFrom(evt.target);
-    this.selectPrevLi(li);
-  }
-
-  selectPrevLi(li) {
-    let prev_item = null;
-    const len = this.listItemTargets.length;
-    for (let i = 0; i < len; ++i) {
-      if (this.listItemTargets[i] == li) {
-        prev_item = i - 1;
-        if (prev_item != null && 0 <= prev_item) {
-          this.activateItem(this.listItemTargets[prev_item]);
-        }
-        break;
-      }
+    if (!li) {
+      return;
     }
+
+    if (!this.multiSelectValue) {
+      this.activateItem(li);
+      this.anchorItem = li;
+      return;
+    }
+
+    if (withShiftKey) {
+      this.selectItemRange(li);
+      this.moveFocusToItem(li);
+      this.fireSelectionChanged(li);
+      return;
+    }
+
+    if (withMetaKey) {
+      this.toggleItemSelection(li);
+      this.moveFocusToItem(li);
+      this.anchorItem = li;
+      this.fireSelectionChanged(li);
+      return;
+    }
+
+    this.activateItem(li);
+    this.anchorItem = li;
   }
 
-  // イベントを発生させた要素を含むリストの、イベント要素のひとつ次の li を「選択状態」にします。
-  // ここで想定しているのは、ある li がフォーカスされている状態から、カーソルキーの下を押下したとき。
+  // イベントを発生させた要素を含むリストの、イベント要素のひとつ前の li を選択します。
+  // Shift 押下時は範囲選択を拡張・縮小します。
+  selectPrevItem(evt) {
+    this.handleArrowKeySelection(evt, -1);
+  }
+
+  // イベントを発生させた要素を含むリストの、イベント要素のひとつ次の li を選択します。
+  // Shift 押下時は範囲選択を拡張・縮小します。
   selectNextItem(evt) {
-    const li = this.detectLiFrom(evt.target)
-    this.selectNextLi(li);
+    this.handleArrowKeySelection(evt, 1);
   }
 
-  selectNextLi(li) {
-    let next_item = null;
+  handleArrowKeySelection(evt, direction) {
+    const li = this.detectLiFrom(evt.target);
+    const newLi = this.selectAdjacentLi(li, direction);
+    if (!newLi) {
+      return;
+    }
+
+    if (this.multiSelectValue && evt.shiftKey) {
+      if (!this.anchorItem) {
+        this.anchorItem = li || this.getSelectedItem() || newLi;
+      }
+
+      this.selectItemRange(newLi);
+      this.moveFocusToItem(newLi);
+      this.fireSelectionChanged(newLi);
+      return;
+    }
+
+    this.activateItem(newLi);
+    this.anchorItem = newLi;
+  }
+
+  selectAdjacentLi(li, direction) {
     const len = this.listItemTargets.length;
     for (let i = 0; i < len; ++i) {
-      if (this.listItemTargets[i] == li) {
-        next_item = i + 1;
-        if (next_item != null && next_item < len) {
-          this.activateItem(this.listItemTargets[next_item]);
+      if (this.listItemTargets[i] === li) {
+        const adjacentIndex = i + direction;
+        if (adjacentIndex >= 0 && adjacentIndex < len) {
+          return this.listItemTargets[adjacentIndex];
         }
         break;
       }
@@ -66,9 +97,9 @@ export default class extends Controller {
   }
 
   openUrl(evt) {
-    const li = this.detectLiFrom(evt.target)
+    const li = this.detectLiFrom(evt.target);
     if (li) {
-      window.open(li.dataset.urlSource, '_blank', 'noopener noreferrer')
+      window.open(li.dataset.urlSource, '_blank', 'noopener noreferrer');
     } else {
       // このブロックへ来るのは、たとえばイベントをリッスンしている <ul> の中で発生したイベントであるも、
       // <li> の上ではない部分（いわゆる余白部分）で発生したとき。
@@ -78,7 +109,7 @@ export default class extends Controller {
       // 見た目の選択状態との兼ね合いに注意してください。
       // 現状は、余白をクリックしたあと、ある <li> が選択状態であれば、
       // キー Enter イベントは #open を実行し、またダブルクリックは実行せずにこのブロックへ来るようにしています。
-      console.warn('<li> was undetected from the event target')
+      console.warn('<li> was undetected from the event target');
     }
   }
 
@@ -92,35 +123,85 @@ export default class extends Controller {
   activateItem(li) {
     this.moveFocusToItem(li); // Important for being the base point for next and previous
 
-    const span = li.querySelector('span[data-link-to-url]');
-    const url = span.dataset['linkToUrl'];
-    const frame = document.querySelector(`turbo-frame[id=${span.dataset['linkToFrame']}]`);
+    const newSelectedLi = this.selectSingleItem(li);
 
-    if (frame) {
-      frame.src = url;
-    } else {
-      Turbo.visit(url);
+    if (!this.multiSelectValue) {
+      // Ignore links from nested descendant <li> items (e.g. grouped subscriptions).
+      const span = Array.from(li.querySelectorAll('span[data-link-to-url]'))
+        .find((candidate) => candidate.closest('li') === li);
+      if (span) {
+        const url = span.dataset['linkToUrl'];
+        const frame = document.querySelector(`turbo-frame[id=${span.dataset['linkToFrame']}]`);
+        if (frame) {
+          frame.src = url;
+        } else {
+          Turbo.visit(url);
+        }
+      }
     }
 
-    this.fireChangeSelectedLiEvent(this.element, this.#updateListSelectionStatus(span));
+    this.fireSelectionChanged(newSelectedLi);
   }
 
-  #updateListSelectionStatus(currentTag) {
-    let newSelectedLi = null;
-
-    this.listItemTargets.forEach(li => {
-      delete li.dataset.selected;
-      if (li.contains(currentTag)) {
-        li.dataset.selected = 'true';
-        newSelectedLi = li;
-      }
+  selectSingleItem(li) {
+    this.listItemTargets.forEach(currentLi => {
+      delete currentLi.dataset.selected;
     });
 
-    return newSelectedLi;
+    li.dataset.selected = 'true';
+    return li;
   }
 
+  toggleItemSelection(li) {
+    if (li.dataset.selected === 'true') {
+      delete li.dataset.selected;
+    }
+    else {
+      li.dataset.selected = 'true';
+    }
+  }
+
+  selectItemRange(li) {
+    const items = this.listItemTargets;
+    if (!items || items.length === 0) {
+      return;
+    }
+
+    const anchor = this.anchorItem || this.getSelectedItem() || li;
+    const anchorIndex = items.indexOf(anchor);
+    const currentIndex = items.indexOf(li);
+    if (anchorIndex === -1 || currentIndex === -1) {
+      this.selectSingleItem(li);
+      return;
+    }
+
+    const from = Math.min(anchorIndex, currentIndex);
+    const to = Math.max(anchorIndex, currentIndex);
+
+    items.forEach((currentLi, index) => {
+      if (from <= index && index <= to) {
+        currentLi.dataset.selected = 'true';
+      }
+      else {
+        delete currentLi.dataset.selected;
+      }
+    });
+  }
+
+  fireSelectionChanged(focusedItem = null) {
+    const selectedItems = Array.from(this.getSelectedItems());
+    const selected = selectedItems.length > 0 ? selectedItems[0] : null;
+
+    fireChangeSelectedLiEvent(this.element, {
+      selected,
+      selectedItems,
+      focusedItem,
+    });
+  }
+
+
   detectLiFrom(elem) {
-    return elem.closest('li')
+    return elem.closest('li');
   }
 
   activateFirstItem() {
@@ -128,6 +209,16 @@ export default class extends Controller {
     if (li) {
       this.activateItem(li);
     }
+  }
+
+  activateItemBySelector(selector) {
+    const li = this.element.querySelector(selector)
+    if (!li) {
+      return null
+    }
+
+    this.activateItem(li)
+    return li
   }
 
   getSelectedItem() {

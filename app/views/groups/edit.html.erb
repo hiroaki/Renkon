@@ -1,0 +1,34 @@
+<%
+  form = capture { render 'form', group: @group, show_parent_selector: false }
+  button_to_destroy = capture do
+    button_to('Destroy this group', @group,
+      method: :delete,
+      class: 'button-danger',
+      data: { 'turbo-confirm': 'Delete this group and all nested groups/subscriptions?' },
+    )
+  end
+%>
+
+<% unless turbo_frame_request? %>
+  <h2>Editing group</h2>
+
+  <%= form %>
+
+  <div class="container">
+    <%= button_to_destroy %>
+  </div>
+<% else %>
+  <%= render('shared/modal_frame', heading: 'Editing group') do %>
+    <%= form %>
+
+    <div class="container">
+      <%= button_to_destroy %>
+    </div>
+  <% end %>
+<% end %>
+
+<hr>
+
+<div class="container">
+  <%= link_to 'Back to subscriptions', subscriptions_path %>
+</div>

@@ -1,0 +1,40 @@
+<div class="container">
+  <p>
+    <strong>Title:</strong>
+    <%= subscription.title %>
+  </p>
+  <p>
+    <strong>Src:</strong>
+    <%= subscription.src %>
+  </p>
+
+  <p>
+    <strong>Description:</strong>
+    <%= subscription.description %>
+  </p>
+
+  <p>
+    <strong>Last build date:</strong>
+    <%= subscription.last_build_date %>
+  </p>
+
+  <p>
+    <strong>Unread:</strong>
+    <%= subscription.respond_to?(:count_articles) ? subscription.count_articles : subscription.articles.count %>
+    <span style="color: green"><%= notice %></span>
+  </p>
+
+  <p>
+    <strong>URL:</strong>
+    <%= subscription.url %>
+  </p>
+
+  <p>
+    <strong>Favicon:</strong>
+      <% if subscription.favicon.attached? %>
+        <%= image_tag subscription.favicon, width: 16, height: 16, class: 'inline' %>
+      <% else %>
+        <%= default_favicon %>
+      <% end %>
+    </p>
+</div>

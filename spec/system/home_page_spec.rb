@@ -13,7 +13,17 @@ RSpec.describe "Main Page", type: :system do
 
     it "has a 'Refresh' button" do
       visit root_path
-      expect(page).to have_selector('button', text: 'Refresh')
+      expect(page).to have_selector('button[title="Refresh"]')
+    end
+
+    it "has a 'Mark Read' button" do
+      visit root_path
+      expect(page).to have_selector('[data-pane-focus-target="buttonMarkSelectedRead"][title="Mark selected articles read (r toggles selected items)"]')
+    end
+
+    it "has a 'Mark Unread' button" do
+      visit root_path
+      expect(page).to have_selector('[data-pane-focus-target="buttonMarkSelectedUnread"][title="Mark selected articles unread (u)"]')
     end
 
     it "has a 'New subscription' link" do
@@ -21,14 +31,24 @@ RSpec.describe "Main Page", type: :system do
       expect(page).to have_link('New subscription', href: new_subscription_path)
     end
 
-    it "has an 'Edit subscription' link" do
+    it "has an 'Edit selected item' link" do
       visit root_path
-      expect(page).to have_link('Edit subscription', href: '#')
+      expect(page).to have_selector('a[data-pane-focus-target="linkEdit"][title="Edit selected item"][href="#"]')
+    end
+
+    it "has a 'New group' link" do
+      visit root_path
+      expect(page).to have_link('New group', href: new_group_path)
+    end
+
+    it "does not have separate 'Edit group' link" do
+      visit root_path
+      expect(page).not_to have_selector('a[data-pane-focus-target="linkEditGroup"]')
     end
 
     it "has an 'Empty Trash' button" do
       visit root_path
-      expect(page).to have_selector('button', text: 'Empty Trash')
+      expect(page).to have_selector('button[title="Empty Trash"]')
     end
   end
 
@@ -36,7 +56,7 @@ RSpec.describe "Main Page", type: :system do
     context "when there are no Subscription records" do
       it "displays only 'Trash'" do
         visit root_path
-        within('main > div:first-of-type') do
+        within('main > div#subscriptions-pane') do
           expect(page).to have_content('Trash')
           expect(page).not_to have_selector('li.subscription')
         end
@@ -51,7 +71,7 @@ RSpec.describe "Main Page", type: :system do
 
       it "displays 'Trash' and the list of Subscriptions" do
         visit root_path
-        within('main > div:first-of-type') do
+        within('main > div#subscriptions-pane') do
           expect(page).to have_content('Trash')
           @subscriptions.each do |subscription|
             expect(page).to have_content(subscription.title)
@@ -65,7 +85,7 @@ RSpec.describe "Main Page", type: :system do
         # ウィンドウの高さを設定
         page.driver.resize(1280, 300)
 
-        within('main > div:first-of-type') do
+        within('main > div#subscriptions-pane') do
           parent_div_selector = '#subscriptions-pane > div:first-child'
           last_li_selector = '#subscriptions-pane > div ul li:last-child'
 
@@ -129,10 +149,7 @@ RSpec.describe "Main Page", type: :system do
         visit root_path
 
         # Click the subscription item (using turbo-frame tag inside an li element)
-        within('main > div#subscriptions-pane') do
-          li = find('li', text: 'Sample Subscription')
-          li.find('turbo-frame').click
-        end
+        click_list_item_in_subscriptions_pane('Sample Subscription')
 
         within('main > div#articles-pane') do
           expect(page).to have_selector('li[data-articles-target="listItem"]', count: 20)
@@ -143,10 +160,7 @@ RSpec.describe "Main Page", type: :system do
         visit root_path
 
         # Click the subscription item (using turbo-frame tag inside an li element)
-        within('main > div#subscriptions-pane') do
-          li = find('li', text: 'Sample Subscription')
-          li.find('turbo-frame').click
-        end
+        click_list_item_in_subscriptions_pane('Sample Subscription')
 
         # Set window height
         page.driver.resize(1280, 300)
@@ -206,16 +220,10 @@ RSpec.describe "Main Page", type: :system do
         visit root_path
 
         # Click the subscription item (using turbo-frame tag inside an li element)
-        within('main > div#subscriptions-pane') do
-          li = find('li', text: 'Sample Subscription')
-          li.find('turbo-frame').click
-        end
+        click_list_item_in_subscriptions_pane('Sample Subscription')
 
         # Click the article item to display its content
-        within('main > div#articles-pane') do
-          li = find('li', text: 'Sample Article')
-          li.find('p:first-of-type').click
-        end
+        click_list_item_in_articles_pane('Sample Article')
 
         within('turbo-frame#contents') do
           expect(page).to have_content("Sample Article")
@@ -227,16 +235,10 @@ RSpec.describe "Main Page", type: :system do
         visit root_path
 
         # Click the subscription item (using turbo-frame tag inside an li element)
-        within('main > div#subscriptions-pane') do
-          li = find('li', text: 'Sample Subscription')
-          li.find('turbo-frame').click
-        end
+        click_list_item_in_subscriptions_pane('Sample Subscription')
 
         # Click the article item to display its content
-        within('main > div#articles-pane') do
-          li = find('li', text: 'Sample Article')
-          li.find('p:first-of-type').click
-        end
+        click_list_item_in_articles_pane('Sample Article')
 
         # ウィンドウの高さを設定
         page.driver.resize(1280, 300)

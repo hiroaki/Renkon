@@ -39,6 +39,20 @@ RSpec.describe FeedUtils do
       result = FeedUtils.fetch(url)
       expect(result).to eq(xml)
     end
+
+    it 'raises HttpError when the upstream response is not successful' do
+      stub_request(:get, url).to_return(status: 503, body: 'unavailable')
+
+      expect { FeedUtils.fetch(url) }
+        .to raise_error(FeedUtils::HttpError, 'Feed source is temporarily unavailable (HTTP 503). Try again later.')
+    end
+
+    it 'raises InvalidFeedError when the response body is empty' do
+      stub_request(:get, url).to_return(status: 200, body: '')
+
+      expect { FeedUtils.fetch(url) }
+        .to raise_error(FeedUtils::InvalidFeedError, 'Feed source returned an empty response. Check the subscription URL or settings.')
+    end
   end
 
   describe '.parse' do
@@ -46,6 +60,11 @@ RSpec.describe FeedUtils do
       parsed_feed = FeedUtils.parse(xml)
       expect(parsed_feed).to be_a(Feedjira::Parser::RSS)
       expect(parsed_feed.title).to eq('Sample Feed')
+    end
+
+    it 'raises InvalidFeedError when the payload is not a feed' do
+      expect { FeedUtils.parse('<html><body>not a feed</body></html>') }
+        .to raise_error(FeedUtils::InvalidFeedError, 'Source did not return a valid RSS or Atom feed. Check the subscription URL or settings.')
     end
   end
 end

@@ -1,0 +1,17 @@
+<%= render('shared/modal_frame',
+  heading: heading,
+  message: message,
+  close_label: 'Close'
+) do %>
+  <%= turbo_frame_tag dom_id(subscription) do %>
+    <%= render partial: 'subscriptions/subscription_detail', locals: { subscription: subscription } %>
+  <% end %>
+
+  <% if run_create_flow %>
+    <div
+      data-controller="subscription-create-success"
+      data-subscription-create-success-subscription-id-value="<%= subscription.id %>"
+      data-subscription-create-success-refresh-url-value="<%= refresh_feed_row_subscription_path(subscription) %>"
+    ></div>
+  <% end %>
+<% end %>

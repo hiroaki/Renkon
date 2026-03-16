@@ -1,9 +1,7 @@
 source "https://rubygems.org"
 
-ruby "3.3.6"
-
-# Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
-gem "rails", "~> 8.0.0"
+ruby "3.4.9"
+gem "rails", "~> 8.1", ">= 8.1.2"
 
 # The modern asset pipeline for Rails [https://github.com/rails/propshaft]
 gem "propshaft"
@@ -69,9 +67,9 @@ end
 
 gem 'feedjira'
 gem 'http'
-gem 'tailwindcss-rails', '~> 2.7'
+gem 'tailwindcss-rails', '~> 4.4'
 gem 'image_processing', '>= 1.2'
 
 # The version is specified to avoid "Unresolved or ambiguous specs" warnings.
-gem "stringio", ">= 3.1.5"
+gem "stringio", "~> 3.1.5"
 

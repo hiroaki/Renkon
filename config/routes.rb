@@ -14,7 +14,17 @@ Rails.application.routes.draw do
   delete 'trash', to: 'articles#empty_trash'
 
   resources :subscriptions do
+    collection do
+      get :list
+      patch :reorder_tree
+    end
+
     resources :articles do
+      collection do
+        patch :bulk_update_read_status
+        patch :bulk_delete
+      end
+
       member do
         patch :disable
         patch :enable
@@ -24,7 +34,11 @@ Rails.application.routes.draw do
     end
 
     member do
-      patch :fetch
+      get :row
+      patch :refresh_feed
+      patch :refresh_feed_row
     end
   end
+
+  resources :groups, only: %i[ new create edit update destroy ]
 end
