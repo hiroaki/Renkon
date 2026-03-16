@@ -13,17 +13,17 @@ RSpec.describe "Main Page", type: :system do
 
     it "has a 'Refresh' button" do
       visit root_path
-      expect(page).to have_selector('button', text: 'Refresh')
+      expect(page).to have_selector('button[title="Refresh"]')
     end
 
     it "has a 'Mark Read' button" do
       visit root_path
-      expect(page).to have_selector('button', text: 'Mark Read')
+      expect(page).to have_selector('[data-pane-focus-target="buttonMarkSelectedRead"][title="Mark selected articles read (r toggles selected items)"]')
     end
 
     it "has a 'Mark Unread' button" do
       visit root_path
-      expect(page).to have_selector('button', text: 'Mark Unread')
+      expect(page).to have_selector('[data-pane-focus-target="buttonMarkSelectedUnread"][title="Mark selected articles unread (u)"]')
     end
 
     it "has a 'New subscription' link" do
@@ -31,9 +31,9 @@ RSpec.describe "Main Page", type: :system do
       expect(page).to have_link('New subscription', href: new_subscription_path)
     end
 
-    it "has an 'Edit subscription' link" do
+    it "has an 'Edit selected item' link" do
       visit root_path
-      expect(page).to have_link('Edit subscription', href: '#')
+      expect(page).to have_selector('a[data-pane-focus-target="linkEdit"][title="Edit selected item"][href="#"]')
     end
 
     it "has a 'New group' link" do
@@ -41,14 +41,14 @@ RSpec.describe "Main Page", type: :system do
       expect(page).to have_link('New group', href: new_group_path)
     end
 
-    it "has an 'Edit group' link" do
+    it "does not have separate 'Edit group' link" do
       visit root_path
-      expect(page).to have_link('Edit group', href: '#')
+      expect(page).not_to have_selector('a[data-pane-focus-target="linkEditGroup"]')
     end
 
     it "has an 'Empty Trash' button" do
       visit root_path
-      expect(page).to have_selector('button', text: 'Empty Trash')
+      expect(page).to have_selector('button[title="Empty Trash"]')
     end
   end
 

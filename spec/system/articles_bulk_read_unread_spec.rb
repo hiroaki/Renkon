@@ -17,8 +17,8 @@ RSpec.describe 'Bulk read and unread actions', type: :system do
     expect(page).to have_selector("li[data-article-id='#{article2.id}']")
     expect(page).to have_selector("li[data-subscription='#{subscription.id}'] span[data-unread-count]", text: '2')
 
-    mark_read_button = find('button', text: 'Mark Read')
-    mark_unread_button = find('button', text: 'Mark Unread')
+    mark_read_button = find('[data-pane-focus-target="buttonMarkSelectedRead"]')
+    mark_unread_button = find('[data-pane-focus-target="buttonMarkSelectedUnread"]')
     expect(mark_read_button.disabled?).to be(true)
     expect(mark_unread_button.disabled?).to be(true)
 
@@ -44,8 +44,8 @@ RSpec.describe 'Bulk read and unread actions', type: :system do
       })()
     JS
 
-    mark_read_button = find('button', text: 'Mark Read')
-    mark_unread_button = find('button', text: 'Mark Unread')
+    mark_read_button = find('[data-pane-focus-target="buttonMarkSelectedRead"]')
+    mark_unread_button = find('[data-pane-focus-target="buttonMarkSelectedUnread"]')
     expect(mark_read_button.disabled?).to be(false)
     expect(mark_unread_button.disabled?).to be(false)
 

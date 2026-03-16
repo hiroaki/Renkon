@@ -6,7 +6,7 @@ import { clearPaneFocusStatusMessage, showPaneFocusStatusMessage } from 'lib/pan
 
 export default class extends Controller {
   static outlets = ['subscriptions', 'articles'];
-  static targets = ['navigationPane', 'subscriptionsPane', 'articlesPane', 'contentsPane', 'linkNewSubscription', 'linkNewGroup', 'linkEditSubscription', 'linkEditGroup', 'buttonMarkSelectedRead', 'buttonMarkSelectedUnread', 'statusArea', 'statusText', 'statusIdle'];
+  static targets = ['navigationPane', 'subscriptionsPane', 'articlesPane', 'contentsPane', 'linkNewSubscription', 'linkNewGroup', 'linkEdit', 'buttonMarkSelectedRead', 'buttonMarkSelectedUnread', 'buttonMoveSelectedToTrash', 'statusArea', 'statusText', 'statusIdle'];
 
   connect() {
     // それぞれの Pane は、その範囲の要素がクリックされることで "focused" のマークがつくようにします。
@@ -183,6 +183,7 @@ export default class extends Controller {
     const hasSelectedArticles = selectedItems.length > 0;
     this.buttonMarkSelectedReadTarget.disabled = !hasSelectedArticles;
     this.buttonMarkSelectedUnreadTarget.disabled = !hasSelectedArticles;
+    this.buttonMoveSelectedToTrashTarget.disabled = !hasSelectedArticles;
   }
 
   resetArticleDependentUi() {
@@ -204,6 +205,13 @@ export default class extends Controller {
     }
   }
 
+  moveSelectedArticlesToTrash() {
+    const controller = this.articlesController();
+    if (controller) {
+      controller.deleteSelectedItems();
+    }
+  }
+
   syncContentsPaneBySelectedArticles(selectedItems) {
     const contentsFrame = this.getContentsFrame();
     if (!contentsFrame) {
@@ -222,8 +230,8 @@ export default class extends Controller {
 
     this.#resetNewSubscriptionLinkHref(li);
     this.#resetNewGroupLinkHref(li);
-    this.#resetEditSubscriptionLinkHref(subscriptionEditUrl);
-    this.#resetEditGroupLinkHref(groupEditUrl);
+    // set unified edit link to either subscription or group edit url
+    this.#resetEditLinkHref(subscriptionEditUrl || groupEditUrl);
   }
 
   #resetNewSubscriptionLinkHref(li) {
@@ -236,12 +244,9 @@ export default class extends Controller {
     this.linkNewGroupTarget.href = buildInsertContextHref(baseHref, li, window.location.origin);
   }
 
-  #resetEditSubscriptionLinkHref(settingHref) {
-    setPaneFocusEditLinkState(this.linkEditSubscriptionTarget, settingHref);
-  }
-
-  #resetEditGroupLinkHref(settingHref) {
-    setPaneFocusEditLinkState(this.linkEditGroupTarget, settingHref);
+  #resetEditLinkHref(settingHref) {
+    if (!this.hasLinkEditTarget) { return; }
+    setPaneFocusEditLinkState(this.linkEditTarget, settingHref);
   }
 
   // "購読" または "記事" コントローラが接続されたとき。

@@ -92,7 +92,7 @@ RSpec.describe "Subscriptions", type: :system do
     context "when the update succeeds" do
       it 'can update a subscription from the modal' do
         find("li[data-subscription='#{subscription.id}']").click
-        find('[data-pane-focus-target="linkEditSubscription"]').click
+        find('[data-pane-focus-target="linkEdit"]').click
 
         expect(page).to have_selector("turbo-frame#modal", wait: 5)
         fill_in 'subscription_title', with: 'Updated Subscription Title'
@@ -105,7 +105,7 @@ RSpec.describe "Subscriptions", type: :system do
 
       it 'can remove the favicon when updating a subscription' do
         find("li[data-subscription='#{subscription_with_favicon.id}']").click
-        find('[data-pane-focus-target="linkEditSubscription"]').click
+        find('[data-pane-focus-target="linkEdit"]').click
 
         expect(page).to have_selector("turbo-frame#modal", wait: 5)
         fill_in 'subscription_title', with: 'Updated Subscription Title'
@@ -122,7 +122,7 @@ RSpec.describe "Subscriptions", type: :system do
     context "when the update fails" do
       it "shows an error message when title is blank" do
         find("li[data-subscription='#{subscription.id}']").click
-        find('[data-pane-focus-target="linkEditSubscription"]').click
+        find('[data-pane-focus-target="linkEdit"]').click
 
         expect(page).to have_selector("turbo-frame#modal", wait: 5)
 
@@ -153,7 +153,7 @@ RSpec.describe "Subscriptions", type: :system do
       end
 
       find("li[data-subscription='#{subscription.id}']").click
-      find('[data-pane-focus-target="linkEditSubscription"]').click
+      find('[data-pane-focus-target="linkEdit"]').click
 
       expect(page).to have_selector("turbo-frame#modal", wait: 5)
       check 'Fetch favicon'
@@ -242,7 +242,7 @@ RSpec.describe "Subscriptions", type: :system do
     context "when destroying from the modal" do
       it "shows a success message and closes the modal" do
         find("li[data-subscription='#{subscription.id}']").click
-        find('[data-pane-focus-target="linkEditSubscription"]').click
+        find('[data-pane-focus-target="linkEdit"]').click
         expect(page).to have_selector("turbo-frame#modal", wait: 5)
 
         accept_confirm "Are you sure?" do
@@ -256,7 +256,7 @@ RSpec.describe "Subscriptions", type: :system do
       it "shows an error message when destruction fails" do
         allow_any_instance_of(Subscription).to receive(:destroy).and_return(false)
         find("li[data-subscription='#{subscription.id}']").click
-        find('[data-pane-focus-target="linkEditSubscription"]').click
+        find('[data-pane-focus-target="linkEdit"]').click
         expect(page).to have_selector("turbo-frame#modal", wait: 5)
 
         accept_confirm "Are you sure?" do
