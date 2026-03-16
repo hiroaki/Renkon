@@ -49,9 +49,9 @@
       <%=
         link_to('#',
           'data-turbo-frame' => 'modal',
-          'data-pane-focus-target' => 'linkEditSubscription',
+          'data-pane-focus-target' => 'linkEdit',
           'class' => 'px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-green-600 border border-transparent rounded-md active:bg-green-600 hover:bg-green-700 focus:outline-hidden focus:shadow-outline-green inline-flex items-center hover:text-white data-[disabled=true]:bg-gray-400',
-          'title' => 'Edit subscription',
+          'title' => 'Edit selected item'
         ) do
       %>
         <%= icon_edit_subscription(class: 'size-6') %>
@@ -72,18 +72,7 @@
       <% end %>
     </div>
 
-    <div class="mx-2">
-      <%=
-        link_to('#',
-          'data-turbo-frame' => 'modal',
-          'data-pane-focus-target' => 'linkEditGroup',
-          'class' => 'px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-green-600 border border-transparent rounded-md active:bg-green-600 hover:bg-green-700 focus:outline-hidden focus:shadow-outline-green inline-flex items-center hover:text-white data-[disabled=true]:bg-gray-400',
-          'title' => 'Edit group',
-        ) do
-      %>
-        <%= icon_edit_group(class: 'size-6') %>
-      <% end %>
-    </div>
+    <!-- unified Edit button (single target updated by pane_focus_controller) -->
 
     <div class="mx-2">
       <button class="px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-indigo-600 border border-transparent rounded-md active:bg-indigo-600 hover:bg-indigo-700 focus:outline-hidden focus:shadow-outline-indigo disabled:bg-gray-400 disabled:cursor-not-allowed"
