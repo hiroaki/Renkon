@@ -26,8 +26,9 @@
         data-controller="refresh"
         data-action="click->refresh#all"
         data-refresh-concurrency-value="2"
+        title="Refresh"
       >
-        Refresh
+        <%= icon_refresh(class: 'size-6') %>
       </button>
     </div>
 
@@ -37,8 +38,9 @@
         data-action="click->pane-focus#markSelectedArticlesRead"
         title="Mark selected articles read (r toggles selected items)"
         disabled
+        title="Mark Read"
       >
-        Mark Read
+        <%= icon_mark_read(class: 'size-6') %>
       </button>
     </div>
 
@@ -48,50 +50,63 @@
         data-action="click->pane-focus#markSelectedArticlesUnread"
         title="Mark selected articles unread (u)"
         disabled
+        title="Mark Unread"
       >
-        Mark Unread
+        <%= icon_mark_unread(class: 'size-6') %>
       </button>
     </div>
 
     <div class="mx-2">
       <%=
-        link_to('New subscription', new_subscription_path,
+        link_to(new_subscription_path,
           'data-turbo-frame' => 'modal',
           'data-pane-focus-target' => 'linkNewSubscription',
           'data-base-href' => new_subscription_path,
-          'class' => 'px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-green-600 border border-transparent rounded-md active:bg-green-600 hover:bg-green-700 focus:outline-hidden focus:shadow-outline-green inline-block hover:text-white'
-        )
+          'class' => 'px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-green-600 border border-transparent rounded-md active:bg-green-600 hover:bg-green-700 focus:outline-hidden focus:shadow-outline-green inline-flex items-center hover:text-white',
+          'title' => 'New subscription',
+        ) do
       %>
+        <%= icon_new_subscription(class: 'size-6') %>
+      <% end %>
     </div>
     <div class="mx-2">
       <%=
-        link_to('Edit subscription', '#',
+        link_to('#',
           'data-turbo-frame' => 'modal',
           'data-pane-focus-target' => 'linkEditSubscription',
-          'class' => 'px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-green-600 border border-transparent rounded-md active:bg-green-600 hover:bg-green-700 focus:outline-hidden focus:shadow-outline-green inline-block hover:text-white data-[disabled=true]:bg-gray-400',
-        )
+          'class' => 'px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-green-600 border border-transparent rounded-md active:bg-green-600 hover:bg-green-700 focus:outline-hidden focus:shadow-outline-green inline-flex items-center hover:text-white data-[disabled=true]:bg-gray-400',
+          'title' => 'Edit subscription',
+        ) do
       %>
+        <%= icon_edit_subscription(class: 'size-6') %>
+      <% end %>
     </div>
 
     <div class="mx-2">
       <%=
-        link_to('New group', new_group_path,
+        link_to(new_group_path,
           'data-turbo-frame' => 'modal',
           'data-pane-focus-target' => 'linkNewGroup',
           'data-base-href' => new_group_path,
-          'class' => 'px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-green-600 border border-transparent rounded-md active:bg-green-600 hover:bg-green-700 focus:outline-hidden focus:shadow-outline-green inline-block hover:text-white'
-        )
+          'class' => 'px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-green-600 border border-transparent rounded-md active:bg-green-600 hover:bg-green-700 focus:outline-hidden focus:shadow-outline-green inline-flex items-center hover:text-white',
+          'title' => 'New group',
+        ) do
       %>
+        <%= icon_new_group(class: 'size-6') %>
+      <% end %>
     </div>
 
     <div class="mx-2">
       <%=
-        link_to('Edit group', '#',
+        link_to('#',
           'data-turbo-frame' => 'modal',
           'data-pane-focus-target' => 'linkEditGroup',
-          'class' => 'px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-green-600 border border-transparent rounded-md active:bg-green-600 hover:bg-green-700 focus:outline-hidden focus:shadow-outline-green inline-block hover:text-white data-[disabled=true]:bg-gray-400',
-        )
+          'class' => 'px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-green-600 border border-transparent rounded-md active:bg-green-600 hover:bg-green-700 focus:outline-hidden focus:shadow-outline-green inline-flex items-center hover:text-white data-[disabled=true]:bg-gray-400',
+          'title' => 'Edit group',
+        ) do
       %>
+        <%= icon_edit_group(class: 'size-6') %>
+      <% end %>
     </div>
 
     <div class="mx-2">
@@ -103,8 +118,9 @@
         "
         data-url-empty-trash="<%= trash_path %>"
         data-text-for-confirm-empty-trash="Are you sure you want to empty the trash?"
+        title="Empty Trash"
       >
-        Empty Trash
+        <%= icon_trash(class: 'size-6') %>
       </button>
     </div>
   </nav>
