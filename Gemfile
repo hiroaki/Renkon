@@ -24,21 +24,19 @@ gem "stimulus-rails"
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 
-#-- Rails 8 includes
-#
-# # Use the database-backed adapters for Rails.cache, Active Job, and Action Cable
-# gem "solid_cache"
-# gem "solid_queue"
-# gem "solid_cable"
-#
-# # Reduces boot times through caching; required in config/boot.rb
-# gem "bootsnap", require: false
-#
-# # Deploy this application anywhere as a Docker container [https://kamal-deploy.org]
-# gem "kamal", require: false
-#
-# # Add HTTP asset caching/compression and X-Sendfile acceleration to Puma [https://github.com/basecamp/thruster/]
-# gem "thruster", require: false
+# Use the database-backed adapters for Rails.cache, Active Job, and Action Cable
+gem "solid_cache"
+gem "solid_queue"
+gem "solid_cable"
+
+# Reduces boot times through caching; required in config/boot.rb
+gem "bootsnap", require: false
+
+# Deploy this application anywhere as a Docker container [https://kamal-deploy.org]
+gem "kamal", require: false
+
+# Add HTTP asset caching/compression and X-Sendfile acceleration to Puma [https://github.com/basecamp/thruster/]
+gem "thruster", require: false
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
@@ -63,13 +61,12 @@ group :test do
   gem 'webmock'
 end
 
-#-----
+#-------
+# Renkon
+#
 
 gem 'feedjira'
 gem 'http'
 gem 'tailwindcss-rails', '~> 4.4'
 gem 'image_processing', '>= 1.2'
-
-# The version is specified to avoid "Unresolved or ambiguous specs" warnings.
-gem "stringio", "~> 3.1.5"
-
+gem 'ruby-vips', '~> 2.3'
