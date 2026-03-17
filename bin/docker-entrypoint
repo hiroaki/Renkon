@@ -1,8 +1,11 @@
-#!/bin/bash -e
+#!/bin/bash
+set -e
 
-# If running the rails server then create or migrate existing database
-if [ "${1}" == "./bin/rails" ] && [ "${2}" == "server" ]; then
+if [ "$RAILS_ENV" = "development" ]; then
+  echo "[docker-entrypoint] Skipping db:prepare in development. Please run manually if needed."
+else
+  echo "Preparing database..."
   ./bin/rails db:prepare
 fi
 
-exec "${@}"
+exec "$@"

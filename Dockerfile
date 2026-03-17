@@ -1,58 +1,112 @@
-# syntax = docker/dockerfile:1
+# # For production environment
+# $ docker build --build-arg RAILS_ENV=production -t renkon-production:latest .
+#
+# # For staging environment
+# $ docker build --build-arg RAILS_ENV=staging -t renkon-staging:latest .
+#
+# # For development environment
+# $ docker build --build-arg RAILS_ENV=development -t renkon-development:latest .
 
 # Make sure RUBY_VERSION matches the Ruby version in .ruby-version and Gemfile
-ARG RUBY_VERSION=3.3.4
-FROM registry.docker.com/library/ruby:$RUBY_VERSION-slim as base
+ARG RUBY_VERSION=3.4.9
+
+ARG RAILS_ENV=production
+
+FROM registry.docker.com/library/ruby:$RUBY_VERSION-slim AS base
+
+# Re-declare ARG before using it in ENV
+ARG RAILS_ENV
 
 # Rails app lives here
 WORKDIR /rails
 
-# Set production environment
-ENV RAILS_ENV="production" \
-    BUNDLE_DEPLOYMENT="1" \
-    BUNDLE_PATH="/usr/local/bundle" \
-    BUNDLE_WITHOUT="development"
-
+# Set environment with flexibility for staging/production
+ENV BUNDLE_PATH="/usr/local/bundle" \
+    RAILS_ENV=$RAILS_ENV
 
 # Throw-away build stage to reduce size of final image
-FROM base as build
+FROM base AS build
 
-# Install packages needed to build gems
-RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential git pkg-config
+# Install packages needed to build gems and run the application
+RUN DEBIAN_FRONTEND=noninteractive apt-get update -qq \
+  && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+  build-essential \
+  pkg-config \
+  libyaml-dev \
+  libsqlite3-dev \
+  tzdata \
+  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install application gems
 COPY Gemfile Gemfile.lock ./
-RUN bundle install && \
+# NOTE:
+# We use `bundle config set --local without 'development test'` and `bundle config set deployment true`
+# instead of environment variables, because some tools (e.g. bootsnap precompile) require .bundle/config
+# to correctly recognize excluded gem groups. Using only environment variables may cause build failures
+# when gems in excluded groups are missing.
+RUN if [ "$RAILS_ENV" = "development" ]; then \
+      bundle config unset --local without; \
+      bundle install; \
+    else \
+      bundle config set --local without 'development test'; \
+      bundle config set deployment true; \
+      bundle install; \
+    fi && \
     rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git
 
 # Copy application code
 COPY . .
 
-# Precompiling assets for production without requiring secret RAILS_MASTER_KEY
-RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
+# Precompile bootsnap code for faster boot times
+RUN bundle exec bootsnap precompile -j 0 --gemfile app/ lib/ config/
 
+# Precompiling assets without requiring secret RAILS_MASTER_KEY
+RUN if [ "$RAILS_ENV" != "development" ]; then \
+      SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile; \
+    else \
+      echo "Skip assets:precompile in development"; \
+    fi
 
 # Final stage for app image
 FROM base
 
 # Install packages needed for deployment
-RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y curl libsqlite3-0 && \
-    rm -rf /var/lib/apt/lists /var/cache/apt/archives
+RUN DEBIAN_FRONTEND=noninteractive apt-get update -qq \
+  && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+  curl \
+  libsqlite3-0 \
+  libvips \
+  tzdata \
+  && if [ "$RAILS_ENV" = "development" ]; then \
+    apt-get install --no-install-recommends -y \
+      build-essential pkg-config libyaml-dev libsqlite3-dev vim-tiny less; \
+  fi \
+  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Copy built artifacts: gems, application
-COPY --from=build /usr/local/bundle /usr/local/bundle
+# Copy built artifacts: application
 COPY --from=build /rails /rails
+COPY --from=build /usr/local/bundle /usr/local/bundle
 
 # Run and own only the runtime files as a non-root user for security
 RUN useradd rails --create-home --shell /bin/bash && \
-    chown -R rails:rails db log storage tmp
+    mkdir -p /rails/log /rails/storage /rails/tmp /usr/local/bundle && \
+    chown -R rails:rails /rails /usr/local/bundle
+
 USER rails:rails
 
-# Entrypoint prepares the database.
+# Entrypoint prepares the database
 ENTRYPOINT ["/rails/bin/docker-entrypoint"]
 
-# Start the server by default, this can be overwritten at runtime
-EXPOSE 3000
-CMD ["./bin/rails", "server"]
+# Start the server with thruster for production/staging.
+# Puma listening on port to THRUSTER_TARGET_PORT,
+# kamal-proxy THRUSTER_HTTP_PORT for Thruster
+ARG THRUSTER_HTTP_PORT=3001
+ARG THRUSTER_TARGET_PORT=3000
+
+ENV THRUSTER_HTTP_PORT=${THRUSTER_HTTP_PORT} \
+    THRUSTER_TARGET_PORT=${THRUSTER_TARGET_PORT} \
+    THRUSTER_DEBUG=1 \
+    PORT=${THRUSTER_TARGET_PORT}
+
+EXPOSE ${PORT}
+CMD ["bundle", "exec", "thrust", "bin/rails", "server"]

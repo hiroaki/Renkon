@@ -1,0 +1,89 @@
+# For development environment - compose.yml
+#
+# Usage:
+#
+# 1. Build and start the container
+#
+#   # This will start /bin/sh inside the container,
+#   # which is just to keep the container running.
+#   # The Rails server will NOT start automatically,
+#   # so please operate inside the container as described below.
+#   $ docker compose up --build
+#
+# 2. In another terminal, enter the container
+#
+#   $ docker compose exec web bash
+#
+# 3. Run rails commands inside the container
+#
+#   # Start the server
+#   > bin/dev
+#
+#   # Run migrations or other Rails commands
+#   > bin/rails db:migrate
+#
+# 4. Access from your browser on the host
+#
+#   # Application
+#   http://127.0.0.1:3000/
+#
+# [Optional] Using SQLite Web UI (sqlite-web)
+#
+# By default, sqlite-web is not started. If you want to browse the SQLite DB via web UI:
+#
+# 1. Make sure the DB file exists (e.g. run `bin/rails db:prepare` inside the web container if needed).
+#
+# 2. Start sqlite-web
+#
+#      $ docker compose --profile tools up sqlite-web
+#    Or, to start both web and sqlite-web at once:
+#      $ docker compose --profile tools up web sqlite-web
+#
+# 3. After startup, access the following URL
+#      http://127.0.0.1:8080/
+#
+# Note: sqlite-web will NOT start if the DB file does not exist.
+#
+services:
+  web:
+    build:
+      context: .
+      args:
+        RAILS_ENV: development
+    environment:
+      DOCKER: 1
+      RAILS_ENV: development
+      PORT: 3000
+      BINDING: 0.0.0.0
+    command: /bin/sh
+    ports:
+      - "${HOST_PORT:-3000}:3000"
+    volumes:
+      - bundle:/usr/local/bundle
+      - .:/rails
+      - tmp:/rails/tmp
+      - log:/rails/log
+      - storage:/rails/storage
+    tty: true
+    stdin_open: true
+
+  sqlite-web:
+    # SQLite をブラウザで操作するための Web UI (coleifer/sqlite-web)
+    image: coleifer/sqlite-web
+    platform: linux/amd64
+    profiles: ["tools"]
+    volumes:
+      - storage:/rails/storage
+    ports:
+      - "${SQLITE_WEB_PORT:-8080}:8080"
+    entrypoint:
+      - /bin/sh
+      - -c
+      - test -f /rails/storage/development.sqlite3 && exec sqlite_web -H 0.0.0.0 /rails/storage/development.sqlite3
+    restart: "no"
+
+volumes:
+  bundle:
+  tmp:
+  log:
+  storage:
