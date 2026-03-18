@@ -45,6 +45,8 @@ builder:
 env:
   clear:
     RAILS_ENV: staging
+  secret:
+    - SECRET_KEY_BASE
 
 ssh:
   port: <%= ENV.fetch('DEPLOY_SSH_PORT', 22) %>
