@@ -34,6 +34,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update -qq \
   pkg-config \
   libyaml-dev \
   libsqlite3-dev \
+  libvips42 \
   tzdata \
   && apt-get clean && rm -rf /var/lib/apt/lists/*
 
@@ -75,7 +76,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update -qq \
   && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
   curl \
   libsqlite3-0 \
-  libvips \
+  libvips42 \
   tzdata \
   && if [ "$RAILS_ENV" = "development" ]; then \
     apt-get install --no-install-recommends -y \
