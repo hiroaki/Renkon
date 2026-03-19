@@ -1,0 +1,77 @@
+# Uncomment the following lines to always allow requests from localhost.
+# All blocklists and throttles will be skipped for localhost requests.
+#Rack::Attack.safelist('allow from localhost') do |req|
+#  '127.0.0.1' == req.ip || '::1' == req.ip
+#end
+
+env_boolean = ->(name, default) do
+  value = ENV.key?(name) ? ENV[name] : default
+  ActiveModel::Type::Boolean.new.cast(value)
+end
+
+env_positive_integer = lambda do |name, default|
+  value = ENV.fetch(name, default.to_s)
+  integer = Integer(value, 10)
+  integer.positive? ? integer : default
+rescue ArgumentError, TypeError
+  default
+end
+
+rack_attack_enabled = env_boolean.call('ENABLED_RACK_ATTACK', '1')
+rack_attack_throttle_name = 'req/ip'
+rack_attack_throttle_limit = env_positive_integer.call('RACK_ATTACK_THROTTLE_LIMIT', 120)
+rack_attack_throttle_period = env_positive_integer.call('RACK_ATTACK_THROTTLE_PERIOD_SECONDS', 60).seconds
+rack_attack_ban_duration = env_positive_integer.call('RACK_ATTACK_BAN_DURATION_SECONDS', 600).seconds
+rack_attack_ban_cache_key = ->(ip) { "rack::attack:ban:#{ip}" }
+
+Rack::Attack.enabled = rack_attack_enabled
+Rack::Attack.cache.store = Rails.cache
+
+if rack_attack_enabled
+  Rack::Attack.throttle(rack_attack_throttle_name, limit: rack_attack_throttle_limit, period: rack_attack_throttle_period) do |req|
+    req.ip
+  end
+
+  Rack::Attack.blocklist('ban abusive IPs') do |req|
+    Rack::Attack.cache.store.read(rack_attack_ban_cache_key.call(req.ip)) == '1'
+  end
+
+  Rack::Attack.throttled_responder = lambda do |request|
+    headers = {
+      'Content-Type' => 'application/json; charset=utf-8',
+      'Retry-After' => rack_attack_throttle_period.to_i.to_s
+    }
+
+    body = {
+      error: 'throttled',
+      message: 'Too many requests'
+    }.to_json
+
+    [429, headers, [body]]
+  end
+
+  Rack::Attack.blocklisted_responder = lambda do |_request|
+    headers = {
+      'Content-Type' => 'application/json; charset=utf-8',
+      'Retry-After' => rack_attack_ban_duration.to_i.to_s
+    }
+
+    body = {
+      error: 'blocked',
+      message: 'Too many requests'
+    }.to_json
+
+    [429, headers, [body]]
+  end
+
+  ActiveSupport::Notifications.subscribe('throttle.rack_attack') do |_name, _start, _finish, _id, payload|
+    request = payload[:request]
+    match_data = request.env['rack.attack.match_data'] || {}
+    limit = match_data[:limit].to_i
+    count = match_data[:count].to_i
+
+    next unless count > limit
+
+    Rack::Attack.cache.store.write(rack_attack_ban_cache_key.call(request.ip), '1', expires_in: rack_attack_ban_duration)
+  end
+end

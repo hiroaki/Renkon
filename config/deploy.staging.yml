@@ -1,0 +1,67 @@
+service: renkon
+
+image: <%= ENV.fetch('DEPLOY_IMAGE') %>
+
+servers:
+  web:
+    hosts:
+<% ENV.fetch('DEPLOY_SERVERS_WEB_HOSTS').split(',').each do |host| %>
+      - <%= host.strip %>
+<% end %>
+
+proxy:
+  ssl:
+    certificate_pem: DEPLOY_CERTIFICATE_PEM
+    private_key_pem: DEPLOY_PRIVATE_KEY_PEM
+  host: <%= ENV.fetch('DEPLOY_PROXY_HOST') %>
+  app_port: 3001
+<% if ENV['DEPLOY_PROXY_BUFFERING_MAX_REQUEST_BODY'].present? %>
+  buffering:
+    requests: true
+    responses: true
+    max_request_body: <%= ENV['DEPLOY_PROXY_BUFFERING_MAX_REQUEST_BODY'] %>
+    max_response_body: 0
+<% end %>
+
+registry:
+<% if ENV['DEPLOY_REGISTRY_SERVER'].present? %>
+  server: <%= ENV.fetch('DEPLOY_REGISTRY_SERVER') %>
+  username: <%= ENV.fetch('DEPLOY_REGISTRY_USERNAME') %>
+  password:
+    - DEPLOY_REGISTRY_PASSWORD
+<% else %>
+  server: localhost:<%= ENV.fetch('DEPLOY_REGISTRY_SERVER_PORT', 5555) %>
+<% end %>
+
+builder:
+  arch:
+    - amd64
+    - arm64
+  context: .
+  dockerfile: Dockerfile
+  args:
+    RAILS_ENV: staging
+
+env:
+  clear:
+    RAILS_ENV: staging
+    ENABLED_BASIC_AUTH: <%= ENV.fetch('ENABLED_BASIC_AUTH', '0') %>
+    ENABLED_RACK_ATTACK: <%= ENV.fetch('ENABLED_RACK_ATTACK', '1') %>
+    RACK_ATTACK_THROTTLE_LIMIT: <%= ENV.fetch('RACK_ATTACK_THROTTLE_LIMIT', '120') %>
+    RACK_ATTACK_THROTTLE_PERIOD_SECONDS: <%= ENV.fetch('RACK_ATTACK_THROTTLE_PERIOD_SECONDS', '60') %>
+    RACK_ATTACK_BAN_DURATION_SECONDS: <%= ENV.fetch('RACK_ATTACK_BAN_DURATION_SECONDS', '600') %>
+  secret:
+    - BASIC_AUTH_PAIRS
+    - SECRET_KEY_BASE
+
+ssh:
+  port: <%= ENV.fetch('DEPLOY_SSH_PORT', 22) %>
+  user: <%= ENV.fetch('DEPLOY_SSH_USER') %>
+  keys_only: true
+  keys:
+<% ENV.fetch('DEPLOY_SSH_KEYS').split(',').each do |key| %>
+    - <%= key.strip %>
+<% end %>
+
+volumes:
+  - "<%= ENV.fetch('DEPLOY_VOLUMES_STORAGE') %>:/rails/storage"
