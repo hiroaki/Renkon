@@ -45,7 +45,9 @@ builder:
 env:
   clear:
     RAILS_ENV: staging
+    ENABLED_BASIC_AUTH: <%= ENV.fetch('ENABLED_BASIC_AUTH', '0') %>
   secret:
+    - BASIC_AUTH_PAIRS
     - SECRET_KEY_BASE
 
 ssh:
