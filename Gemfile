@@ -70,5 +70,5 @@ gem 'http'
 gem 'tailwindcss-rails', '~> 4.4'
 gem 'image_processing', '>= 1.2'
 gem 'ruby-vips', '~> 2.3'
-
-gem "solid_cache", "~> 1.0"
+gem 'solid_cache', '~> 1.0'
+gem 'rack-attack', '~> 6.8'
