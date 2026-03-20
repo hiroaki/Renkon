@@ -8,6 +8,8 @@ servers:
 <% ENV.fetch('DEPLOY_SERVERS_WEB_HOSTS').split(',').each do |host| %>
       - <%= host.strip %>
 <% end %>
+    options:
+      hostname: <%= ENV.fetch('DEPLOY_WEB_HOSTNAME', 'renkon-web') %>
 
 proxy:
   ssl: true
