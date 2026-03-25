@@ -4,23 +4,15 @@
 #
 # 1. Build and start the container
 #
-#   # This will start /bin/sh inside the container,
-#   # which is just to keep the container running.
-#   # The Rails server will NOT start automatically,
-#   # so please operate inside the container as described below.
-#   $ docker compose up --build
+#   $ docker compose up --build -d
 #
-# 2. In another terminal, enter the container
+# 2. For the first time, set up the database
 #
-#   $ docker compose exec web bash
+#   $ docker compose exec web bin/rails db:prepare
 #
-# 3. Run rails commands inside the container
+# 3. Start the server
 #
-#   # Start the server
-#   > bin/dev
-#
-#   # Run migrations or other Rails commands
-#   > bin/rails db:migrate
+#   $ docker compose exec web bin/dev
 #
 # 4. Access from your browser on the host
 #
@@ -68,7 +60,6 @@ services:
     stdin_open: true
 
   sqlite-web:
-    # SQLite をブラウザで操作するための Web UI (coleifer/sqlite-web)
     image: coleifer/sqlite-web
     platform: linux/amd64
     profiles: ["tools"]
