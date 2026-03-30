@@ -118,21 +118,22 @@ export default class extends Controller {
 
   // keyup SPACE on articles pane or contents pane
   async forwardContentsOrNextArticle(evt) {
+    const controller = this.articlesController();
+
     if (this.isCurrentPane(this.contentsPaneTarget)) {
       // コンテンツペインにフォーカスがある場合、記事リストペインへ戻してから処理を続けます。
       this.setCurrentPane(this.articlesPaneTarget);
-      this.articlesController()?.setFocusToCurrentItem();
+      controller?.setFocusToCurrentItem();
     } else if (!this.isCurrentPane(this.articlesPaneTarget)) {
       return;
     }
 
-    const controller = this.articlesController();
     if (!controller) {
       return;
     }
 
     const selectedItems = Array.from(controller.getSelectedItems());
-    const anchorItem = this.resolveSpaceActionAnchorItem(controller, selectedItems);
+    const anchorItem = this.resolveSpaceActionAnchorItem(selectedItems);
 
     // contents ペインに、現在選択している Article のコンテンツが表示されている場合、
     // それがまだスクロール可能ならばスクロールだけを行います。
@@ -142,7 +143,7 @@ export default class extends Controller {
       const maxScroll = contentsPane.scrollHeight - contentsPane.clientHeight;
       if (contentsPane.scrollTop + 1 < maxScroll) {
         contentsPane.scrollBy({ top: contentsPane.clientHeight, behavior: 'auto' });
-        return false;
+        return;
       }
     }
 
@@ -154,7 +155,7 @@ export default class extends Controller {
     }
   }
 
-  resolveSpaceActionAnchorItem(controller, selectedItems) {
+  resolveSpaceActionAnchorItem(selectedItems) {
     if (selectedItems.length === 0) {
       return null;
     }
