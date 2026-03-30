@@ -25,7 +25,8 @@
     ><%= group.name %></div>
   </div>
 
-  <ul class="ml-2 min-h-3" data-tree-sort-list>
+  <div data-tree-sort-container>
+    <ul class="ml-2" data-tree-sort-list>
     <% group_nodes = (groups_by_parent_id[group.id] || []).map { |item| { item_type: 'group', item: item, position: item.position } } %>
     <% subscription_nodes = (subscriptions_by_group[group.id] || []).map { |item| { item_type: 'subscription', item: item, position: item.position } } %>
     <% (group_nodes + subscription_nodes).sort_by { |node| [node[:position], node[:item].id] }.each do |node| %>
@@ -40,4 +41,5 @@
       <% end %>
     <% end %>
   </ul>
+  </div>
 </li>
