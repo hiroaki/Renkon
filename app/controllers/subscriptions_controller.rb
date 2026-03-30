@@ -169,7 +169,6 @@ class SubscriptionsController < ApplicationController
     end
 
     def load_grouped_subscriptions
-      Group.default_root!
       @groups = Group.ordered.to_a
       @root_groups = @groups.select { |group| group.parent_id.nil? }
       @groups_by_parent_id = @groups.group_by(&:parent_id)
