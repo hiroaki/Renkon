@@ -2,6 +2,11 @@ import SelectedLiBaseController from 'lib/selected_li_base_controller'
 import RefreshDelegator from 'lib/refresh_delegator'
 import { getCsrfToken } from 'lib/schema'
 import { fireChangeSelectedLiEvent, fireStatusErrorEvent } from 'lib/pane_focus_events'
+import {
+  collapseGroup,
+  expandGroup,
+  setGroupVisibilityInstant,
+} from 'lib/group_collapse_animation'
 
 export default class extends SelectedLiBaseController {
   connect() {
@@ -199,9 +204,9 @@ export default class extends SelectedLiBaseController {
   setGroupCollapsed(li, collapsed, persist) {
     li.dataset.collapsed = collapsed ? 'true' : 'false';
 
-    const nested = li.querySelector(':scope > ul[data-tree-sort-list]');
+    const nested = li.querySelector(':scope > [data-tree-sort-container]');
     if (nested) {
-      nested.hidden = collapsed;
+      this.setNestedGroupVisibility(nested, collapsed, persist);
     }
 
     const button = li.querySelector(':scope > div .group-collapse-toggle');
@@ -221,5 +226,18 @@ export default class extends SelectedLiBaseController {
 
   collapseStorageKey(groupId) {
     return `renkon.groupCollapsed.${groupId}`;
+  }
+
+  setNestedGroupVisibility(container, collapsed, animate) {
+    if (!animate || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setGroupVisibilityInstant(container, collapsed);
+      return;
+    }
+
+    if (collapsed) {
+      collapseGroup(container);
+    } else {
+      expandGroup(container);
+    }
   }
 }
