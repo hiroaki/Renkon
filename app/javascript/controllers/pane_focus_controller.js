@@ -242,6 +242,7 @@ export default class extends Controller {
       return;
     }
     syncContentsPaneBySelectedArticles(contentsFrame, selectedItems);
+    this.contentsPaneTarget.scrollTop = 0;
   }
 
   getContentsFrame() {
