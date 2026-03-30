@@ -184,6 +184,9 @@
     <!-- -->
     <div id="contents-pane" tabindex="-1" class="flex-1 overflow-y-auto min-w-8 focus:outline-hidden"
       data-pane-focus-target="contentsPane"
+      data-action="
+        keydown.space->pane-focus#forwardContentsOrNextArticle:prevent
+      "
     >
       <div class="bg-white p-2">
         <%= turbo_frame_tag('contents', autoscroll: true, data: { autoscroll_block: 'start' } ) %>
