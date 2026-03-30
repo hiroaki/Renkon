@@ -20,6 +20,7 @@ export default class extends Controller {
     // initialize state for Edit subscription button
     this.#syncSubscriptionAndGroupActions(this.getSelectedSubscriptionListItem());
     this.updateBulkReadButtons([]);
+    this.lastFocusedArticleItem = null;
     this.clearStatusMessage();
 
     //
@@ -116,32 +117,24 @@ export default class extends Controller {
   }
 
   // keyup SPACE on articles pane
-  forwardContentsOrNextArticle(evt) {
+  async forwardContentsOrNextArticle(evt) {
     if (!this.isCurrentPane(this.articlesPaneTarget)) {
       console.error('articlesPane is not the current');
       return;
     }
 
     const controller = this.articlesController();
-    const articles = controller.listItemTargets;
-
-    // 記事が選択されている場合、その位置以降から "未読" 項目を探すようにします。
-    const li = controller.getSelectedItem();
-    let pos = -1;
-    if (li) {
-      for (let i = 0; i < articles.length; ++i) {
-        if (articles[i] === li) {
-          pos = i;
-          break;
-        }
-      }
+    if (!controller) {
+      return;
     }
-    const isSomeArticleActivated = pos !== -1;
+
+    const selectedItems = Array.from(controller.getSelectedItems());
+    const anchorItem = this.resolveSpaceActionAnchorItem(controller, selectedItems);
 
     // contents ペインに、現在選択している Article のコンテンツが表示されている場合、
     // それがまだスクロール可能ならばスクロールだけを行います。
     // スクロールが最後まで到達しているならば、次の Article を "選択状態" にするための処理へ続きます。
-    if (isSomeArticleActivated) {
+    if (selectedItems.length > 0) {
       const contentsPane = this.contentsPaneTarget;
       const maxScroll = contentsPane.scrollHeight - contentsPane.clientHeight;
       if (contentsPane.scrollTop + 1 < maxScroll) {
@@ -150,13 +143,38 @@ export default class extends Controller {
       }
     }
 
+    await controller.markItemsRead(selectedItems);
+
+    const nextUnread = this.findNextUnreadAfter(controller, anchorItem);
+    if (nextUnread) {
+      controller.activateItem(nextUnread);
+    }
+  }
+
+  resolveSpaceActionAnchorItem(controller, selectedItems) {
+    if (selectedItems.length === 0) {
+      return null;
+    }
+
+    if (this.lastFocusedArticleItem && selectedItems.includes(this.lastFocusedArticleItem)) {
+      return this.lastFocusedArticleItem;
+    }
+
+    return selectedItems[selectedItems.length - 1];
+  }
+
+  findNextUnreadAfter(controller, currentItem) {
+    const articles = controller.listItemTargets;
+    const currentPos = currentItem ? articles.indexOf(currentItem) : -1;
+
     // 次の "未読" 項目をアクティブにします。
-    for (let i = pos + 1; i < articles.length; ++i) {
+    for (let i = currentPos + 1; i < articles.length; ++i) {
       if (articles[i].dataset['unread'] === 'true') {
-        controller.activateItem(articles[i]);
-        break;
+        return articles[i];
       }
     }
+
+    return null;
   }
 
   // "既読状況" に変化があった時、購読リストの当該項目を更新します（未読数バッジの更新）
@@ -175,6 +193,11 @@ export default class extends Controller {
 
   onChangeSelectedArticleListItems(evt) {
     const selectedItems = evt.detail.selectedItems || [];
+    const focusedItem = evt.detail.focusedItem || null;
+    this.lastFocusedArticleItem = selectedItems.includes(focusedItem)
+      ? focusedItem
+      : selectedItems[selectedItems.length - 1] || null;
+
     this.updateBulkReadButtons(selectedItems);
     this.syncContentsPaneBySelectedArticles(selectedItems);
   }
@@ -189,6 +212,7 @@ export default class extends Controller {
   resetArticleDependentUi() {
     this.clearContentsPane();
     this.updateBulkReadButtons([]);
+    this.lastFocusedArticleItem = null;
   }
 
   markSelectedArticlesRead() {
