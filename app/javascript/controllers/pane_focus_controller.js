@@ -116,10 +116,13 @@ export default class extends Controller {
     this.articlesController().activateFirstUnreadItem();
   }
 
-  // keyup SPACE on articles pane
+  // keyup SPACE on articles pane or contents pane
   async forwardContentsOrNextArticle(evt) {
-    if (!this.isCurrentPane(this.articlesPaneTarget)) {
-      console.error('articlesPane is not the current');
+    if (this.isCurrentPane(this.contentsPaneTarget)) {
+      // コンテンツペインにフォーカスがある場合、記事リストペインへ戻してから処理を続けます。
+      this.setCurrentPane(this.articlesPaneTarget);
+      this.articlesController()?.setFocusToCurrentItem();
+    } else if (!this.isCurrentPane(this.articlesPaneTarget)) {
       return;
     }
 
