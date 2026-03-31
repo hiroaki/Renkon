@@ -1,3 +1,5 @@
+# rack_attack.rb - Demo purposes only: settings are deliberately strict for public access
+
 # Uncomment the following lines to always allow requests from localhost.
 # All blocklists and throttles will be skipped for localhost requests.
 #Rack::Attack.safelist('allow from localhost') do |req|
@@ -19,15 +21,26 @@ end
 
 rack_attack_enabled = env_boolean.call('ENABLED_RACK_ATTACK', '1')
 rack_attack_throttle_name = 'req/ip'
-rack_attack_throttle_limit = env_positive_integer.call('RACK_ATTACK_THROTTLE_LIMIT', 120)
+rack_attack_throttle_limit = env_positive_integer.call('RACK_ATTACK_THROTTLE_LIMIT', 60)
 rack_attack_throttle_period = env_positive_integer.call('RACK_ATTACK_THROTTLE_PERIOD_SECONDS', 60).seconds
 rack_attack_ban_duration = env_positive_integer.call('RACK_ATTACK_BAN_DURATION_SECONDS', 600).seconds
-rack_attack_ban_cache_key = ->(ip) { "rack::attack:ban:#{ip}" }
+rack_attack_ban_cache_key = ->(ip) { "rack:attack:ban:#{ip}" }
 
 Rack::Attack.enabled = rack_attack_enabled
 Rack::Attack.cache.store = Rails.cache
 
 if rack_attack_enabled
+  # Block IPs that request .env or similar sensitive files (immediate ban and cache)
+  Rack::Attack.blocklist('block env file scanners') do |req|
+    # Broad `.env` match for demo to aggressively catch scanners
+    if req.path.match?(%r{\.env}i)
+      Rack::Attack.cache.store.write(rack_attack_ban_cache_key.call(req.ip), '1', expires_in: rack_attack_ban_duration)
+      true
+    else
+      false
+    end
+  end
+
   Rack::Attack.throttle(rack_attack_throttle_name, limit: rack_attack_throttle_limit, period: rack_attack_throttle_period) do |req|
     req.ip
   end
@@ -44,7 +57,7 @@ if rack_attack_enabled
 
     body = {
       error: 'throttled',
-      message: 'Too many requests'
+      message: 'Rate limit exceeded, retry after some time'
     }.to_json
 
     [429, headers, [body]]
@@ -57,11 +70,11 @@ if rack_attack_enabled
     }
 
     body = {
-      error: 'blocked',
-      message: 'Too many requests'
+      error: 'forbidden',
+      message: 'Access denied due to suspicious activity'
     }.to_json
 
-    [429, headers, [body]]
+    [403, headers, [body]]
   end
 
   ActiveSupport::Notifications.subscribe('throttle.rack_attack') do |_name, _start, _finish, _id, payload|

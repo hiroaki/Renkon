@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe 'Rack::Attack', type: :request do
-  let(:ban_cache_key) { 'rack::attack:ban:127.0.0.1' }
+  let(:ban_cache_key) { 'rack:attack:ban:127.0.0.1' }
 
   around do |example|
     original_enabled = Rack::Attack.enabled
@@ -36,19 +36,19 @@ RSpec.describe 'Rack::Attack', type: :request do
     expect(response.headers['X-Rack-Attack-Match-Name']).to be_nil
     expect(JSON.parse(response.body)).to eq(
       'error' => 'throttled',
-      'message' => 'Too many requests'
+      'message' => 'Rate limit exceeded, retry after some time'
     )
     expect(Rack::Attack.cache.store.read(ban_cache_key)).to eq('1')
 
     get rails_health_check_path
 
-    expect(response).to have_http_status(:too_many_requests)
+    expect(response).to have_http_status(:forbidden)
     expect(response.headers['Retry-After']).to eq('600')
     expect(response.headers['X-Rack-Attack-Match-Type']).to be_nil
     expect(response.headers['X-Rack-Attack-Match-Name']).to be_nil
     expect(JSON.parse(response.body)).to eq(
-      'error' => 'blocked',
-      'message' => 'Too many requests'
+      'error' => 'forbidden',
+      'message' => 'Access denied due to suspicious activity'
     )
   end
 end
