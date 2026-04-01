@@ -135,5 +135,20 @@ RSpec.describe 'Subscriptions OPML', type: :request do
       expect(response).to have_http_status(:unprocessable_content)
       expect(response.body).to include('binary')
     end
+
+    it 'returns unprocessable content for non-utf8 bytes without raising encoding error' do
+      Tempfile.create(['subscriptions', '.xml']) do |file|
+        file.binmode
+        file.write("\xFF\xFE<opml><body/></opml>")
+        file.rewind
+
+        uploaded_file = Rack::Test::UploadedFile.new(file.path, 'application/xml')
+
+        post opml_import_upload_subscriptions_path, params: { file: uploaded_file }
+      end
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(response.body).to include('does not look like OPML/XML')
+    end
   end
 end
