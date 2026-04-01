@@ -1,5 +1,5 @@
 module Subscriptions
-  class OpmlInputValidationService
+  class OpmlInputValidator
     DEFAULT_MAX_BYTES = 2.megabytes
 
     def self.validate_upload(file:, max_bytes: DEFAULT_MAX_BYTES)

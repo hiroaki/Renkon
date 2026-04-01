@@ -121,7 +121,7 @@ class SubscriptionsController < ApplicationController
 
   # reorder_tree_subscriptions PATCH /subscriptions/reorder_tree(.:format)
   def reorder_tree
-    validation = Subscriptions::ReorderTreeValidationService.call(raw_nodes: params[:tree_nodes])
+    validation = Subscriptions::ReorderTreeValidator.call(raw_nodes: params[:tree_nodes])
     unless validation[:ok]
       return render_reorder_error(validation[:error])
     end
