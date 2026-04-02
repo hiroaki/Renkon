@@ -1,5 +1,6 @@
 require 'rails_helper'
 require 'webmock/rspec'
+require 'tempfile'
 
 RSpec.describe "Subscriptions", type: :system do
   before do
@@ -289,6 +290,71 @@ RSpec.describe "Subscriptions", type: :system do
         expect(page).to have_current_path(edit_subscription_path(subscription))
         expect(page).to have_content("Subscription destruction failed.")
       end
+    end
+  end
+
+  describe 'OPML settings menu' do
+    let!(:subscription) { FactoryBot.create(:subscription, title: 'Export Target') }
+
+    before do
+      visit root_path
+    end
+
+    it 'opens and closes the settings menu' do
+      click_button 'Settings'
+
+      expect(page).to have_link('Export')
+      expect(page).to have_link('Import')
+
+      find('[aria-label="Close settings menu"]').click
+      expect(page).to have_no_link('Export')
+    end
+
+    it 'opens export modal from settings menu' do
+      find("li[data-subscription='#{subscription.id}']").click
+      click_button 'Settings'
+      click_link 'Export'
+
+      expect(page).to have_selector('turbo-frame#modal', wait: 5)
+      expect(page).to have_content('Export OPML')
+      expect(page).to have_content('Selected item only')
+    end
+
+    it 'closes export modal automatically on success' do
+      click_button 'Settings'
+      click_link 'Export'
+
+      expect(page).to have_selector('turbo-frame#modal', wait: 5)
+      click_button 'Export'
+
+      expect(page).to have_selector('turbo-frame#modal', text: '', wait: 5)
+    end
+
+    it 'opens import modal from settings menu' do
+      click_button 'Settings'
+      click_link 'Import'
+
+      expect(page).to have_selector('turbo-frame#modal', wait: 5)
+      expect(page).to have_content('Import OPML')
+      expect(page).to have_field('OPML file')
+    end
+
+    it 'keeps modal open and shows error when import fails' do
+      Tempfile.create(['invalid-opml', '.opml']) do |invalid_file|
+        invalid_file.write('<opml><body><outline></body>')
+        invalid_file.rewind
+
+        click_button 'Settings'
+        click_link 'Import'
+
+        expect(page).to have_selector('turbo-frame#modal', wait: 5)
+        attach_file('OPML file', invalid_file.path)
+        click_button 'Import'
+      end
+
+      expect(page).to have_selector('turbo-frame#modal', wait: 5)
+      expect(page).to have_content('could not be parsed')
+      expect(page).to have_button('Close')
     end
   end
 end

@@ -17,6 +17,10 @@ Rails.application.routes.draw do
     collection do
       get :list
       patch :reorder_tree
+      get :opml_export
+      post :opml_export_download
+      get :opml_import
+      post :opml_import_upload
     end
 
     resources :articles do

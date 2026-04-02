@@ -121,7 +121,7 @@ class SubscriptionsController < ApplicationController
 
   # reorder_tree_subscriptions PATCH /subscriptions/reorder_tree(.:format)
   def reorder_tree
-    validation = Subscriptions::ReorderTreeValidationService.call(raw_nodes: params[:tree_nodes])
+    validation = Subscriptions::ReorderTreeValidator.call(raw_nodes: params[:tree_nodes])
     unless validation[:ok]
       return render_reorder_error(validation[:error])
     end
@@ -140,6 +140,62 @@ class SubscriptionsController < ApplicationController
     end
 
     head :no_content
+  end
+
+  # opml_export_subscriptions GET /subscriptions/opml_export(.:format)
+  def opml_export
+    set_opml_export_context
+  end
+
+  # opml_export_download_subscriptions POST /subscriptions/opml_export_download(.:format)
+  def opml_export_download
+    set_opml_export_context
+    scope = params[:scope].to_s == 'selected' ? 'selected' : 'all'
+    include_groups = ActiveModel::Type::Boolean.new.cast(params[:include_groups])
+
+    if scope == 'selected' && !@selected_available
+      flash.now[:alert] = 'Select a subscription or group before exporting selected items.'
+      return render :opml_export, status: :unprocessable_content
+    end
+
+    result = Subscriptions::OpmlExportService.call(
+      scope: scope,
+      include_groups: include_groups,
+      selected_item_type: params[:selected_item_type],
+      selected_item_id: params[:selected_item_id]
+    )
+
+    send_data(
+      result[:xml],
+      type: 'application/xml; charset=utf-8',
+      disposition: 'attachment',
+      filename: "subscriptions-#{Time.current.strftime('%Y%m%d')}.opml"
+    )
+  rescue ActiveRecord::RecordNotFound
+    flash.now[:alert] = 'Selected item was not found.'
+    render :opml_export, status: :unprocessable_content
+  end
+
+  # opml_import_subscriptions GET /subscriptions/opml_import(.:format)
+  def opml_import
+  end
+
+  # opml_import_upload_subscriptions POST /subscriptions/opml_import_upload(.:format)
+  def opml_import_upload
+    result = Subscriptions::OpmlImportUploadService.call(file: params[:file])
+    unless result[:ok]
+      flash.now[:alert] = result[:error]
+      return render :opml_import, status: :unprocessable_content
+    end
+
+    @import_result = result
+    render turbo_stream: [
+      subscriptions_reload_stream,
+      turbo_stream.replace(
+        SubscriptionsStreams::MODAL_TARGET,
+        render_to_string(template: 'subscriptions/opml_import', layout: false)
+      ),
+    ]
   end
 
   private
@@ -178,6 +234,12 @@ class SubscriptionsController < ApplicationController
 
       @subscriptions_by_group = grouped.group_by(&:group_id)
       @top_level_subscriptions = @subscriptions_by_group[nil] || []
+    end
+
+    def set_opml_export_context
+      @selected_item_type = params[:selected_item_type].to_s.presence
+      @selected_item_id = params[:selected_item_id].to_i
+      @selected_available = @selected_item_type.present? && @selected_item_id.positive?
     end
 
     def apply_insert_context(subscription)

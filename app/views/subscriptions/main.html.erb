@@ -133,18 +133,57 @@
 
     <!-- -->
     <div id="subscriptions-pane" tabindex="-1" class="flex flex-row shrink-0 min-w-8 focus:outline-hidden" style="width: 8rem;"
-      data-controller="frame"
+      data-controller="frame app-settings"
       data-frame-target="adjustable"
       data-frame-storage-key-value="subscriptions-width"
+      data-app-settings-export-url-value="<%= opml_export_subscriptions_path %>"
       data-pane-focus-target="subscriptionsPane"
       data-action="
         keydown.right->pane-focus#forwardToArticlesPane
         keydown.space->pane-focus#forwardToUnreadArticlePane:prevent
         changeSelectedLi->pane-focus#onChangeSelectedSubscriptionListItem
+        changeSelectedLi->app-settings#onChangeSelectedLi
       "
     >
-      <div class="flex-1 bg-blue-100 overflow-y-auto overflow-x-hidden pt-2">
-        <%= turbo_frame_tag('subscriptions', src: list_subscriptions_path) %>
+      <div class="relative flex-1 bg-blue-100 overflow-hidden flex flex-col">
+        <div class="flex-1 overflow-y-auto overflow-x-hidden pt-2">
+          <%= turbo_frame_tag('subscriptions', src: list_subscriptions_path) %>
+        </div>
+
+        <div class="shrink-0 border-t border-blue-200 px-2 py-2 bg-blue-100">
+          <button
+            type="button"
+            class="w-full px-2 py-1 text-xs text-left text-inherit rounded hover:bg-blue-200/60 focus:outline-hidden"
+            data-action="click->app-settings#toggleMenu"
+          >
+            <span class="flex items-center justify-between">
+              <span class="inline-flex items-center gap-1">
+                <%= icon_cog_8_tooth(class: 'size-4') %>
+                <span>Settings</span>
+              </span>
+            </span>
+          </button>
+
+          <button
+            type="button"
+            class="hidden fixed inset-0 z-10 cursor-default bg-black/10"
+            data-app-settings-target="backdrop"
+            data-action="click->app-settings#closeMenu"
+            aria-label="Close settings menu"
+          ></button>
+
+          <div
+            class="hidden absolute bottom-14 left-2 right-2 z-20 rounded-md border border-gray-200 bg-white p-1 shadow-lg"
+            data-app-settings-target="menu"
+          >
+            <%= link_to 'Export ...', opml_export_subscriptions_path,
+              class: 'block rounded px-2 py-1 text-sm text-gray-700 hover:bg-gray-100',
+              data: { turbo_frame: 'modal', app_settings_target: 'exportLink', action: 'click->app-settings#closeMenu' } %>
+            <%= link_to 'Import ...', opml_import_subscriptions_path,
+              class: 'block rounded px-2 py-1 text-sm text-gray-700 hover:bg-gray-100',
+              data: { turbo_frame: 'modal', action: 'click->app-settings#closeMenu' } %>
+          </div>
+        </div>
       </div>
       <div class="w-0.5 bg-gray-200 cursor-col-resize" draggable="true"
         data-action="

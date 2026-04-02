@@ -1,0 +1,42 @@
+<%= render('shared/modal_frame', heading: 'Export OPML') do %>
+  <p data-opml-export-target="alert" class="hidden mb-3 text-sm text-red-700"></p>
+  <% if flash.now[:alert].present? %>
+    <p class="mb-3 text-sm text-red-700"><%= flash.now[:alert] %></p>
+  <% end %>
+
+  <%= form_with url: opml_export_download_subscriptions_path, method: :post,
+    data: { turbo: false, controller: 'opml-export', action: 'submit->opml-export#submit' },
+    class: 'space-y-4' do |form| %>
+    <%= form.hidden_field :selected_item_type, value: @selected_item_type %>
+    <%= form.hidden_field :selected_item_id, value: @selected_item_id %>
+
+    <fieldset>
+      <legend class="text-sm font-semibold text-gray-700">Export scope</legend>
+      <div class="mt-2 space-y-2 text-sm">
+        <label class="flex items-center gap-2">
+          <%= form.radio_button :scope, 'all', checked: true %>
+          <span>All subscriptions</span>
+        </label>
+
+        <label class="flex items-center gap-2">
+          <%= form.radio_button :scope, 'selected', disabled: !@selected_available %>
+          <span class="<%= @selected_available ? '' : 'text-gray-400' %>">
+            Selected item only
+          </span>
+        </label>
+      </div>
+      <% unless @selected_available %>
+        <p class="mt-2 text-xs text-gray-500">Select a subscription or a group first to enable "Selected item only".</p>
+      <% end %>
+    </fieldset>
+
+    <label class="flex items-center gap-2 text-sm">
+      <%= form.check_box :include_groups, { checked: true }, '1', '0' %>
+      <span>Include group folders</span>
+    </label>
+
+    <div class="my-4">
+      <%= form.submit 'Export', class: 'px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-blue-600 border border-transparent rounded-md active:bg-blue-600 hover:bg-blue-700 focus:outline-hidden focus:shadow-outline-blue' %>
+    </div>
+  <% end %>
+<% end %>

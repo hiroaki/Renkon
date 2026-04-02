@@ -47,5 +47,42 @@ RSpec.describe 'Subscriptions refresh_feed_row', type: :request do
       expect(response.headers['Location']).to end_with(row_subscription_path(subscription))
       expect(a_request(:get, source_url)).to have_been_made.once
     end
+
+    it 'normalizes binary-encoded feed values before persistence' do
+      entry = instance_double(
+        'FeedEntry',
+        id: "\xE7guid".b,
+        title: "\xE8title".b,
+        url: "https://example.com/article".b,
+        content: "\xE9content".b,
+        summary: nil,
+        published: Time.current
+      )
+
+      feed = instance_double(
+        'Feed',
+        url: "https://example.com/feed\xE8".b,
+        entries: [entry]
+      )
+
+      allow(FeedUtils).to receive(:fetch).with(source_url).and_return("<rss>\xE8</rss>".b)
+      allow(FeedUtils).to receive(:parse).and_return(feed)
+
+      patch refresh_feed_row_subscription_path(subscription)
+
+      expect(response).to have_http_status(:see_other)
+      expect(response.headers['Location']).to end_with(row_subscription_path(subscription))
+
+      subscription.reload
+      article = subscription.articles.find_by(guid: 'guid')
+      cache = FeedCache.find_by(subscription: subscription)
+
+      expect(subscription.url).to be_valid_encoding
+      expect(article).to be_present
+      expect(article.title).to be_valid_encoding
+      expect(article.description).to be_valid_encoding
+      expect(cache).to be_present
+      expect(cache.contents).to be_valid_encoding
+    end
   end
 end
