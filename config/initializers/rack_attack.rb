@@ -20,8 +20,10 @@ rescue ArgumentError, TypeError
 end
 
 rack_attack_enabled = env_boolean.call('ENABLED_RACK_ATTACK', '1')
-rack_attack_throttle_name = 'req/ip'
-rack_attack_throttle_limit = env_positive_integer.call('RACK_ATTACK_THROTTLE_LIMIT', 60)
+rack_attack_get_throttle_name = 'req/ip:get'
+rack_attack_write_throttle_name = 'req/ip:write'
+rack_attack_get_throttle_limit = env_positive_integer.call('RACK_ATTACK_GET_THROTTLE_LIMIT', 300)
+rack_attack_write_throttle_limit = env_positive_integer.call('RACK_ATTACK_THROTTLE_LIMIT', 60)
 rack_attack_throttle_period = env_positive_integer.call('RACK_ATTACK_THROTTLE_PERIOD_SECONDS', 60).seconds
 rack_attack_ban_duration = env_positive_integer.call('RACK_ATTACK_BAN_DURATION_SECONDS', 600).seconds
 rack_attack_ban_cache_key = ->(ip) { "rack:attack:ban:#{ip}" }
@@ -41,8 +43,12 @@ if rack_attack_enabled
     end
   end
 
-  Rack::Attack.throttle(rack_attack_throttle_name, limit: rack_attack_throttle_limit, period: rack_attack_throttle_period) do |req|
-    req.ip
+  Rack::Attack.throttle(rack_attack_get_throttle_name, limit: rack_attack_get_throttle_limit, period: rack_attack_throttle_period) do |req|
+    req.ip if req.get? || req.head?
+  end
+
+  Rack::Attack.throttle(rack_attack_write_throttle_name, limit: rack_attack_write_throttle_limit, period: rack_attack_throttle_period) do |req|
+    req.ip unless req.get? || req.head?
   end
 
   Rack::Attack.blocklist('ban abusive IPs') do |req|
@@ -77,14 +83,4 @@ if rack_attack_enabled
     [403, headers, [body]]
   end
 
-  ActiveSupport::Notifications.subscribe('throttle.rack_attack') do |_name, _start, _finish, _id, payload|
-    request = payload[:request]
-    match_data = request.env['rack.attack.match_data'] || {}
-    limit = match_data[:limit].to_i
-    count = match_data[:count].to_i
-
-    next unless count > limit
-
-    Rack::Attack.cache.store.write(rack_attack_ban_cache_key.call(request.ip), '1', expires_in: rack_attack_ban_duration)
-  end
 end

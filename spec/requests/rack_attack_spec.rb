@@ -18,8 +18,8 @@ RSpec.describe 'Rack::Attack', type: :request do
     Rack::Attack.enabled = original_enabled
   end
 
-  it 'returns 429 on throttle and while the ban is active' do
-    throttle = Rack::Attack.throttles.fetch('req/ip')
+  it 'returns 429 on throttle without caching a ban' do
+    throttle = Rack::Attack.throttles.fetch('req/ip:get')
     throttle_limit = throttle.limit
     throttle_period = throttle.period
 
@@ -37,6 +37,20 @@ RSpec.describe 'Rack::Attack', type: :request do
     expect(JSON.parse(response.body)).to eq(
       'error' => 'throttled',
       'message' => 'Rate limit exceeded, retry after some time'
+    )
+    expect(Rack::Attack.cache.store.read(ban_cache_key)).to be_nil
+  end
+
+  it 'immediately caches a ban when probing env-like paths' do
+    get '/.env'
+
+    expect(response).to have_http_status(:forbidden)
+    expect(response.headers['Retry-After']).to eq('600')
+    expect(response.headers['X-Rack-Attack-Match-Type']).to be_nil
+    expect(response.headers['X-Rack-Attack-Match-Name']).to be_nil
+    expect(JSON.parse(response.body)).to eq(
+      'error' => 'forbidden',
+      'message' => 'Access denied due to suspicious activity'
     )
     expect(Rack::Attack.cache.store.read(ban_cache_key)).to eq('1')
 
