@@ -1,5 +1,5 @@
 module Subscriptions
-  class OpmlInputValidationService
+  class OpmlInputValidator
     DEFAULT_MAX_BYTES = 2.megabytes
 
     def self.validate_upload(file:, max_bytes: DEFAULT_MAX_BYTES)
@@ -18,10 +18,9 @@ module Subscriptions
       file.rewind if file.respond_to?(:rewind)
 
       return error('The file is empty.') if sample.blank?
-      return error('The file appears to be binary. Please upload a text OPML/XML file.') if sample.include?("\x00")
+      return error('The file appears to be binary. Please upload a text OPML/XML file.') if sample.b.include?("\x00".b)
 
-      normalized = sample.sub(/\A\uFEFF/, '').lstrip
-      return error('The file does not look like OPML/XML content.') unless normalized.start_with?('<?xml', '<opml')
+      return error('The file does not look like OPML/XML content.') unless opml_like_header?(sample)
 
       ok
     end
@@ -31,10 +30,9 @@ module Subscriptions
 
       return error('The file is empty.') if text.strip.empty?
       return error(file_too_large_message(max_bytes)) if text.bytesize > max_bytes
-      return error('The file appears to be binary. Please upload a text OPML/XML file.') if text.include?("\x00")
+      return error('The file appears to be binary. Please upload a text OPML/XML file.') if text.b.include?("\x00".b)
 
-      normalized = text.sub(/\A\uFEFF/, '').lstrip
-      return error('The file does not look like OPML/XML content.') unless normalized.start_with?('<?xml', '<opml')
+      return error('The file does not look like OPML/XML content.') unless opml_like_header?(text)
 
       ok
     end
@@ -56,6 +54,11 @@ module Subscriptions
         skipped_subscriptions: 0,
         invalid_subscriptions: 0,
       }
+    end
+
+    def self.opml_like_header?(raw_text)
+      normalized = raw_text.to_s.b.delete_prefix("\xEF\xBB\xBF".b).lstrip
+      normalized.start_with?('<?xml'.b, '<opml'.b)
     end
   end
 end

@@ -106,7 +106,7 @@ RSpec.describe 'Subscriptions OPML', type: :request do
     end
 
     it 'returns unprocessable content for oversized upload' do
-      stub_const('Subscriptions::OpmlInputValidationService::DEFAULT_MAX_BYTES', 16)
+      stub_const('Subscriptions::OpmlInputValidator::DEFAULT_MAX_BYTES', 16)
 
       Tempfile.create(['subscriptions', '.opml']) do |file|
         file.write('<?xml version="1.0"?><opml><body>1234567890</body></opml>')
@@ -134,6 +134,21 @@ RSpec.describe 'Subscriptions OPML', type: :request do
 
       expect(response).to have_http_status(:unprocessable_content)
       expect(response.body).to include('binary')
+    end
+
+    it 'returns unprocessable content for non-utf8 bytes without raising encoding error' do
+      Tempfile.create(['subscriptions', '.xml']) do |file|
+        file.binmode
+        file.write("\xFF\xFE<opml><body/></opml>")
+        file.rewind
+
+        uploaded_file = Rack::Test::UploadedFile.new(file.path, 'application/xml')
+
+        post opml_import_upload_subscriptions_path, params: { file: uploaded_file }
+      end
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(response.body).to include('does not look like OPML/XML')
     end
   end
 end
