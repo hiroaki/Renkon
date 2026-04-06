@@ -53,7 +53,7 @@ RSpec.describe 'Bulk read and unread actions', type: :system do
 
     expect(page).to have_selector("li[data-article-id='#{article1.id}'][data-unread='false']")
     expect(page).to have_selector("li[data-article-id='#{article2.id}'][data-unread='false']")
-    expect(page).to have_selector("li[data-subscription='#{subscription.id}'] span[data-unread-count].invisible", visible: :all)
+    expect(page).to have_selector("li[data-subscription='#{subscription.id}'] span[data-unread-count].hidden", visible: :all)
 
     mark_unread_button.click
 
