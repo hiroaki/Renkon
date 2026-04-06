@@ -169,6 +169,7 @@ RSpec.describe "Subscriptions", type: :system do
   describe 'Unread count updates after fetching articles' do
     let!(:subscription_a) { FactoryBot.create(:subscription, :with_articles, number_of_articles: 2, unread: true, src: "https://example.com/feed_a.xml") }
     let!(:subscription_b) { FactoryBot.create(:subscription, :with_articles, number_of_articles: 2, unread: true, src: "https://example.com/feed_b.xml") }
+    let!(:subscription_c) { FactoryBot.create(:subscription, :with_articles, number_of_articles: 1, unread: false, src: "https://example.com/feed_c.xml") }
 
     before do
       stub_request(:get, "https://example.com/feed_a.xml").to_return(
@@ -206,6 +207,19 @@ RSpec.describe "Subscriptions", type: :system do
           </rss>
         XML
       )
+
+      stub_request(:get, "https://example.com/feed_c.xml").to_return(
+        body: <<~XML
+          <?xml version="1.0" encoding="UTF-8" ?>
+          <rss version="2.0">
+            <channel>
+              <title>Feed C</title>
+              <link>https://example.com/feed_c.xml</link>
+              <description>No unread articles</description>
+            </channel>
+          </rss>
+        XML
+      )
     end
 
     it "updates unread counts after fetching new articles" do
@@ -230,6 +244,39 @@ RSpec.describe "Subscriptions", type: :system do
 
       expect(page).to have_selector('turbo-frame#articles', text: 'New Article 1')
       expect(page).to have_selector('turbo-frame#articles', text: 'New Article 2')
+    end
+
+    it "shows refresh status for subscriptions with zero unread articles" do
+      visit root_path
+
+      expect(page).to have_selector("li[data-subscription='#{subscription_c.id}'] span[data-unread-count].hidden", visible: :all)
+
+      page.execute_script(<<~JS)
+        (() => {
+          const originalFetch = window.fetch.bind(window);
+
+          window.fetch = async (input, init) => {
+            const url = typeof input === 'string' ? input : input.url;
+
+            if (url.includes('/subscriptions/#{subscription_c.id}/refresh_feed_row')) {
+              await new Promise((resolve) => window.setTimeout(resolve, 300));
+            }
+
+            return originalFetch(input, init);
+          };
+        })()
+      JS
+
+      click_button 'Refresh'
+
+      expect(page).to have_selector(
+        "li[data-subscription='#{subscription_c.id}'] [data-refresh-status][aria-label='Refreshing subscription']"
+      )
+      expect(page).to have_selector("li[data-subscription='#{subscription_c.id}'] span[data-unread-count].hidden", visible: :all)
+      expect(page).to have_no_selector(
+        "li[data-subscription='#{subscription_c.id}'] [data-refresh-status][aria-label='Refreshing subscription']",
+        wait: 5
+      )
     end
   end
 
