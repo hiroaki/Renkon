@@ -242,7 +242,9 @@
       role="status"
       aria-live="polite"
     >
-      <span aria-hidden="true">!</span>
+      <span aria-hidden="true" class="inline-flex">
+        <%= icon_warning_triangle(css_class: 'size-3.5 shrink-0') %>
+      </span>
       <span data-pane-focus-target="statusText"></span>
       <button
         type="button"
