@@ -1,26 +1,93 @@
-# Renkon レンコン
+# Renkon
 
-Renkon is a simple RSS reader. This project is being developed as my personal practice with Rails and is not of a quality that is suitable for general use.
+Japanese version: [README.ja.md](README.ja.md)
 
-Renkon はシンプルな RSS リーダーです。このプロジェクトは Rails を使うことの個人的な練習として開発しているもので、一般的な利用に適した品質ではありません。
+Renkon is a simple web-based RSS reader designed to run as a self-hosted personal server.
 
+- Three-pane layout
+- Keyboard-driven navigation
+- Lightweight article preview based only on RSS feed contents
+- OPML import and export support
 
-## Requirements 要件
-
-SQLite3 is used for the database. Aside from that, there’s nothing particularly special.
-
-データベースには SQLite3 が使われています。それ以外は特に特別なことはありません。
-
-
-## Usage 使い方
-
-It’s just a web server, so start it with `rails s` and open the top page in your browser.
-
-ただの Web サーバですので、 `rails s` で起動し、ブラウザーでトップページにアクセスしてください。
+Renkon is currently in alpha. More features are planned.
 
 
-## License ライセンス
+## Requirements
 
-MIT License
+You can run Renkon with Docker on any environment where Docker Engine is available.
 
-MIT ライセンス
+If you do not use Docker, you will need:
+
+- Ruby 3.4.9
+- SQLite3
+
+
+## Getting Started
+
+To run the app locally with Docker, use the development compose setup:
+
+```sh
+$ docker compose up --build -d
+$ docker compose exec web bin/rails db:prepare
+$ docker compose exec web bin/dev
+```
+
+Then open http://127.0.0.1:3000/ in your browser.
+
+To run without Docker, install dependencies, prepare the database, and start the app locally:
+
+```sh
+$ bundle install
+$ bin/rails db:prepare
+$ bin/dev
+```
+
+
+## Developer Guide
+
+### Setup
+
+Build and start the development containers, then prepare the database:
+
+```sh
+$ docker compose up --build -d
+$ docker compose exec web bin/rails db:prepare
+```
+
+### Start the Server
+
+Start the development server inside the running container:
+
+```sh
+$ docker compose exec web bin/dev
+```
+
+### Test
+
+```sh
+$ bin/rspec
+```
+
+System tests use cuprite. The Docker container does not include Chrome, so system tests will fail if you run them inside the container. Install Chrome in the container, or run the system tests on a host machine where Chrome is available.
+
+### Local CI
+
+```sh
+$ bin/ci
+```
+
+This runs local test prerequisites, the importmap vulnerability audit, RSpec, and a staging image boot check. Use it as a final pre-deploy check.
+
+### Deploy
+
+Before deploying, create an environment file such as `.env.staging` from `dot.env.staging.sample`, fill in the required variables, and specify the destination.
+
+```sh
+$ dotenv -f .env.staging bundle exec kamal deploy --destination=staging
+```
+
+
+## License
+
+This project is licensed under the Zero-Clause BSD License (0BSD). See the LICENSE file for details.
+
