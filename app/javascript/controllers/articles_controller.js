@@ -7,6 +7,8 @@ export default class extends SelectedLiBaseController {
     super.connect();
     this.deleteRequestInFlight = false;
     this.deleteRequestQueued = false;
+    // Publish the current selection state for a freshly replaced articles list.
+    this.fireSelectionChanged(this.getSelectedItem());
   }
 
   //
