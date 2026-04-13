@@ -11,6 +11,7 @@ Renkon は Web ベースのシンプルな RSS リーダーです。セルフホ
 
 現在はアルファ版です。今後多くの機能を実装していく予定です。
 
+![サンプル画像](README.png)
 
 ## 要件
 
@@ -29,7 +30,7 @@ Docker でローカル起動する場合は、開発用の compose 設定を使�
 ```sh
 $ docker compose up --build -d
 $ docker compose exec web bin/rails db:prepare
-$ docker compose exec web bin/dev
+$ docker compose exec web bin/rails s
 ```
 
 その後、ブラウザで http://127.0.0.1:3000/ を開いてください。
@@ -39,7 +40,7 @@ Docker を使わずに起動する場合は、依存関係をインストール�
 ```sh
 $ bundle install
 $ bin/rails db:prepare
-$ bin/dev
+$ bin/rails s
 ```
 
 

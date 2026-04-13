@@ -11,6 +11,7 @@ Renkon is a simple web-based RSS reader designed to run as a self-hosted persona
 
 Renkon is currently in alpha. More features are planned.
 
+![Sample image](README.png)
 
 ## Requirements
 
@@ -29,7 +30,7 @@ To run the app locally with Docker, use the development compose setup:
 ```sh
 $ docker compose up --build -d
 $ docker compose exec web bin/rails db:prepare
-$ docker compose exec web bin/dev
+$ docker compose exec web bin/rails s
 ```
 
 Then open http://127.0.0.1:3000/ in your browser.
@@ -39,7 +40,7 @@ To run without Docker, install dependencies, prepare the database, and start the
 ```sh
 $ bundle install
 $ bin/rails db:prepare
-$ bin/dev
+$ bin/rails s
 ```
 
 
