@@ -1,5 +1,5 @@
 module Subscriptions
-  class ReorderTreeValidationService
+  class ReorderTreeValidator
     def self.call(raw_nodes:)
       new(raw_nodes:).call
     end

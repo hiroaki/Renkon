@@ -16,7 +16,7 @@ RSpec.describe 'Footer status message', type: :system do
       }))
     JS
 
-    expect(page).to have_selector('footer', text: '!')
+    expect(page).to have_selector('footer svg')
     expect(page).to have_selector('footer', text: "Couldn't save the new order. Please try again.")
     expect(page).to have_selector('footer button', text: 'x')
 

@@ -1,5 +1,5 @@
 import SelectedLiBaseController from "lib/selected_li_base_controller"
-import { fireChangeReadStatusEvent } from 'lib/pane_focus_events'
+import { fireChangeReadStatusEvent, fireStatusErrorEvent } from 'lib/pane_focus_events'
 import { groupItemsByUrl, indexItemsByArticleId, requestBulkOperation } from 'lib/articles_bulk_client'
 
 export default class extends SelectedLiBaseController {
@@ -7,6 +7,8 @@ export default class extends SelectedLiBaseController {
     super.connect();
     this.deleteRequestInFlight = false;
     this.deleteRequestQueued = false;
+    // Publish the current selection state for a freshly replaced articles list.
+    this.fireSelectionChanged(this.getSelectedItem());
   }
 
   //
@@ -41,7 +43,16 @@ export default class extends SelectedLiBaseController {
   }
 
   async markSelectedItemsRead() {
-    await this.updateSelectedItemsUnreadStatus(false);
+    await this.markItemsRead(Array.from(this.getSelectedItems()));
+  }
+
+  async markItemsRead(items) {
+    const targetItems = Array.isArray(items) ? items.filter(Boolean) : [];
+    if (targetItems.length === 0) {
+      return;
+    }
+
+    await this.updateItemsUnreadStatus(targetItems, false);
   }
 
   async markSelectedItemsUnread() {
@@ -80,6 +91,7 @@ export default class extends SelectedLiBaseController {
 
     const groups = groupItemsByUrl(actionableItems, 'urlBulkUpdateReadStatus');
     const subscriptionEventSources = new Map();
+    let errorMessage = null;
 
     const requests = Array.from(groups.entries()).map(async ([url, groupedItems]) => {
       if (!url) {
@@ -94,6 +106,7 @@ export default class extends SelectedLiBaseController {
       });
 
       if (!response.ok) {
+        errorMessage ||= response.errorMessage;
         return;
       }
 
@@ -118,6 +131,9 @@ export default class extends SelectedLiBaseController {
     });
 
     await Promise.all(requests);
+    if (errorMessage) {
+      fireStatusErrorEvent(window, errorMessage);
+    }
     this.fireChangeReadStatusBySubscription(subscriptionEventSources);
   }
 
@@ -212,6 +228,7 @@ export default class extends SelectedLiBaseController {
     const groups = groupItemsByUrl(items, 'urlBulkDelete');
     const deletedItems = [];
     const subscriptionEventSources = new Map();
+    let errorMessage = null;
 
     const requests = Array.from(groups.entries()).map(async ([url, groupedItems]) => {
       if (!url) {
@@ -225,6 +242,7 @@ export default class extends SelectedLiBaseController {
       });
 
       if (!response.ok) {
+        errorMessage ||= response.errorMessage;
         return;
       }
 
@@ -244,6 +262,9 @@ export default class extends SelectedLiBaseController {
     });
 
     await Promise.all(requests);
+    if (errorMessage) {
+      fireStatusErrorEvent(window, errorMessage);
+    }
     this.fireChangeReadStatusBySubscription(subscriptionEventSources);
     return deletedItems;
   }

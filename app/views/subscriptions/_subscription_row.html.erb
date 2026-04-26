@@ -1,6 +1,6 @@
 <div class="relative w-full">
-  <div class="flex justify-between">
-    <span class="left text-nowrap overflow-hidden">
+  <div class="flex min-h-5 items-center justify-between gap-2">
+    <span class="min-w-0 flex-1 overflow-hidden text-nowrap">
       <% if subscription.favicon.attached? %>
         <%= image_tag subscription.favicon, width: 16, height: 16, class: 'inline' %>
         <%= subscription.title %>
@@ -10,8 +10,17 @@
       <% end %>
     </span>
     <% unread_count = subscription.attributes.fetch('count_articles').to_i %>
-    <span data-refresh-badge data-unread-count="<%= unread_count %>" class="right ml-2 px-2 py-1 font-semibold leading-none text-green-700 bg-green-100 rounded-full dark:bg-green-700 dark:text-green-100">
-      <%= unread_count %>
+    <span class="flex min-h-5 shrink-0 items-center justify-end gap-1">
+      <span
+        data-refresh-status
+        class="hidden h-5 min-w-5 items-center justify-center rounded-full px-1.5 font-semibold leading-none"
+        aria-live="polite"
+      ></span>
+      <%= content_tag :span,
+        unread_count,
+        data: { unread_count: unread_count },
+        class: "h-5 min-w-5 items-center justify-center rounded-full bg-green-100 px-1.5 font-semibold leading-none text-green-700 dark:bg-green-700 dark:text-green-100 " + (unread_count > 0 ? "inline-flex" : "hidden")
+      %>
     </span>
   </div>
 </div>

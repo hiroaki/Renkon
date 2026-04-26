@@ -15,15 +15,18 @@ RSpec.describe 'Subscriptions group collapse', type: :system do
     expect(page).to have_selector("li[data-item-type='group'][data-group-id='#{parent.id}']")
 
     toggle_selector = "li[data-item-type='group'][data-group-id='#{parent.id}'] .group-collapse-toggle"
-    nested_selector = "li[data-item-type='group'][data-group-id='#{parent.id}'] > ul[data-tree-sort-list]"
+    nested_container_selector = "li[data-item-type='group'][data-group-id='#{parent.id}'] > [data-tree-sort-container]"
+    nested_selector = "#{nested_container_selector} > ul[data-tree-sort-list]"
 
     expect(page).to have_selector(nested_selector, visible: :all)
 
     find(toggle_selector, match: :first).click
 
+    expect(page).to have_selector("#{nested_container_selector}[hidden]", visible: :all)
+
     collapsed_state = page.evaluate_script("document.querySelector(\"li[data-item-type='group'][data-group-id='#{parent.id}']\").dataset.collapsed")
     selected_count = page.evaluate_script("document.querySelectorAll(\"#subscriptions-pane li[data-selected='true']\").length")
-    nested_hidden = page.evaluate_script("document.querySelector(\"#{nested_selector}\").hidden")
+    nested_hidden = page.evaluate_script("document.querySelector(\"#{nested_container_selector}\").hidden")
 
     expect(collapsed_state).to eq('true')
     expect(selected_count).to eq(0)
@@ -34,15 +37,17 @@ RSpec.describe 'Subscriptions group collapse', type: :system do
     expect(page).to have_selector("li[data-item-type='group'][data-group-id='#{parent.id}']", wait: 10)
 
     restored_state = page.evaluate_script("document.querySelector(\"li[data-item-type='group'][data-group-id='#{parent.id}']\").dataset.collapsed")
-    restored_hidden = page.evaluate_script("document.querySelector(\"#{nested_selector}\").hidden")
+    restored_hidden = page.evaluate_script("document.querySelector(\"#{nested_container_selector}\").hidden")
 
     expect(restored_state).to eq('true')
     expect(restored_hidden).to be(true)
 
     find(toggle_selector, match: :first).click
 
+    expect(page).to have_no_selector("#{nested_container_selector}[hidden]", visible: :all)
+
     reopened_state = page.evaluate_script("document.querySelector(\"li[data-item-type='group'][data-group-id='#{parent.id}']\").dataset.collapsed")
-    reopened_hidden = page.evaluate_script("document.querySelector(\"#{nested_selector}\").hidden")
+    reopened_hidden = page.evaluate_script("document.querySelector(\"#{nested_container_selector}\").hidden")
 
     expect(reopened_state).to eq('false')
     expect(reopened_hidden).to be(false)

@@ -10,7 +10,7 @@
   data-pane-focus-subscriptions-outlet='[data-controller~="subscriptions"]'
   data-pane-focus-articles-outlet='[data-controller~="articles"]'
 >
-  <nav class="shrink-0 h-12 bg-gray-200 px-1 flex flex-row place-items-center"
+  <nav class="shrink-0 h-12 bg-gray-100 px-1 flex flex-row place-items-center"
     data-pane-focus-target="navigationPane",
   >
     <%= image_tag('renkon.png', size: '46x46') %>
@@ -22,7 +22,7 @@
     </div>
 
     <div class="mx-2">
-      <button class="px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-blue-600 border border-transparent rounded-md active:bg-blue-600 hover:bg-blue-700 focus:outline-hidden focus:shadow-outline-blue"
+      <button class="px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-blue-600 border border-transparent rounded-md active:bg-blue-600 hover:bg-blue-700 focus:outline-hidden focus:shadow-outline-blue cursor-pointer"
         data-controller="refresh"
         data-action="click->refresh#all"
         data-refresh-concurrency-value="2"
@@ -113,7 +113,7 @@
     </div>
 
     <div class="mx-2 ml-auto">
-      <button class="px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-orange-300 border border-transparent rounded-md active:bg-orange-300 hover:bg-orange-400 focus:outline-hidden focus:shadow-outline-orange"
+      <button class="px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-orange-300 border border-transparent rounded-md active:bg-orange-300 hover:bg-orange-400 focus:outline-hidden focus:shadow-outline-orange cursor-pointer"
         data-controller="trash"
         data-action="
           click->trash#confirmEmptyTrash
@@ -132,21 +132,60 @@
     <div id="subscription-create-flow-hook"></div>
 
     <!-- -->
-    <div id="subscriptions-pane" tabindex="-1" class="flex flex-row shrink-0 min-w-8 focus:outline-hidden" style="width: 8rem;"
-      data-controller="frame"
+    <div id="subscriptions-pane" tabindex="-1" class="flex flex-row shrink-0 min-w-8 focus:outline-hidden" style="width: 15rem;"
+      data-controller="frame app-settings"
       data-frame-target="adjustable"
       data-frame-storage-key-value="subscriptions-width"
+      data-app-settings-export-url-value="<%= opml_export_subscriptions_path %>"
       data-pane-focus-target="subscriptionsPane"
       data-action="
         keydown.right->pane-focus#forwardToArticlesPane
         keydown.space->pane-focus#forwardToUnreadArticlePane:prevent
         changeSelectedLi->pane-focus#onChangeSelectedSubscriptionListItem
+        changeSelectedLi->app-settings#onChangeSelectedLi
       "
     >
-      <div class="flex-1 bg-blue-100 overflow-y-auto overflow-x-hidden pt-2">
-        <%= turbo_frame_tag('subscriptions', src: list_subscriptions_path) %>
+      <div class="relative flex-1 bg-blue-100 overflow-hidden flex flex-col">
+        <div class="flex-1 overflow-y-auto overflow-x-hidden pt-2">
+          <%= turbo_frame_tag('subscriptions', src: list_subscriptions_path) %>
+        </div>
+
+        <div class="shrink-0 border-t border-blue-200 px-2 py-2 bg-blue-100">
+          <button
+            type="button"
+            class="w-full px-2 py-1 text-xs text-left text-inherit rounded hover:bg-blue-200/60 focus:outline-hidden cursor-pointer"
+            data-action="click->app-settings#toggleMenu"
+          >
+            <span class="flex items-center justify-between">
+              <span class="inline-flex items-center gap-1">
+                <%= icon_cog_8_tooth(class: 'size-4') %>
+                <span>Settings</span>
+              </span>
+            </span>
+          </button>
+
+          <button
+            type="button"
+            class="hidden fixed inset-0 z-10 cursor-default bg-black/10"
+            data-app-settings-target="backdrop"
+            data-action="click->app-settings#closeMenu"
+            aria-label="Close settings menu"
+          ></button>
+
+          <div
+            class="hidden absolute bottom-14 left-2 right-2 z-20 rounded-md border border-gray-200 bg-white p-1 shadow-lg"
+            data-app-settings-target="menu"
+          >
+            <%= link_to 'Export ...', opml_export_subscriptions_path,
+              class: 'block rounded px-2 py-1 text-sm text-gray-700 hover:bg-gray-100',
+              data: { turbo_frame: 'modal', app_settings_target: 'exportLink', action: 'click->app-settings#closeMenu' } %>
+            <%= link_to 'Import ...', opml_import_subscriptions_path,
+              class: 'block rounded px-2 py-1 text-sm text-gray-700 hover:bg-gray-100',
+              data: { turbo_frame: 'modal', action: 'click->app-settings#closeMenu' } %>
+          </div>
+        </div>
       </div>
-      <div class="w-0.5 bg-gray-200 cursor-col-resize" draggable="true"
+      <div class="w-1 bg-gray-100 cursor-col-resize" draggable="true"
         data-action="
           dragstart->frame#handlerDragStart
           drag->frame#handlerDrag
@@ -157,7 +196,7 @@
     </div>
 
     <!-- -->
-    <div id="articles-pane" tabindex="-1" class="flex flex-row shrink-0 min-w-8 focus:outline-hidden" style="width: 8rem;"
+    <div id="articles-pane" tabindex="-1" class="flex flex-row shrink-0 min-w-8 focus:outline-hidden" style="width: 30rem;"
       data-controller="frame"
       data-frame-target="adjustable"
       data-frame-storage-key-value="articles-width"
@@ -171,7 +210,7 @@
       <div class="flex-1 bg-white-100 overflow-y-auto overflow-x-hidden pt-2">
         <%= turbo_frame_tag('articles') %>
       </div>
-      <div class="w-0.5 bg-gray-200 cursor-col-resize" draggable="true"
+      <div class="w-1 bg-gray-100 cursor-col-resize" draggable="true"
       data-action="
         dragstart->frame#handlerDragStart
         drag->frame#handlerDrag
@@ -184,23 +223,28 @@
     <!-- -->
     <div id="contents-pane" tabindex="-1" class="flex-1 overflow-y-auto min-w-8 focus:outline-hidden"
       data-pane-focus-target="contentsPane"
+      data-action="
+        keydown.space->pane-focus#forwardContentsOrNextArticle:prevent
+      "
     >
       <div class="bg-white p-2">
         <%= turbo_frame_tag('contents', autoscroll: true, data: { autoscroll_block: 'start' } ) %>
       </div>
-      <div class="w-0.5 bg-gray-200 cursor-col-resize">
+      <div class="w-1 bg-gray-100 cursor-col-resize">
       </div>
     </div>
   </main>
 
-  <footer class="shrink-0 h-6 bg-gray-200 text-xs px-2 flex items-center">
+  <footer class="shrink-0 h-6 bg-gray-100 text-xs px-2 flex items-center">
     <p
       class="hidden items-center gap-1 text-red-700"
       data-pane-focus-target="statusArea"
       role="status"
       aria-live="polite"
     >
-      <span aria-hidden="true">!</span>
+      <span aria-hidden="true" class="inline-flex">
+        <%= icon_warning_triangle(css_class: 'size-3.5 shrink-0') %>
+      </span>
       <span data-pane-focus-target="statusText"></span>
       <button
         type="button"
@@ -211,6 +255,6 @@
         x
       </button>
     </p>
-    <p data-pane-focus-target="statusIdle">Status</p>
+    <p data-pane-focus-target="statusIdle" class="text-gray-300">Status</p>
   </footer>
 </div>

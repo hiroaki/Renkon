@@ -1,5 +1,6 @@
 require 'rails_helper'
 require 'webmock/rspec'
+require 'tempfile'
 
 RSpec.describe "Subscriptions", type: :system do
   before do
@@ -168,6 +169,7 @@ RSpec.describe "Subscriptions", type: :system do
   describe 'Unread count updates after fetching articles' do
     let!(:subscription_a) { FactoryBot.create(:subscription, :with_articles, number_of_articles: 2, unread: true, src: "https://example.com/feed_a.xml") }
     let!(:subscription_b) { FactoryBot.create(:subscription, :with_articles, number_of_articles: 2, unread: true, src: "https://example.com/feed_b.xml") }
+    let!(:subscription_c) { FactoryBot.create(:subscription, :with_articles, number_of_articles: 1, unread: false, src: "https://example.com/feed_c.xml") }
 
     before do
       stub_request(:get, "https://example.com/feed_a.xml").to_return(
@@ -205,6 +207,19 @@ RSpec.describe "Subscriptions", type: :system do
           </rss>
         XML
       )
+
+      stub_request(:get, "https://example.com/feed_c.xml").to_return(
+        body: <<~XML
+          <?xml version="1.0" encoding="UTF-8" ?>
+          <rss version="2.0">
+            <channel>
+              <title>Feed C</title>
+              <link>https://example.com/feed_c.xml</link>
+              <description>No unread articles</description>
+            </channel>
+          </rss>
+        XML
+      )
     end
 
     it "updates unread counts after fetching new articles" do
@@ -229,6 +244,39 @@ RSpec.describe "Subscriptions", type: :system do
 
       expect(page).to have_selector('turbo-frame#articles', text: 'New Article 1')
       expect(page).to have_selector('turbo-frame#articles', text: 'New Article 2')
+    end
+
+    it "shows refresh status for subscriptions with zero unread articles" do
+      visit root_path
+
+      expect(page).to have_selector("li[data-subscription='#{subscription_c.id}'] span[data-unread-count].hidden", visible: :all)
+
+      page.execute_script(<<~JS)
+        (() => {
+          const originalFetch = window.fetch.bind(window);
+
+          window.fetch = async (input, init) => {
+            const url = typeof input === 'string' ? input : input.url;
+
+            if (url.includes('/subscriptions/#{subscription_c.id}/refresh_feed_row')) {
+              await new Promise((resolve) => window.setTimeout(resolve, 300));
+            }
+
+            return originalFetch(input, init);
+          };
+        })()
+      JS
+
+      click_button 'Refresh'
+
+      expect(page).to have_selector(
+        "li[data-subscription='#{subscription_c.id}'] [data-refresh-status][aria-label='Refreshing subscription']"
+      )
+      expect(page).to have_selector("li[data-subscription='#{subscription_c.id}'] span[data-unread-count].hidden", visible: :all)
+      expect(page).to have_no_selector(
+        "li[data-subscription='#{subscription_c.id}'] [data-refresh-status][aria-label='Refreshing subscription']",
+        wait: 5
+      )
     end
   end
 
@@ -289,6 +337,71 @@ RSpec.describe "Subscriptions", type: :system do
         expect(page).to have_current_path(edit_subscription_path(subscription))
         expect(page).to have_content("Subscription destruction failed.")
       end
+    end
+  end
+
+  describe 'OPML settings menu' do
+    let!(:subscription) { FactoryBot.create(:subscription, title: 'Export Target') }
+
+    before do
+      visit root_path
+    end
+
+    it 'opens and closes the settings menu' do
+      click_button 'Settings'
+
+      expect(page).to have_link('Export')
+      expect(page).to have_link('Import')
+
+      find('[aria-label="Close settings menu"]').click
+      expect(page).to have_no_link('Export')
+    end
+
+    it 'opens export modal from settings menu' do
+      find("li[data-subscription='#{subscription.id}']").click
+      click_button 'Settings'
+      click_link 'Export'
+
+      expect(page).to have_selector('turbo-frame#modal', wait: 5)
+      expect(page).to have_content('Export OPML')
+      expect(page).to have_content('Selected item only')
+    end
+
+    it 'closes export modal automatically on success' do
+      click_button 'Settings'
+      click_link 'Export'
+
+      expect(page).to have_selector('turbo-frame#modal', wait: 5)
+      click_button 'Export'
+
+      expect(page).to have_selector('turbo-frame#modal', text: '', wait: 5)
+    end
+
+    it 'opens import modal from settings menu' do
+      click_button 'Settings'
+      click_link 'Import'
+
+      expect(page).to have_selector('turbo-frame#modal', wait: 5)
+      expect(page).to have_content('Import OPML')
+      expect(page).to have_field('OPML file')
+    end
+
+    it 'keeps modal open and shows error when import fails' do
+      Tempfile.create(['invalid-opml', '.opml']) do |invalid_file|
+        invalid_file.write('<opml><body><outline></body>')
+        invalid_file.rewind
+
+        click_button 'Settings'
+        click_link 'Import'
+
+        expect(page).to have_selector('turbo-frame#modal', wait: 5)
+        attach_file('OPML file', invalid_file.path)
+        click_button 'Import'
+      end
+
+      expect(page).to have_selector('turbo-frame#modal', wait: 5)
+      expect(page).to have_content('could not be parsed')
+      expect(page).to have_button('Close')
     end
   end
 end

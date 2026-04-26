@@ -7,11 +7,11 @@
   data-url-destroy="<%= group_path(group) %>"
   data-text-for-confirm-destroy="Delete this group and all nested groups/subscriptions?<%= "\n#{group.name}" %>"
 >
-  <div class="flex items-center w-full cursor-pointer" data-action="click->subscriptions#handlerEnterItem">
+  <div class="flex items-center w-full cursor-pointer pl-2 pr-1 py-0.5" data-action="click->subscriptions#handlerEnterItem">
     <button
       type="button"
       tabindex="-1"
-      class="group-collapse-toggle w-5 h-5 mr-1 text-xs text-inherit hover:text-inherit"
+      class="group-collapse-toggle size-4 shrink-0 text-xs text-inherit hover:text-inherit"
       aria-label="Toggle group"
       aria-expanded="true"
       data-action="click->subscriptions#toggleGroupCollapse"
@@ -21,11 +21,15 @@
 
     <div
       tabindex="-1"
-      class="group-select-label flex-1 pl-1 pr-1 py-0.5 block text-xs font-semibold text-inherit hover:text-inherit"
-    ><%= group.name %></div>
+      class="group-select-label flex min-h-5 flex-1 items-center gap-1 text-xs font-semibold text-inherit hover:text-inherit"
+    >
+      <%= icon_folder(css_class: 'size-4 shrink-0') %>
+      <span class="min-w-0 overflow-hidden text-nowrap"><%= group.name %></span>
+    </div>
   </div>
 
-  <ul class="ml-2 min-h-3" data-tree-sort-list>
+  <div data-tree-sort-container>
+    <ul class="ml-6" data-tree-sort-list>
     <% group_nodes = (groups_by_parent_id[group.id] || []).map { |item| { item_type: 'group', item: item, position: item.position } } %>
     <% subscription_nodes = (subscriptions_by_group[group.id] || []).map { |item| { item_type: 'subscription', item: item, position: item.position } } %>
     <% (group_nodes + subscription_nodes).sort_by { |node| [node[:position], node[:item].id] }.each do |node| %>
@@ -40,4 +44,5 @@
       <% end %>
     <% end %>
   </ul>
+  </div>
 </li>
