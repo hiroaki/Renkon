@@ -2,6 +2,7 @@ source "https://rubygems.org"
 
 ruby "3.4.9"
 gem "rails", "~> 8.1", ">= 8.1.2"
+gem 'json', '~> 2.15' # NOTE: https://techracho.bpsinc.jp/hachi8833/2026_09_15/159987
 
 # The modern asset pipeline for Rails [https://github.com/rails/propshaft]
 gem "propshaft"
