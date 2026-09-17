@@ -1,4 +1,4 @@
-# :nocov:
+# simplecov:disable
 # FOR DEVELOPMENT ENVIRONMENT ONLY
 module Middleware
   class ShortRequestId
@@ -12,4 +12,4 @@ module Middleware
     end
   end
 end
-# :nocov:
+# simplecov:enable
