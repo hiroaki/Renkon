@@ -17,7 +17,7 @@ RSpec.describe 'Space key behavior in articles pane', type: :system do
     article2 = FactoryBot.create(:article, subscription: subscription, title: 'Space Single Article 2', unread: true)
 
     visit root_path
-    page.driver.resize(1280, 340)
+    page.current_window.resize_to(1280, 340)
 
     click_list_item_in_subscriptions_pane('Space Single Subscription')
     click_list_item_in_articles_pane('Space Single Article 1')

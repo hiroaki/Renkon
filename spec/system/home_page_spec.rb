@@ -83,7 +83,7 @@ RSpec.describe "Main Page", type: :system do
         visit root_path
 
         # ウィンドウの高さを設定
-        page.driver.resize(1280, 300)
+        page.current_window.resize_to(1280, 300)
 
         within('main > div#subscriptions-pane') do
           parent_div_selector = '#subscriptions-pane > div:first-child'
@@ -163,7 +163,7 @@ RSpec.describe "Main Page", type: :system do
         click_list_item_in_subscriptions_pane('Sample Subscription')
 
         # Set window height
-        page.driver.resize(1280, 300)
+        page.current_window.resize_to(1280, 300)
 
         within('main > div#articles-pane') do
           parent_div_selector = '#articles-pane > div:first-child'
@@ -241,7 +241,7 @@ RSpec.describe "Main Page", type: :system do
         click_list_item_in_articles_pane('Sample Article')
 
         # ウィンドウの高さを設定
-        page.driver.resize(1280, 300)
+        page.current_window.resize_to(1280, 300)
 
         # within('turbo-frame#contents') do
           parent_div_selector = '#contents-pane'
